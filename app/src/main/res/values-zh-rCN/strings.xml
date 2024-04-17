@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">东方同音鉴 Demo</string>
+    <string name="nav_explore_title">发现</string>
+    <string name="nav_radio_title">电台</string>
+    <string name="nav_library_title">曲库</string>
+    <string name="nav_account_title">个人</string>
+
+    <string name="activity_user_login_title">用户登录</string>
+    <string name="activity_user_register_title">用户注册</string>
+    <string name="inputbox_hint_username">用户名</string>
+    <string name="inputbox_hint_password">密码</string>
+    <string name="login_header_tips">如需继续，请登录使用。登录即表示您同意我们的<a href="https://www.bilibili.com">隐私政策</a>以及<a href="https://www.bilibili.com">使用条例</a>。</string>
+    <string name="register_header_tips">注册用户账户即表示您同意我们的<a href="https://www.bilibili.com">隐私政策</a>以及<a href="https://www.bilibili.com">使用条例</a>。</string>
+    <string name="login_btn_login">登录</string>
+    <string name="login_btn_register">注册</string>
+    <string name="login_btn_back_login">返回以登录</string>
+</resources>

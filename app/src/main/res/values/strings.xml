@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">TouhouCloudMusic</string>
+    <string name="nav_explore_title">Explore</string>
+    <string name="nav_radio_title">Radio</string>
+    <string name="nav_library_title">Library</string>
+    <string name="nav_account_title">Account</string>
+
+    <string name="activity_user_login_title">User Login</string>
+    <string name="activity_user_register_title">User Register</string>
+    <string name="inputbox_hint_username">Username</string>
+    <string name="inputbox_hint_password">Password</string>
+    <string name="login_header_tips">To continue, please log in to use. By logging in, you agree to our <a href="https://www.bilibili.com">Privacy Policy</a> and <a href="https://www.bilibili.com">Terms of Use</a>.</string>
+    <string name="register_header_tips">By registering user account, you agree to our <a href="https://www.bilibili.com">Privacy Policy</a> and <a href="https://www.bilibili.com">Terms of Use</a>.</string>
+    <string name="login_btn_login">Login</string>
+    <string name="login_btn_register">Register</string>
+    <string name="login_btn_back_login">Back to login</string>
+</resources>

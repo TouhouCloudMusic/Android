@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/account_cardview_height"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_margin="@dimen/account_cardview_margin"
+    app:cardElevation="@dimen/account_cardview_elevation"
+    app:cardCornerRadius="@dimen/account_cardview_corner_radius"
+    app:cardBackgroundColor="@color/system_accent_soft">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/account_cardview_height"
+            android:scaleType="centerCrop"
+            android:id="@+id/user_card_background"
+            tools:src="@drawable/test_res1"/>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:layout_width="@dimen/account_cardview_avatar_width"
+                android:layout_height="@dimen/account_cardview_avatar_height"
+                android:layout_marginStart="@dimen/account_cardview_avatar_margin_start"
+                android:layout_marginEnd="@dimen/account_cardview_avatar_margin_end"
+                android:layout_marginTop="@dimen/account_cardview_avatar_margin_top"
+                android:layout_marginBottom="@dimen/account_cardview_avatar_margin_bottom"
+                android:src="@drawable/test_avatar"
+                android:scaleType="fitCenter"
+                android:id="@+id/user_avatar"
+                app:shapeAppearance="@style/UserAvatarCircle"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/user_info_space"/>
+
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="@dimen/account_cardview_avatar_margin_top"
+                android:layout_marginBottom="@dimen/account_cardview_avatar_margin_bottom"
+                android:layout_marginEnd="@dimen/account_cardview_avatar_margin_end"
+                android:id="@+id/user_info_space"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/user_avatar"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <ImageButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_above="@id/username_text"
+                    android:layout_alignParentEnd="true"
+                    style="@style/UserCard_UserProfileEditButton" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:id="@+id/username_text"
+                    android:text="Test Users"
+                    android:textColor="@color/white"
+                    style="@style/TextAppearance.AppCompat.Title.Inverse" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/username_text"
+                    android:id="@+id/user_sub_text"
+                    android:text="I'm a touhou fans~"
+                    style="@style/UserCard_UserSubText"/>
+
+            </RelativeLayout>
+
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </FrameLayout>
+
+</com.google.android.material.card.MaterialCardView>

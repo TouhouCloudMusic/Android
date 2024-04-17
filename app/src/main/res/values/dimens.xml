@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="main_explore_banner_height">160dp</dimen>
+    <dimen name="main_explore_banner_margin">12dp</dimen>
+    <dimen name="activity_login_margin">16dp</dimen>
+    <dimen name="account_cardview_avatar_height">80dp</dimen>
+    <dimen name="account_cardview_avatar_width">@dimen/account_cardview_avatar_height</dimen>
+    <dimen name="account_cardview_avatar_margin_start">24dp</dimen>
+    <dimen name="account_cardview_avatar_margin_end">16dp</dimen>
+    <dimen name="account_cardview_avatar_margin_top">24dp</dimen>
+    <dimen name="account_cardview_avatar_margin_bottom">@dimen/account_cardview_avatar_margin_top</dimen>
+    <dimen name="account_cardview_margin">12dp</dimen>
+    <dimen name="account_cardview_height">128dp</dimen>
+    <dimen name="account_cardview_corner_radius">8dp</dimen>
+    <dimen name="account_cardview_elevation">6dp</dimen>
+    <dimen name="account_cardview_view_margin">@dimen/account_cardview_margin</dimen>
+</resources>

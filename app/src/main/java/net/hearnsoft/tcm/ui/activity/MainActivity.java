@@ -35,16 +35,8 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets cutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout());
             Insets statusBar = insets.getInsets(WindowInsetsCompat.Type.statusBars());
-            Log.d(TAG, "cutout.top:" + cutout.top
-                    + ",statusBar.top:" + statusBar.top);
-            //对于没有屏幕切口的设备而言，无需设置切口padding
-            if (cutout.top != 0) {
-                v.setPadding(0, cutout.top, 0, 0);
-            } else if (cutout.top == 0 && statusBar.top != 0) {
-                v.setPadding(0, statusBar.top, 0, 0);
-            }
+            v.setPadding(0, statusBar.top, 0, 0);
             return insets;
         });
         adapter = new AppViewPagerAdapter(this);

@@ -2,6 +2,7 @@ package net.hearnsoft.tcm.ui.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,6 +44,7 @@ public class UserRegisterFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        binding.registerHeaderTips.setMovementMethod(LinkMovementMethod.getInstance());
         binding.userBackLogin.setOnClickListener(v -> {
             portal.switchPages(0);
             portal.setActivityTitle(requireContext().getString(R.string.activity_user_login_title));

@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="@dimen/account_cardview_height"
+    android:id="@+id/user_card"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_margin="@dimen/account_cardview_margin"
     app:cardElevation="@dimen/account_cardview_elevation"
@@ -32,7 +33,7 @@
                 android:layout_marginEnd="@dimen/account_cardview_avatar_margin_end"
                 android:layout_marginTop="@dimen/account_cardview_avatar_margin_top"
                 android:layout_marginBottom="@dimen/account_cardview_avatar_margin_bottom"
-                android:src="@drawable/test_avatar"
+                android:src="@drawable/ic_account_circle"
                 android:scaleType="fitCenter"
                 android:id="@+id/user_avatar"
                 app:shapeAppearance="@style/UserAvatarCircle"
@@ -66,17 +67,17 @@
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
                     android:id="@+id/username_text"
-                    android:text="Test Users"
                     android:textColor="@color/white"
-                    style="@style/TextAppearance.AppCompat.Title.Inverse" />
+                    style="@style/TextAppearance.AppCompat.Title.Inverse"
+                    tools:text="Dev Username"/>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/username_text"
-                    android:id="@+id/user_sub_text"
-                    android:text="I'm a touhou fans~"
-                    style="@style/UserCard_UserSubText"/>
+                    android:id="@+id/user_description"
+                    style="@style/UserCard_UserSubText"
+                    tools:text="I'm a touhou fans~"/>
 
             </RelativeLayout>
 

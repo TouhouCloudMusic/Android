@@ -20,19 +20,18 @@ import net.hearnsoft.tcm.R;
 import net.hearnsoft.tcm.databinding.FragmentAccountBinding;
 import net.hearnsoft.tcm.databinding.UserCardBinding;
 import net.hearnsoft.tcm.ui.activity.UserLoginActivity;
+import net.hearnsoft.tcm.ui.widgets.UserCardView;
 
 public class AccountFragment extends Fragment {
 
     private static final String TAG = AccountFragment.class.getSimpleName();
     private FragmentAccountBinding binding;
-    private UserCardBinding userCardBinding;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         binding = FragmentAccountBinding.inflate(inflater, container, false);
-        userCardBinding = UserCardBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
 
@@ -43,7 +42,13 @@ public class AccountFragment extends Fragment {
     }
 
     private void initUserCard() {
-        MaterialCardView userCard = userCardBinding.getRoot();
+        UserCardView userCard = new UserCardView(requireContext());
+        // 测试信息设置，非实际用户 Yuyuko1024 add code start
+        // 上线时需移除该测试代码为实际代码
+        userCard.setUserAvatarFromRes(R.drawable.test_avatar);
+        userCard.setUserName("测试用户ABC");
+        userCard.setUserDescription("大地に咲く旋律");
+        // Yuyuko1024 add code end
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
@@ -60,20 +65,6 @@ public class AccountFragment extends Fragment {
         userCard.setLayoutParams(params);
         binding.getRoot().addView(userCard, 0);
 
-        userCardBinding.userCardBackground.setImageResource(R.drawable.test_res2);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
-            userCardBinding.userCardBackground
-                    .setRenderEffect(RenderEffect.createBlurEffect(
-                            150F,
-                            150F,
-                            Shader.TileMode.DECAL)
-                    );
-        }
-
-        userCardBinding.userAvatar.setOnClickListener(v -> {
-            Intent loginPage = new Intent(requireActivity(), UserLoginActivity.class);
-            startActivity(loginPage);
-        });
     }
 
 }

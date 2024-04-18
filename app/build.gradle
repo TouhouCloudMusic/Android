@@ -45,6 +45,8 @@ dependencies {
     implementation libs.bannerviewpager
     // Glide
     implementation libs.glide
+    // Glide Transformations
+    implementation libs.glide.transformations
     // OkHttp
     implementation libs.okhttp
     // Gson

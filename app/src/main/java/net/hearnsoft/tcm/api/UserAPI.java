@@ -41,7 +41,7 @@ public class UserAPI {
         apiCore.callAPI(Constants.API_LOGIN, ApiMethod.POST, requestData, String.class, new APICore.SessionTokenCallback<String>() {
             @Override
             public void onSuccess(String data, String sessionToken) {
-                preferences.writeStringSettings("session_token", sessionToken);
+                preferences.writeStringSettings(Constants.KEY_USER_TOKEN, sessionToken);
                 apiCore.setSessionToken(sessionToken);
                 callback.onSuccess(data, sessionToken);
             }
@@ -67,7 +67,7 @@ public class UserAPI {
         apiCore.callAPI(Constants.API_REGISTER, ApiMethod.POST, requestData, String.class, new APICore.SessionTokenCallback<String>() {
             @Override
             public void onSuccess(String data, String sessionToken) {
-                preferences.writeStringSettings("session_token", sessionToken);
+                preferences.writeStringSettings(Constants.KEY_USER_TOKEN, sessionToken);
                 apiCore.setSessionToken(sessionToken);
                 callback.onSuccess(data, sessionToken);
             }

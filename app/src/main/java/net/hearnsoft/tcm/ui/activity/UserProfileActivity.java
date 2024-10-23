@@ -93,6 +93,7 @@ public class UserProfileActivity extends AppCompatActivity {
                     openEditNameDialog(item.getContent());
                 }));
                 items.add(new ProfileItem(ProfileItem.TYPE_INFO, "标签", data.getLocation()));
+                items.add(new ProfileItem(ProfileItem.TYPE_INFO, "E-mail", data.getEmail()));
                 SimpleDateFormat dateFormat = new SimpleDateFormat(getString(R.string.date_format_str), Locale.CHINA);
                 items.add(new ProfileItem(ProfileItem.TYPE_INFO, "账户创建时间", dateFormat.format(data.getCreated_at())));
                 items.add(new ProfileItem(ProfileItem.TYPE_INFO, "账户更新时间", dateFormat.format(data.getUpdated_at())));

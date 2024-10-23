@@ -4,6 +4,7 @@ import java.util.Date;
 
 public class UserProfile {
     private String name;
+    private String email;
     private String location;
     private String avatar_id;
     private Date created_at;
@@ -56,6 +57,14 @@ public class UserProfile {
 
     public void setAvatar(Avatar avatar) {
         this.avatar = avatar;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public class Avatar {

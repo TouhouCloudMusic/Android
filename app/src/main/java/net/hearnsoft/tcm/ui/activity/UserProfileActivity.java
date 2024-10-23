@@ -231,17 +231,23 @@ public class UserProfileActivity extends AppCompatActivity {
                         .placeholder(R.drawable.test_avatar)
                         .into(avatarHolder.avatarImageView);
                 setItemClickListener(avatarHolder.itemView, item, isEditMode);
+                // 根据编辑模式更新 UI
+                if (isEditMode && item.isClickable()) {
+                    avatarHolder.itemView.setBackgroundResource(R.drawable.bg_editable_item);
+                } else {
+                    avatarHolder.itemView.setBackgroundResource(0);
+                }
             } else if (holder instanceof InfoViewHolder) {
                 InfoViewHolder infoHolder = (InfoViewHolder) holder;
                 infoHolder.titleTextView.setText(item.getTitle());
                 infoHolder.contentTextView.setText(item.getContent());
                 setItemClickListener(infoHolder.itemView, item, isEditMode);
-                /*// 根据编辑模式更新 UI
+                // 根据编辑模式更新 UI
                 if (isEditMode && item.isClickable()) {
                     infoHolder.itemView.setBackgroundResource(R.drawable.bg_editable_item);
                 } else {
                     infoHolder.itemView.setBackgroundResource(0);
-                }*/
+                }
             } else if (holder instanceof ButtonViewHolder) {
                 ButtonViewHolder buttonHolder = (ButtonViewHolder) holder;
                 buttonHolder.button.setText(item.getTitle());

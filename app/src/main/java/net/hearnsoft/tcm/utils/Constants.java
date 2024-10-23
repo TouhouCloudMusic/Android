@@ -4,7 +4,7 @@ import net.hearnsoft.tcm.BuildConfig;
 
 public class Constants {
     public static final String PREF_GLOBAL_NAME = BuildConfig.APPLICATION_ID;
-    public static final String API_HOST = "http://192.168.27.190:11451";
+    public static final String API_HOST = "http://192.168.27.191:11451";
 
     // 用户登录鉴权注册
     public static final String API_LOGIN = "sign-in";

@@ -18,6 +18,8 @@ import net.hearnsoft.tcm.R;
 import net.hearnsoft.tcm.api.APICore;
 import net.hearnsoft.tcm.api.UserAPI;
 import net.hearnsoft.tcm.databinding.FragmentUserLoginBinding;
+import net.hearnsoft.tcm.misc.UserLoginType;
+import net.hearnsoft.tcm.ui.activity.UserLoginActivity;
 import net.hearnsoft.tcm.utils.UserLoginPortal;
 
 public class UserLoginFragment extends Fragment {
@@ -68,6 +70,8 @@ public class UserLoginFragment extends Fragment {
                     Snackbar.make(binding.getRoot(), data + "，登录成功" + "\n" + sessionToken
                             , Snackbar.LENGTH_SHORT).show();
                     binding.userLogin.setEnabled(true);
+                    ((UserLoginActivity) requireActivity()).onLoginSuccess(sessionToken,
+                            UserLoginType.LOGIN);
                 }
 
                 @Override

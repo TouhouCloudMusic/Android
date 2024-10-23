@@ -94,7 +94,8 @@ public class UserAPI {
         }
 
         apiCore.setSessionToken(token);
-        apiCore.callAPI(Constants.API_USER_PROFILE, ApiMethod.GET, null, UserProfile.class, new APICore.APICallback<UserProfile>() {
+        apiCore.callAPI(Constants.API_USER_PROFILE, ApiMethod.GET, null,
+                UserProfile.class, new APICore.APICallback<UserProfile>() {
             @Override
             public void onSuccess(UserProfile data) {
                 callback.onSuccess(data);

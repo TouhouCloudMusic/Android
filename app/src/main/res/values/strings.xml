@@ -14,4 +14,18 @@
     <string name="login_btn_login">Login</string>
     <string name="login_btn_register">Register</string>
     <string name="login_btn_back_login">Back to login</string>
+
+    <string name="profile_title">Your profile</string>
+    <string name="profile_title_avatar">Avatar</string>
+    <string name="profile_title_avatar_content">Click to set avatar</string>
+    <string name="profile_title_username">Username</string>
+    <string name="profile_title_user_label">Label</string>
+    <string name="profile_title_create_time">Account created at</string>
+    <string name="profile_title_modify_time">Account modified at</string>
+    <string name="profile_title_user_permission">Permission</string>
+    <string name="profile_title_logout_content">Are you sure to logout?</string>
+    <string name="profile_title_logout">Logout</string>
+    <string name="profile_title_logout_title">@string/profile_title_logout</string>
+
+    <string name="menu_profile_edit">Edit profile</string>
 </resources>

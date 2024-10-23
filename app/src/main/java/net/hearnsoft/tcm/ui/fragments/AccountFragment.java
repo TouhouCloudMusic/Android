@@ -30,6 +30,7 @@ import net.hearnsoft.tcm.beans.UserProfile;
 import net.hearnsoft.tcm.databinding.FragmentAccountBinding;
 import net.hearnsoft.tcm.databinding.UserCardBinding;
 import net.hearnsoft.tcm.ui.activity.UserLoginActivity;
+import net.hearnsoft.tcm.ui.activity.UserProfileActivity;
 import net.hearnsoft.tcm.ui.widgets.UserCardView;
 import net.hearnsoft.tcm.utils.Constants;
 import net.hearnsoft.tcm.utils.SettingsPrefUtils;
@@ -122,6 +123,7 @@ public class AccountFragment extends Fragment {
                             setUserCardInfo(data.getName(),
                                     data.getCreated_at().toString(),
                                     null);
+                            userCard.setUserCardEditClickListener(v -> openUserProfile());
                             Toast.makeText(requireContext(), "刷新用户信息成功", Toast.LENGTH_SHORT).show();
                         }
 
@@ -152,6 +154,11 @@ public class AccountFragment extends Fragment {
                 userCard.setUserAvatarFromUrl(userAvatarUrl);
             }
         }
+    }
+
+    private void openUserProfile() {
+        Intent profilePage = new Intent(getContext(), UserProfileActivity.class);
+        requireContext().startActivity(profilePage);
     }
 
 }

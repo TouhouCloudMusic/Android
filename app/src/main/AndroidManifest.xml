@@ -26,6 +26,10 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".ui.activity.UserProfileActivity"
+            android:exported="true"
+            android:label="@string/profile_title"/>
+
         <activity android:name=".ui.activity.UserLoginActivity"
             android:exported="true"
             android:label="@string/activity_user_login_title"/>

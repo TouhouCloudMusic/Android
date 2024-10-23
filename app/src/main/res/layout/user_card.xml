@@ -60,7 +60,9 @@
                     android:layout_height="wrap_content"
                     android:layout_above="@id/username_text"
                     android:layout_alignParentEnd="true"
-                    style="@style/UserCard_UserProfileEditButton" />
+                    android:id="@+id/user_profile_edit"
+                    style="@style/UserCard_UserProfileEditButton"
+                    android:contentDescription="Edit profile" />
 
                 <TextView
                     android:layout_width="match_parent"

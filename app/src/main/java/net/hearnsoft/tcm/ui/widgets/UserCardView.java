@@ -8,6 +8,7 @@ import android.os.Build;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -33,6 +34,7 @@ public class UserCardView extends LinearLayout {
     private ImageView userBackground;
     private TextView userName;
     private TextView userDescription;
+    private ImageButton userProfileEdit;
 
     public UserCardView(Context context) {
         this(context, null);
@@ -50,6 +52,7 @@ public class UserCardView extends LinearLayout {
         userBackground = findViewById(R.id.user_card_background);
         userName = findViewById(R.id.username_text);
         userDescription = findViewById(R.id.user_description);
+        userProfileEdit = findViewById(R.id.user_profile_edit);
 
         // 初始化默认的信息
         setUserName("");
@@ -64,6 +67,14 @@ public class UserCardView extends LinearLayout {
      */
     public void setOnUserCardClickListener(OnClickListener listener) {
         userCard.setOnClickListener(listener);
+    }
+
+    /**
+     * 设置UserCard的用户编辑按钮点击监听器
+     * @param listener 点击监听器
+     */
+    public void setUserCardEditClickListener(OnClickListener listener) {
+        userProfileEdit.setOnClickListener(listener);
     }
 
     /**

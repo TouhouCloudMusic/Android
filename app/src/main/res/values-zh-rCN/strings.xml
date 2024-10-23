@@ -15,4 +15,18 @@
     <string name="login_btn_login">登录</string>
     <string name="login_btn_register">注册</string>
     <string name="login_btn_back_login">返回以登录</string>
+
+    <string name="profile_title">你的信息</string>
+    <string name="profile_title_avatar">头像</string>
+    <string name="profile_title_avatar_content">点击以设置头像</string>
+    <string name="profile_title_username">用户名</string>
+    <string name="profile_title_user_label">标签</string>
+    <string name="profile_title_create_time">账户创建时间</string>
+    <string name="profile_title_modify_time">账户更新时间</string>
+    <string name="profile_title_user_permission">权限</string>
+    <string name="profile_title_logout_content">你确定要注销登录吗？</string>
+    <string name="profile_title_logout">注销登录</string>
+    <string name="profile_title_logout_title">@string/profile_title_logout</string>
+
+    <string name="menu_profile_edit">编辑个人信息</string>
 </resources>

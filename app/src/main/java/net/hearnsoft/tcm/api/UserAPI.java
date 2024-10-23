@@ -1,10 +1,12 @@
 package net.hearnsoft.tcm.api;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.gson.JsonObject;
 
+import net.hearnsoft.tcm.beans.UserProfile;
 import net.hearnsoft.tcm.utils.Constants;
 import net.hearnsoft.tcm.utils.SettingsPrefUtils;
 
@@ -84,6 +86,30 @@ public class UserAPI {
         }, false);// 注册请求不需要包含 Cookie
     }
 
+    public void getUserProfile(String token, APICore.APICallback<UserProfile> callback) {
+        // 首先检查token是否为空
+        if (token == null || TextUtils.isEmpty(token)) {
+            callback.onError(new APICore.ApiError("Unauthorized", "No session token available"));
+            return;
+        }
+
+        apiCore.setSessionToken(token);
+        apiCore.callAPI(Constants.API_USER_PROFILE, ApiMethod.GET, null, UserProfile.class, new APICore.APICallback<UserProfile>() {
+            @Override
+            public void onSuccess(UserProfile data) {
+                callback.onSuccess(data);
+            }
+
+            @Override
+            public void onError(APICore.ApiError error) {
+                if ("Unauthorized".equals(error.getState())) {
+                    // 如果未授权，可能是 token 过期，清除存储的 token
+                    preferences.writeStringSettings(Constants.KEY_USER_TOKEN, null);
+                }
+                callback.onError(error);
+            }
+        }, true);
+    }
 
 
 }

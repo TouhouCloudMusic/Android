@@ -51,15 +51,19 @@ public class UserCardView extends LinearLayout {
         userName = findViewById(R.id.username_text);
         userDescription = findViewById(R.id.user_description);
 
-        userCard.setOnClickListener(v -> {
-            Intent loginPage = new Intent(getContext(), UserLoginActivity.class);
-            getContext().startActivity(loginPage);
-        });
         // 初始化默认的信息
         setUserName("");
         setUserDescription("");
         setUserAvatarFromRes(R.drawable.ic_account_circle);
         setUserCardBackgroundFromRes(R.drawable.test_res2);
+    }
+
+    /**
+     * 设置UserCard的点击监听器
+     * @param listener 点击监听器
+     */
+    public void setOnUserCardClickListener(OnClickListener listener) {
+        userCard.setOnClickListener(listener);
     }
 
     /**

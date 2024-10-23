@@ -29,4 +29,5 @@
     <string name="profile_title_logout_title">@string/profile_title_logout</string>
 
     <string name="menu_profile_edit">编辑个人信息</string>
+    <string name="menu_profile_edit_done">完成编辑</string>
 </resources>

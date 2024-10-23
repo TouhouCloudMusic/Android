@@ -45,6 +45,8 @@ public class UserProfileActivity extends AppCompatActivity {
     private UserProfileAdapter adapter;
     private ActivityResultLauncher<PickVisualMediaRequest> pickAvatar;
 
+    private boolean isEditMode = false;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -141,9 +143,27 @@ public class UserProfileActivity extends AppCompatActivity {
             return true;
         } else if (item.getItemId() == R.id.menu_profile_edit) {
             // TODO: 需要实现点击才可以启用可点击项目
+            toggleEditMode();
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void toggleEditMode() {
+        isEditMode = !isEditMode;
+        updateEditModeUI();
+        adapter.notifyDataSetChanged();
+    }
+
+    private void updateEditModeUI() {
+        MenuItem editItem = binding.topAppbar.getMenu().findItem(R.id.menu_profile_edit);
+        if (isEditMode) {
+            editItem.setIcon(R.drawable.ic_check_finish_24px); // 使用一个"完成"图标
+            editItem.setTitle(R.string.menu_profile_edit_done);
+        } else {
+            editItem.setIcon(R.drawable.ic_edit_24px); // 使用一个"编辑"图标
+            editItem.setTitle(R.string.menu_profile_edit);
+        }
     }
 
     private class UserProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -183,22 +203,29 @@ public class UserProfileActivity extends AppCompatActivity {
                         .load(item.getContent())
                         .placeholder(R.drawable.test_avatar)
                         .into(avatarHolder.avatarImageView);
-                setItemClickListener(avatarHolder.itemView, item);
+                setItemClickListener(avatarHolder.itemView, item, isEditMode);
             } else if (holder instanceof InfoViewHolder) {
                 InfoViewHolder infoHolder = (InfoViewHolder) holder;
                 infoHolder.titleTextView.setText(item.getTitle());
                 infoHolder.contentTextView.setText(item.getContent());
-                setItemClickListener(infoHolder.itemView, item);
+                setItemClickListener(infoHolder.itemView, item, isEditMode);
+                /*// 根据编辑模式更新 UI
+                if (isEditMode && item.isClickable()) {
+                    infoHolder.itemView.setBackgroundResource(R.drawable.bg_editable_item);
+                } else {
+                    infoHolder.itemView.setBackgroundResource(0);
+                }*/
             } else if (holder instanceof ButtonViewHolder) {
                 ButtonViewHolder buttonHolder = (ButtonViewHolder) holder;
                 buttonHolder.button.setText(item.getTitle());
-                setItemClickListener(buttonHolder.button, item);
+                setItemClickListener(buttonHolder.button, item, false);
             }
         }
 
-        private void setItemClickListener(View itemView, ProfileItem item) {
-            if (item.isClickable() && item.getClickListener() != null) {
+        private void setItemClickListener(View itemView, ProfileItem item, boolean editMode) {
+            if (item.isClickable() && item.getClickListener() != null && (editMode || item.getType() == ProfileItem.TYPE_BUTTON)) {
                 itemView.setOnClickListener(v -> item.getClickListener().onItemClick(item));
+                itemView.setClickable(true);
             } else {
                 itemView.setOnClickListener(null);
                 itemView.setClickable(false);

@@ -5,6 +5,8 @@
     <string name="nav_library_title">Library</string>
     <string name="nav_account_title">Account</string>
 
+    <string name="date_format_str">E HH:mm:ss MM-dd-yyyy</string>
+
     <string name="activity_user_login_title">User Login</string>
     <string name="activity_user_register_title">User Register</string>
     <string name="inputbox_hint_username">Username</string>

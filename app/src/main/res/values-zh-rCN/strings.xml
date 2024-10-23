@@ -6,6 +6,8 @@
     <string name="nav_library_title">曲库</string>
     <string name="nav_account_title">个人</string>
 
+    <string name="date_format_str">yyyy-MM-dd HH:mm:ss E</string>
+
     <string name="activity_user_login_title">用户登录</string>
     <string name="activity_user_register_title">用户注册</string>
     <string name="inputbox_hint_username">用户名</string>

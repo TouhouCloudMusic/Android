@@ -1,6 +1,7 @@
 package net.hearnsoft.tcm.ui.activity;
 
 import android.content.Intent;
+import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -39,6 +40,7 @@ import net.hearnsoft.tcm.utils.SettingsPrefUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class UserProfileActivity extends AppCompatActivity {
 
@@ -91,8 +93,9 @@ public class UserProfileActivity extends AppCompatActivity {
                     openEditNameDialog(item.getContent());
                 }));
                 items.add(new ProfileItem(ProfileItem.TYPE_INFO, "标签", data.getLocation()));
-                items.add(new ProfileItem(ProfileItem.TYPE_INFO, "账户创建时间", data.getCreated_at().toString()));
-                items.add(new ProfileItem(ProfileItem.TYPE_INFO, "账户更新时间", data.getUpdated_at().toString()));
+                SimpleDateFormat dateFormat = new SimpleDateFormat(getString(R.string.date_format_str), Locale.CHINA);
+                items.add(new ProfileItem(ProfileItem.TYPE_INFO, "账户创建时间", dateFormat.format(data.getCreated_at())));
+                items.add(new ProfileItem(ProfileItem.TYPE_INFO, "账户更新时间", dateFormat.format(data.getUpdated_at())));
                 items.add(new ProfileItem(ProfileItem.TYPE_INFO, "权限", "Admin"));
                 items.add(new ProfileItem(ProfileItem.TYPE_BUTTON,
                         getString(R.string.profile_title_logout), "", true, item -> logout()));

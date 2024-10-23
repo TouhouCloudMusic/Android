@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -92,8 +93,8 @@ public class UserProfileActivity extends AppCompatActivity {
                     // 处理名字点击事件，例如打开编辑对话框
                     openEditNameDialog(item.getContent());
                 }));
-                items.add(new ProfileItem(ProfileItem.TYPE_INFO, "标签", data.getLocation()));
-                items.add(new ProfileItem(ProfileItem.TYPE_INFO, "E-mail", data.getEmail()));
+                items.add(new ProfileItem(ProfileItem.TYPE_INFO, "标签", TextUtils.isEmpty(data.getLocation()) ? "未设置" : data.getLocation()));
+                items.add(new ProfileItem(ProfileItem.TYPE_INFO, "E-mail", TextUtils.isEmpty(data.getEmail()) ? "未设置" : data.getEmail()));
                 SimpleDateFormat dateFormat = new SimpleDateFormat(getString(R.string.date_format_str), Locale.CHINA);
                 items.add(new ProfileItem(ProfileItem.TYPE_INFO, "账户创建时间", dateFormat.format(data.getCreated_at())));
                 items.add(new ProfileItem(ProfileItem.TYPE_INFO, "账户更新时间", dateFormat.format(data.getUpdated_at())));

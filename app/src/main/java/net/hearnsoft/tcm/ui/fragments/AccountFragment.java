@@ -123,6 +123,9 @@ public class AccountFragment extends Fragment {
                             setUserCardInfo(data.getName(),
                                     data.getCreated_at().toString(),
                                     null);
+                            userCard.setOnUserCardClickListener(v -> {
+                                // empty click
+                            });
                             userCard.setUserCardEditClickListener(v -> openUserProfile());
                             Toast.makeText(requireContext(), "刷新用户信息成功", Toast.LENGTH_SHORT).show();
                         }

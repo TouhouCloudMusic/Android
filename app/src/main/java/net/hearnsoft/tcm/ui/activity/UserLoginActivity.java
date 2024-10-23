@@ -86,9 +86,7 @@ public class UserLoginActivity extends AppCompatActivity implements UserLoginPor
             case LOGIN:
                 Toast.makeText(this, "登录成功", Toast.LENGTH_SHORT).show();
                 break;
-            case LOGOUT:
             default:
-                Toast.makeText(this, "登出成功", Toast.LENGTH_SHORT).show();
                 break;
         }
 

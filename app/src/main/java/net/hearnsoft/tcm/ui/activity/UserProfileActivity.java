@@ -11,13 +11,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.PickVisualMediaRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -120,14 +123,39 @@ public class UserProfileActivity extends AppCompatActivity {
     }
 
     private void logout() {
+        String token = SettingsPrefUtils.getInstance(this)
+                .readStringSettings(Constants.KEY_USER_TOKEN);
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
         builder.setTitle(R.string.profile_title_logout);
         builder.setMessage(R.string.profile_title_logout_content);
         builder.setPositiveButton(android.R.string.ok, (dialog, which) -> {
-            // TODO: 待实现
+            userAPI.logout(token, new APICore.APICallback<String>() {
+                @Override
+                public void onSuccess(String data) {
+                    Toast.makeText(UserProfileActivity.this,
+                            "注销登录成功",
+                            Toast.LENGTH_SHORT).show();
+                    // 发送广播通知 AccountFragment 刷新
+                    Intent intent = new Intent("net.hearnsoft.tcm.ACTION_REFRESH_USER_PROFILE");
+                    LocalBroadcastManager.getInstance(UserProfileActivity.this)
+                            .sendBroadcast(intent);
+                    dialog.dismiss();
+                    finish();
+                }
+
+                @Override
+                public void onError(APICore.ApiError error) {
+                    Log.e(TAG, "failed to logout, msg: " + error.getMessage());
+                    Toast.makeText(UserProfileActivity.this,
+                            "注销登录失败",
+                            Toast.LENGTH_SHORT).show();
+                    dialog.dismiss();
+                }
+            });
         });
         builder.setNegativeButton(android.R.string.cancel, null);
-        builder.show();
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     @Override
@@ -142,7 +170,6 @@ public class UserProfileActivity extends AppCompatActivity {
             finish();
             return true;
         } else if (item.getItemId() == R.id.menu_profile_edit) {
-            // TODO: 需要实现点击才可以启用可点击项目
             toggleEditMode();
             return true;
         }

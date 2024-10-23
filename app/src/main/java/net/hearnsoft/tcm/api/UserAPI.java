@@ -86,6 +86,30 @@ public class UserAPI {
         }, false);// 注册请求不需要包含 Cookie
     }
 
+    public void logout(String token, APICore.APICallback<String> callback) {
+        // 首先检查token是否为空
+        if (token == null || TextUtils.isEmpty(token)) {
+            callback.onError(new APICore.ApiError("Unauthorized", "No session token available"));
+            return;
+        }
+
+        apiCore.setSessionToken(token);
+        apiCore.callAPI(Constants.API_LOGOUT, ApiMethod.GET, null, String.class,
+                new APICore.APICallback<String>() {
+                    @Override
+                    public void onSuccess(String data) {
+                        callback.onSuccess(data);
+                        // 清除存储的 token
+                        preferences.writeStringSettings(Constants.KEY_USER_TOKEN, null);
+                    }
+
+                    @Override
+                    public void onError(APICore.ApiError error) {
+                        callback.onError(error);
+                    }
+                }, true);
+    }
+
     public void getUserProfile(String token, APICore.APICallback<UserProfile> callback) {
         // 首先检查token是否为空
         if (token == null || TextUtils.isEmpty(token)) {

@@ -55,30 +55,35 @@ public class UserRegisterFragment extends Fragment {
             portal.switchPages(0);
             portal.setActivityTitle(requireContext().getString(R.string.activity_user_login_title));
         });
-        binding.userRegister.setOnClickListener(v -> {
-            String username = binding.username.getText().toString();
-            String password = binding.password.getText().toString();
-            if (!username.isEmpty() && !password.isEmpty()) {
-                userAPI.register(username, password, new APICore.SessionTokenCallback<String>() {
-                    @Override
-                    public void onSuccess(String data, String sessionToken) {
-                        Snackbar.make(binding.getRoot(), data + "，注册成功" + "\n" + sessionToken
-                                , Snackbar.LENGTH_SHORT).show();
-                    }
+        binding.userRegister.setOnClickListener(v -> registerUser());
+    }
 
-                    @Override
-                    public void onSuccess(String data) {
-                        //empty stub
-                    }
+    private void registerUser() {
+        String username = binding.username.getText().toString();
+        String password = binding.password.getText().toString();
+        if (!username.isEmpty() && !password.isEmpty()) {
+            binding.userRegister.setEnabled(false);
+            userAPI.register(username, password, new APICore.SessionTokenCallback<String>() {
+                @Override
+                public void onSuccess(String data, String sessionToken) {
+                    Snackbar.make(binding.getRoot(), data + "，注册成功" + "\n" + sessionToken
+                            , Snackbar.LENGTH_SHORT).show();
+                    binding.userRegister.setEnabled(true);
+                }
 
-                    @Override
-                    public void onError(APICore.ApiError error) {
-                        Snackbar.make(binding.getRoot(), error.getMessage(), Snackbar.LENGTH_SHORT).show();
-                        Log.e(TAG, error.getMessage());
-                    }
-                });
-            }
-        });
+                @Override
+                public void onSuccess(String data) {
+                    //empty stub
+                }
+
+                @Override
+                public void onError(APICore.ApiError error) {
+                    Snackbar.make(binding.getRoot(), error.getMessage(), Snackbar.LENGTH_SHORT).show();
+                    Log.e(TAG, error.getMessage());
+                    binding.userRegister.setEnabled(true);
+                }
+            });
+        }
     }
 
 }

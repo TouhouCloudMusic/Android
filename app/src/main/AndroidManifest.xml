@@ -28,11 +28,11 @@
         </activity>
 
         <activity android:name=".ui.activity.UserProfileActivity"
-            android:exported="true"
+            android:exported="false"
             android:label="@string/profile_title"/>
 
         <activity android:name=".ui.activity.UserLoginActivity"
-            android:exported="true"
+            android:exported="false"
             android:label="@string/activity_user_login_title"/>
 
         <activity

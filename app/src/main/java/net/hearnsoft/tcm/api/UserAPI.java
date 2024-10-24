@@ -1,6 +1,8 @@
 package net.hearnsoft.tcm.api;
 
+import android.content.ContentResolver;
 import android.content.Context;
+import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -134,6 +136,15 @@ public class UserAPI {
                 callback.onError(error);
             }
         }, true);
+    }
+
+    public void uploadAvatar(String token, Uri imageUri, ContentResolver resolver, APICore.APICallback<String> callback) {
+        if (TextUtils.isEmpty(token)){
+            callback.onError(new APICore.ApiError("Unauthorized", "No session token available"));
+            return;
+        }
+        apiCore.setSessionToken(token);
+        apiCore.uploadImage(Constants.API_USER_AVATAR, imageUri, resolver, callback);
     }
 
 

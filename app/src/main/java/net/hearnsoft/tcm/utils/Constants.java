@@ -11,6 +11,7 @@ public class Constants {
     public static final String API_REGISTER = "sign-up";
     public static final String API_LOGOUT = "sign-out";
     public static final String API_USER_PROFILE = "profile";
+    public static final String API_USER_AVATAR = "avatar";
 
     // 常用shared-pref key
     public static final String KEY_USER_TOKEN = "session_token";

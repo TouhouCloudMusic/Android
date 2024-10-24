@@ -1,9 +1,11 @@
 package net.hearnsoft.tcm.ui.activity;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -29,6 +31,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.yalantis.ucrop.UCrop;
 
 import net.hearnsoft.tcm.R;
 import net.hearnsoft.tcm.api.APICore;
@@ -39,6 +42,7 @@ import net.hearnsoft.tcm.ui.widgets.ProfileItem;
 import net.hearnsoft.tcm.utils.Constants;
 import net.hearnsoft.tcm.utils.SettingsPrefUtils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -46,12 +50,15 @@ import java.util.Locale;
 public class UserProfileActivity extends AppCompatActivity {
 
     private final String TAG = this.getClass().getSimpleName();
+    private static final String tempAvatarImageName = "avatar.jpg";
     private ActivityUserProfileBinding binding;
     private UserAPI userAPI;
     private UserProfileAdapter adapter;
     private ActivityResultLauncher<PickVisualMediaRequest> pickAvatar;
 
+    private String userToken;
     private boolean isEditMode = false;
+    private boolean isProfileUpdated = false; // 用于跟踪资料是否更新
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -68,19 +75,38 @@ public class UserProfileActivity extends AppCompatActivity {
         adapter = new UserProfileAdapter();
         binding.recyclerView.setAdapter(adapter);
 
+        userToken = SettingsPrefUtils.getInstance(this).readStringSettings(Constants.KEY_USER_TOKEN);
+
         pickAvatar = registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), uri -> {
                     if (uri != null) {
-                        Log.d(TAG, "Selected URI: " + uri);
+                        String mimeType = getContentResolver().getType(uri);
+                        if (isValidImageType(mimeType)) {
+                            UCrop.Options options = new UCrop.Options();
+                            // 图片格式
+                            options.setCompressionFormat(Bitmap.CompressFormat.JPEG);
+                            // 设置图片压缩质量
+                            options.setCompressionQuality(100);
+                            UCrop.of(uri, Uri.fromFile(new File(getCacheDir(), tempAvatarImageName)))
+                                    .withAspectRatio(1, 1)
+                                    .withMaxResultSize(500, 500)
+                                    .withOptions(options)
+                                    .start(UserProfileActivity.this);
+                        } else {
+                            runOnUiThread(() -> Toast.makeText(this,
+                                    "请选择 JPG、JPEG 或 PNG 格式的图片!!", Toast.LENGTH_SHORT).show());
+                        }
                     } else {
                         Log.d(TAG, "No media selected");
                     }
                 });
 
-        loadUserProfile();
+        loadUserProfile(userToken);
     }
 
-    private void loadUserProfile() {
-        String userToken = SettingsPrefUtils.getInstance(this).readStringSettings(Constants.KEY_USER_TOKEN);
+    private void loadUserProfile(String userToken) {
+        if (adapter != null && adapter.items.size() != 0) {
+            adapter.items.clear();
+        }
         userAPI.getUserProfile(userToken, new APICore.APICallback<UserProfile>() {
             @Override
             public void onSuccess(UserProfile data) {
@@ -123,8 +149,50 @@ public class UserProfileActivity extends AppCompatActivity {
                 .build());
     }
 
+    private boolean isValidImageType(String mimeType) {
+        return "image/jpeg".equals(mimeType) || "image/jpg".equals(mimeType) || "image/png".equals(mimeType);
+    }
+
     private void openEditNameDialog(String name) {
         // TODO: 待实现
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (resultCode == RESULT_OK && requestCode == UCrop.REQUEST_CROP) {
+            uploadAvatar(userToken, UCrop.getOutput(data));
+        } else if (resultCode == UCrop.RESULT_ERROR) {
+            Toast.makeText(UserProfileActivity.this,
+                    "Failed to crop avatar", Toast.LENGTH_SHORT).show();
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void uploadAvatar(String userToken, Uri uri) {
+        if (uri != null && !TextUtils.isEmpty(userToken)) {
+            Log.d(TAG, "Selected URI: " + uri);
+            userAPI.uploadAvatar(userToken, uri, getContentResolver(), new APICore.APICallback<String>() {
+                @Override
+                public void onSuccess(String data) {
+                    runOnUiThread(() -> Toast.makeText(UserProfileActivity.this,
+                            "上传头像成功！", Toast.LENGTH_SHORT).show());
+                    loadUserProfile(userToken);
+                    isProfileUpdated = true; // 标记资料已更新
+                }
+
+                @Override
+                public void onError(APICore.ApiError error) {
+                    Log.e(TAG, error.getMessage());
+                    runOnUiThread(() ->Toast.makeText(UserProfileActivity.this,
+                            "Failed to upload avatar, reason:\n"+ error.getMessage(), Toast.LENGTH_SHORT).show());
+                }
+            });
+        }
+    }
+
+    private void sendRefreshBroadcast() {
+        Intent intent = new Intent("net.hearnsoft.tcm.ACTION_REFRESH_USER_PROFILE");
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
     private String getAvatarUrl(String fileName) {
@@ -171,6 +239,14 @@ public class UserProfileActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onBackPressed() {
+        if (isProfileUpdated) {
+            sendRefreshBroadcast();
+        }
+        super.onBackPressed();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_user_profile, menu);
         return super.onCreateOptionsMenu(menu);
@@ -179,6 +255,9 @@ public class UserProfileActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
+            if (isProfileUpdated) {
+                sendRefreshBroadcast();
+            }
             finish();
             return true;
         } else if (item.getItemId() == R.id.menu_profile_edit) {

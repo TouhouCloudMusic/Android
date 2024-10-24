@@ -1,8 +1,16 @@
 package net.hearnsoft.tcm.api;
 
+import android.content.ContentResolver;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.OpenableColumns;
+import android.text.TextUtils;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -13,16 +21,23 @@ import com.google.gson.JsonSyntaxException;
 
 import net.hearnsoft.tcm.utils.Constants;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.Headers;
 import okhttp3.MediaType;
+import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.internal.http2.Header;
+import okio.BufferedSink;
+import okio.Okio;
 
 public class APICore {
     private final String TAG = this.getClass().getSimpleName();
@@ -62,6 +77,106 @@ public class APICore {
 
     public void setSessionToken(String sessionToken) {
         this.sessionToken = sessionToken;
+    }
+
+    public void uploadImage(String endpoint, Uri imageUri, ContentResolver resolver, APICallback<String> callback) {
+        String url = apiUrl + "/" + endpoint;
+        if (imageUri == null) {
+            callback.onError(new ApiError("Image URI is null", "Image URI is null"));
+            return;
+        }
+        if (TextUtils.isEmpty(sessionToken)) {
+            callback.onError(new ApiError("Unauthorized", "No session token available"));
+            return;
+        }
+
+        /*RequestBody body = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("data", "image.jpg",
+                        RequestBody.create(image, MediaType.parse("image/*")))
+                .build();*/
+
+        RequestBody requestBody = new RequestBody() {
+            @Nullable
+            @Override
+            public MediaType contentType() {
+                String mimeType = resolver.getType(imageUri);
+                if (mimeType == null) {
+                    mimeType = "images/*";
+                }
+                return MediaType.parse(mimeType);
+            }
+
+            @Override
+            public void writeTo(@NonNull BufferedSink bufferedSink) throws IOException {
+                try (InputStream inputStream = resolver.openInputStream(imageUri)) {
+                    if (inputStream != null) {
+                        bufferedSink.writeAll(Okio.source(inputStream));
+                    }
+                } catch (Exception e) {
+                    callback.onError(new ApiError("File read error", e.getMessage()));
+                }
+            }
+        };
+
+        String fileName = getFileNameFromUri(imageUri, resolver);
+        MultipartBody.Part imagePart = MultipartBody.Part.createFormData("data", fileName, requestBody);
+
+        MultipartBody body = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addPart(imagePart)
+                .build();
+
+        Request.Builder requestBuilder = new Request.Builder().url(url);
+        if (sessionToken != null) {
+            requestBuilder.addHeader("Cookie", "session_token=" + sessionToken);
+        }
+        requestBuilder.post(body).build();
+
+        client.newCall(requestBuilder.build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                callback.onError(new ApiError("Network error", e.getMessage()));
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                Log.d(TAG, "Raw response: " + response);
+                if (response.isSuccessful()) {
+                    String responseBody = response.body().string();
+                    callback.onSuccess(responseBody);
+                } else {
+                    // 处理错误响应
+                    String responseBody = response.body().string();
+                    try {
+                        JsonObject jsonResponse = JsonParser.parseString(responseBody).getAsJsonObject();
+                        String errorMessage = jsonResponse.has("message") ? jsonResponse.get("message").getAsString() : "Unknown error";
+                        callback.onError(new ApiError("Upload failed", errorMessage));
+                    } catch (JsonSyntaxException e) {
+                        callback.onError(new ApiError("JSON parsing error", "Received malformed JSON: " + responseBody));
+                    }
+                }
+            }
+        });
+    }
+
+    private String getFileNameFromUri(Uri uri, ContentResolver contentResolver) {
+        String result = null;
+        if (uri.getScheme().equals("content")) {
+            try (Cursor cursor = contentResolver.query(uri, null, null, null, null)) {
+                if (cursor != null && cursor.moveToFirst()) {
+                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                }
+            }
+        }
+        if (result == null) {
+            result = uri.getPath();
+            int cut = result.lastIndexOf('/');
+            if (cut != -1) {
+                result = result.substring(cut + 1);
+            }
+        }
+        return result;
     }
 
     public <T> void callAPI(String endpoint, ApiMethod method, Object requestData, Class<T> responseType, APICallback<T> callback) {

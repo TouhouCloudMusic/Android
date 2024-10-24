@@ -51,6 +51,8 @@ dependencies {
     implementation libs.okhttp
     // Gson
     implementation libs.gson
+    // uCrop
+    implementation libs.ucrop
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core

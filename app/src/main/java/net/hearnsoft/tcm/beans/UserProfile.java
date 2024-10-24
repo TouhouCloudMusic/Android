@@ -10,6 +10,7 @@ public class UserProfile {
     private Date created_at;
     private Date updated_at;
     private String avatar;
+    private Role[] role;
 
     public String getName() {
         return name;
@@ -65,5 +66,34 @@ public class UserProfile {
 
     public void setAvatar(String avatar) {
         this.avatar = avatar;
+    }
+
+    public Role[] getRole() {
+        return role;
+    }
+
+    public void setRole(Role[] role) {
+        this.role = role;
+    }
+
+    public class Role {
+        private int id;
+        private String name;
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
     }
 }

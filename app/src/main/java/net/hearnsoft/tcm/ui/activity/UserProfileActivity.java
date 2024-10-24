@@ -38,6 +38,7 @@ import net.hearnsoft.tcm.api.APICore;
 import net.hearnsoft.tcm.api.UserAPI;
 import net.hearnsoft.tcm.beans.UserProfile;
 import net.hearnsoft.tcm.databinding.ActivityUserProfileBinding;
+import net.hearnsoft.tcm.misc.UserRole;
 import net.hearnsoft.tcm.ui.widgets.ProfileItem;
 import net.hearnsoft.tcm.utils.Constants;
 import net.hearnsoft.tcm.utils.SettingsPrefUtils;
@@ -124,7 +125,7 @@ public class UserProfileActivity extends AppCompatActivity {
                 SimpleDateFormat dateFormat = new SimpleDateFormat(getString(R.string.date_format_str), Locale.CHINA);
                 items.add(new ProfileItem(ProfileItem.TYPE_INFO, "账户创建时间", dateFormat.format(data.getCreated_at())));
                 items.add(new ProfileItem(ProfileItem.TYPE_INFO, "账户更新时间", dateFormat.format(data.getUpdated_at())));
-                items.add(new ProfileItem(ProfileItem.TYPE_INFO, "权限", "Admin"));
+                items.add(new ProfileItem(ProfileItem.TYPE_INFO, "权限", getRolesString(data.getRole())));
                 items.add(new ProfileItem(ProfileItem.TYPE_BUTTON,
                         getString(R.string.profile_title_logout), "", true, item -> logout()));
                 adapter.setItems(items);
@@ -140,6 +141,36 @@ public class UserProfileActivity extends AppCompatActivity {
                         .show();
             }
         });
+    }
+
+    private String getRolesString(UserProfile.Role[] roles) {
+        if (roles == null || roles.length == 0) {
+            return getString(R.string.role_unknown);
+        }
+        StringBuilder rolesString = new StringBuilder();
+        for (UserProfile.Role role : roles) {
+            UserRole userRole = UserRole.fromId(role.getId());
+            if (userRole != null) {
+                if (rolesString.length() > 0) {
+                    rolesString.append(", ");
+                }
+                rolesString.append(getString(getRoleStringResource(userRole)));
+            }
+        }
+        return rolesString.toString();
+    }
+
+    private int getRoleStringResource(UserRole role) {
+        switch (role) {
+            case ADMIN:
+                return R.string.role_admin;
+            case MODERATOR:
+                return R.string.role_moderator;
+            case USER:
+                return R.string.role_user;
+            default:
+                return R.string.role_unknown;
+        }
     }
 
     private void openImagePicker() {

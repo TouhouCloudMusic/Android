@@ -122,11 +122,12 @@ public class AccountFragment extends Fragment {
                         public void onSuccess(UserProfile data) {
                             setUserCardInfo(data.getName(),
                                     data.getCreated_at().toString(),
-                                    null);
+                                    getAvatarUrl(data.getAvatar()));
                             userCard.setOnUserCardClickListener(v -> {
                                 // empty click
                             });
                             userCard.setUserCardEditClickListener(v -> openUserProfile());
+                            userCard.setUserCardBackgroundFromUrl(getAvatarUrl(data.getAvatar()));
                             Toast.makeText(requireContext(), "刷新用户信息成功", Toast.LENGTH_SHORT).show();
                         }
 
@@ -136,6 +137,13 @@ public class AccountFragment extends Fragment {
                         }
                     });
         }
+    }
+
+    private String getAvatarUrl(String fileName) {
+        if (TextUtils.isEmpty(fileName)) {
+            return "";
+        }
+        return Constants.API_HOST + "/image/" + fileName;
     }
 
     private void setUserCardForLoggedOutState() {

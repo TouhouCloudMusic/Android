@@ -85,7 +85,7 @@ public class UserProfileActivity extends AppCompatActivity {
             @Override
             public void onSuccess(UserProfile data) {
                 List<ProfileItem> items = new ArrayList<>();
-                items.add(new ProfileItem(ProfileItem.TYPE_AVATAR, "头像", "", true, item -> {
+                items.add(new ProfileItem(ProfileItem.TYPE_AVATAR, "头像", getAvatarUrl(data.getAvatar()), true, item -> {
                     // 处理头像点击事件，例如打开图片选择器
                     openImagePicker();
                 }));
@@ -125,6 +125,13 @@ public class UserProfileActivity extends AppCompatActivity {
 
     private void openEditNameDialog(String name) {
         // TODO: 待实现
+    }
+
+    private String getAvatarUrl(String fileName) {
+        if (TextUtils.isEmpty(fileName)) {
+            return "";
+        }
+        return Constants.API_HOST + "/image/" + fileName;
     }
 
     private void logout() {

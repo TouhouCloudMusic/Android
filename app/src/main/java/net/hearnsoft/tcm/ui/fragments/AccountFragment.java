@@ -129,7 +129,8 @@ public class AccountFragment extends Fragment {
                             });
                             userCard.setUserCardEditClickListener(v -> openUserProfile());
                             userCard.setUserCardBackgroundFromUrl(getAvatarUrl(data.getAvatar()));
-                            Toast.makeText(requireContext(), "刷新用户信息成功", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(requireContext(), R.string.toast_refresh_profile_succ,
+                                    Toast.LENGTH_SHORT).show();
                         }
 
                         @Override
@@ -148,7 +149,8 @@ public class AccountFragment extends Fragment {
     }
 
     private void setUserCardForLoggedOutState() {
-        setUserCardInfo("点击登录", "大地に咲く旋律", null);
+        setUserCardInfo(getString(R.string.usercard_default_name),
+                getString(R.string.usercard_default_desc),  null);
         userCard.setOnUserCardClickListener(v -> {
             Intent loginPage = new Intent(getContext(), UserLoginActivity.class);
             getContext().startActivity(loginPage);
@@ -161,8 +163,10 @@ public class AccountFragment extends Fragment {
     private void setUserCardInfo(String userName,
                                  String userDesc, String userAvatarUrl){
         if (userCard != null) {
-            userCard.setUserName(TextUtils.isEmpty(userName) ? "点击登录" : userName);
-            userCard.setUserDescription(TextUtils.isEmpty(userDesc) ? "大地に咲く旋律" : userDesc);
+            userCard.setUserName(TextUtils.isEmpty(userName) ?
+                    getString(R.string.usercard_default_name) : userName);
+            userCard.setUserDescription(TextUtils.isEmpty(userDesc) ?
+                    getString(R.string.usercard_default_desc) : userDesc);
             if (TextUtils.isEmpty(userAvatarUrl)) {
                 userCard.setUserAvatarFromRes(R.drawable.test_avatar);
             } else {

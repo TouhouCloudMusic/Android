@@ -11,6 +11,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import net.hearnsoft.tcm.R;
 import net.hearnsoft.tcm.databinding.ActivityUserLoginBinding;
 import net.hearnsoft.tcm.misc.UserLoginType;
 import net.hearnsoft.tcm.ui.adapter.AppViewPagerAdapter;
@@ -80,10 +81,10 @@ public class UserLoginActivity extends AppCompatActivity implements UserLoginPor
         // 展示Toast
         switch(loginType) {
             case REGISTER:
-                Toast.makeText(this, "注册成功", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.toast_user_register_succ, Toast.LENGTH_SHORT).show();
                 break;
             case LOGIN:
-                Toast.makeText(this, "登录成功", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.toast_user_login_succ, Toast.LENGTH_SHORT).show();
                 break;
             default:
                 break;

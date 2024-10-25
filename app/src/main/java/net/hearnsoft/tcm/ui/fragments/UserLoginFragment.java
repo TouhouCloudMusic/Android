@@ -67,7 +67,9 @@ public class UserLoginFragment extends Fragment {
             userAPI.login(username, password, new APICore.SessionTokenCallback<String>() {
                 @Override
                 public void onSuccess(String data, String sessionToken) {
-                    Snackbar.make(binding.getRoot(), data + "，登录成功！", Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(binding.getRoot(),
+                            data + "," + getString(R.string.toast_user_login_succ),
+                            Snackbar.LENGTH_SHORT).show();
                     binding.userLogin.setEnabled(true);
                     ((UserLoginActivity) requireActivity()).onLoginSuccess(sessionToken,
                             UserLoginType.LOGIN);

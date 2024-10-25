@@ -93,7 +93,7 @@ public class UserProfileActivity extends AppCompatActivity {
                                     .start(UserProfileActivity.this);
                         } else {
                             runOnUiThread(() -> Toast.makeText(this,
-                                    "请选择 JPG、JPEG 或 PNG 格式的图片!!", Toast.LENGTH_SHORT).show());
+                                    R.string.toast_err_image_wrong, Toast.LENGTH_SHORT).show());
                         }
                     } else {
                         Logs.d(TAG, "No media selected");
@@ -111,20 +111,22 @@ public class UserProfileActivity extends AppCompatActivity {
             @Override
             public void onSuccess(UserProfile data) {
                 List<ProfileItem> items = new ArrayList<>();
-                items.add(new ProfileItem(ProfileItem.TYPE_AVATAR, "头像", getAvatarUrl(data.getAvatar()), true, item -> {
+                items.add(new ProfileItem(ProfileItem.TYPE_AVATAR, getString(R.string.profile_title_avatar), getAvatarUrl(data.getAvatar()), true, item -> {
                     // 处理头像点击事件，例如打开图片选择器
                     openImagePicker();
                 }));
-                items.add(new ProfileItem(ProfileItem.TYPE_INFO, "名字", data.getName(), true, item -> {
+                items.add(new ProfileItem(ProfileItem.TYPE_INFO, getString(R.string.profile_title_username), data.getName(), true, item -> {
                     // 处理名字点击事件，例如打开编辑对话框
                     openEditNameDialog(item.getContent());
                 }));
-                items.add(new ProfileItem(ProfileItem.TYPE_INFO, "标签", TextUtils.isEmpty(data.getLocation()) ? "未设置" : data.getLocation()));
-                items.add(new ProfileItem(ProfileItem.TYPE_INFO, "E-mail", TextUtils.isEmpty(data.getEmail()) ? "未设置" : data.getEmail()));
+                items.add(new ProfileItem(ProfileItem.TYPE_INFO, getString(R.string.profile_title_user_label),
+                        TextUtils.isEmpty(data.getLocation()) ? getString(R.string.profile_label_unset) : data.getLocation()));
+                items.add(new ProfileItem(ProfileItem.TYPE_INFO, "E-mail",
+                        TextUtils.isEmpty(data.getEmail()) ? getString(R.string.profile_label_unset) : data.getEmail()));
                 SimpleDateFormat dateFormat = new SimpleDateFormat(getString(R.string.date_format_str), Locale.CHINA);
-                items.add(new ProfileItem(ProfileItem.TYPE_INFO, "账户创建时间", dateFormat.format(data.getCreated_at())));
-                items.add(new ProfileItem(ProfileItem.TYPE_INFO, "账户更新时间", dateFormat.format(data.getUpdated_at())));
-                items.add(new ProfileItem(ProfileItem.TYPE_INFO, "权限", getRolesString(data.getRole())));
+                items.add(new ProfileItem(ProfileItem.TYPE_INFO, getString(R.string.profile_title_create_time), dateFormat.format(data.getCreated_at())));
+                items.add(new ProfileItem(ProfileItem.TYPE_INFO, getString(R.string.profile_title_modify_time), dateFormat.format(data.getUpdated_at())));
+                items.add(new ProfileItem(ProfileItem.TYPE_INFO, getString(R.string.profile_title_user_permission), getRolesString(data.getRole())));
                 items.add(new ProfileItem(ProfileItem.TYPE_BUTTON,
                         getString(R.string.profile_title_logout), "", true, item -> logout()));
                 adapter.setItems(items);
@@ -134,8 +136,8 @@ public class UserProfileActivity extends AppCompatActivity {
             public void onError(APICore.ApiError error) {
                 Logs.e(TAG, "failed to load profile, msg: " + error.getMessage());
                 new MaterialAlertDialogBuilder(UserProfileActivity.this)
-                        .setTitle("Error!")
-                        .setMessage("Failed to load user profile!")
+                        .setTitle(R.string.profile_dialog_err_title)
+                        .setMessage(R.string.profile_dialog_err_msg)
                         .setPositiveButton(android.R.string.ok, (dialog, which) -> finish())
                         .show();
             }
@@ -193,7 +195,7 @@ public class UserProfileActivity extends AppCompatActivity {
             uploadAvatar(userToken, UCrop.getOutput(data));
         } else if (resultCode == UCrop.RESULT_ERROR) {
             Toast.makeText(UserProfileActivity.this,
-                    "Failed to crop avatar", Toast.LENGTH_SHORT).show();
+                    R.string.toast_profile_err_crop_avatar, Toast.LENGTH_SHORT).show();
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -205,7 +207,7 @@ public class UserProfileActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(String data) {
                     runOnUiThread(() -> Toast.makeText(UserProfileActivity.this,
-                            "上传头像成功！", Toast.LENGTH_SHORT).show());
+                            R.string.toast_profile_upload_avatar_succ, Toast.LENGTH_SHORT).show());
                     loadUserProfile(userToken);
                     isProfileUpdated = true; // 标记资料已更新
                 }
@@ -214,7 +216,8 @@ public class UserProfileActivity extends AppCompatActivity {
                 public void onError(APICore.ApiError error) {
                     Logs.e(TAG, error.getMessage());
                     runOnUiThread(() ->Toast.makeText(UserProfileActivity.this,
-                            "Failed to upload avatar, reason:\n"+ error.getMessage(), Toast.LENGTH_SHORT).show());
+                            getString(R.string.toast_profile_upload_avatar_err)
+                                    +"\n"+ error.getMessage(), Toast.LENGTH_SHORT).show());
                 }
             });
         }
@@ -243,7 +246,7 @@ public class UserProfileActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(String data) {
                     Toast.makeText(UserProfileActivity.this,
-                            "注销登录成功",
+                            R.string.toast_profile_logout_succ,
                             Toast.LENGTH_SHORT).show();
                     // 发送广播通知 AccountFragment 刷新
                     Intent intent = new Intent("net.hearnsoft.tcm.ACTION_REFRESH_USER_PROFILE");
@@ -257,7 +260,7 @@ public class UserProfileActivity extends AppCompatActivity {
                 public void onError(APICore.ApiError error) {
                     Logs.e(TAG, "failed to logout, msg: " + error.getMessage());
                     Toast.makeText(UserProfileActivity.this,
-                            "注销登录失败",
+                            R.string.toast_profile_logout_err,
                             Toast.LENGTH_SHORT).show();
                     dialog.dismiss();
                 }

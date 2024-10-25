@@ -69,7 +69,9 @@ public class UserRegisterFragment extends Fragment {
             userAPI.register(username, password, new APICore.SessionTokenCallback<String>() {
                 @Override
                 public void onSuccess(String data, String sessionToken) {
-                    Snackbar.make(binding.getRoot(), data + "，注册成功！", Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(binding.getRoot(),
+                            data + "," + getString(R.string.toast_user_register_succ),
+                            Snackbar.LENGTH_SHORT).show();
                     binding.userRegister.setEnabled(true);
                     ((UserLoginActivity) requireActivity()).onLoginSuccess(sessionToken,
                             UserLoginType.REGISTER);

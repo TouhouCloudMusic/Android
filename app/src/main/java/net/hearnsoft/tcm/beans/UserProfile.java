@@ -9,7 +9,7 @@ public class UserProfile {
     private String avatar_id;
     private Date created_at;
     private Date updated_at;
-    private String avatar;
+    private Avatar avatar;
     private Role[] role;
 
     public String getName() {
@@ -60,11 +60,11 @@ public class UserProfile {
         this.email = email;
     }
 
-    public String getAvatar() {
+    public Avatar getAvatar() {
         return avatar;
     }
 
-    public void setAvatar(String avatar) {
+    public void setAvatar(Avatar avatar) {
         this.avatar = avatar;
     }
 
@@ -74,6 +74,45 @@ public class UserProfile {
 
     public void setRole(Role[] role) {
         this.role = role;
+    }
+
+    public class Avatar {
+        private int id;
+        private String filename;
+        private int uploaded_by;
+        private Date created_at;
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public String getFilename() {
+            return filename;
+        }
+
+        public void setFilename(String filename) {
+            this.filename = filename;
+        }
+
+        public int getUploaded_by() {
+            return uploaded_by;
+        }
+
+        public void setUploaded_by(int uploaded_by) {
+            this.uploaded_by = uploaded_by;
+        }
+
+        public Date getCreated_at() {
+            return created_at;
+        }
+
+        public void setCreated_at(Date created_at) {
+            this.created_at = created_at;
+        }
     }
 
     public class Role {

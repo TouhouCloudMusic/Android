@@ -111,7 +111,8 @@ public class UserProfileActivity extends AppCompatActivity {
             @Override
             public void onSuccess(UserProfile data) {
                 List<ProfileItem> items = new ArrayList<>();
-                items.add(new ProfileItem(ProfileItem.TYPE_AVATAR, getString(R.string.profile_title_avatar), getAvatarUrl(data.getAvatar()), true, item -> {
+                items.add(new ProfileItem(ProfileItem.TYPE_AVATAR, getString(R.string.profile_title_avatar),
+                        getAvatarUrl(data.getAvatar().getFilename()), true, item -> {
                     // 处理头像点击事件，例如打开图片选择器
                     openImagePicker();
                 }));

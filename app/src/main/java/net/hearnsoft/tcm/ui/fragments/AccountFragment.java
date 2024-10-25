@@ -152,6 +152,9 @@ public class AccountFragment extends Fragment {
             Intent loginPage = new Intent(getContext(), UserLoginActivity.class);
             getContext().startActivity(loginPage);
         });
+        userCard.setUserCardEditClickListener(v -> {
+            // empty click
+        });
     }
 
     private void setUserCardInfo(String userName,

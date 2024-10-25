@@ -5,9 +5,7 @@ import android.graphics.Bitmap;
 import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -41,6 +39,7 @@ import net.hearnsoft.tcm.databinding.ActivityUserProfileBinding;
 import net.hearnsoft.tcm.misc.UserRole;
 import net.hearnsoft.tcm.ui.widgets.ProfileItem;
 import net.hearnsoft.tcm.utils.Constants;
+import net.hearnsoft.tcm.utils.Logs;
 import net.hearnsoft.tcm.utils.SettingsPrefUtils;
 
 import java.io.File;
@@ -97,7 +96,7 @@ public class UserProfileActivity extends AppCompatActivity {
                                     "请选择 JPG、JPEG 或 PNG 格式的图片!!", Toast.LENGTH_SHORT).show());
                         }
                     } else {
-                        Log.d(TAG, "No media selected");
+                        Logs.d(TAG, "No media selected");
                     }
                 });
 
@@ -133,7 +132,7 @@ public class UserProfileActivity extends AppCompatActivity {
 
             @Override
             public void onError(APICore.ApiError error) {
-                Log.e(TAG, "failed to load profile, msg: " + error.getMessage());
+                Logs.e(TAG, "failed to load profile, msg: " + error.getMessage());
                 new MaterialAlertDialogBuilder(UserProfileActivity.this)
                         .setTitle("Error!")
                         .setMessage("Failed to load user profile!")
@@ -201,7 +200,7 @@ public class UserProfileActivity extends AppCompatActivity {
 
     private void uploadAvatar(String userToken, Uri uri) {
         if (uri != null && !TextUtils.isEmpty(userToken)) {
-            Log.d(TAG, "Selected URI: " + uri);
+            Logs.d(TAG, "Selected URI: " + uri);
             userAPI.uploadAvatar(userToken, uri, getContentResolver(), new APICore.APICallback<String>() {
                 @Override
                 public void onSuccess(String data) {
@@ -213,7 +212,7 @@ public class UserProfileActivity extends AppCompatActivity {
 
                 @Override
                 public void onError(APICore.ApiError error) {
-                    Log.e(TAG, error.getMessage());
+                    Logs.e(TAG, error.getMessage());
                     runOnUiThread(() ->Toast.makeText(UserProfileActivity.this,
                             "Failed to upload avatar, reason:\n"+ error.getMessage(), Toast.LENGTH_SHORT).show());
                 }
@@ -256,7 +255,7 @@ public class UserProfileActivity extends AppCompatActivity {
 
                 @Override
                 public void onError(APICore.ApiError error) {
-                    Log.e(TAG, "failed to logout, msg: " + error.getMessage());
+                    Logs.e(TAG, "failed to logout, msg: " + error.getMessage());
                     Toast.makeText(UserProfileActivity.this,
                             "注销登录失败",
                             Toast.LENGTH_SHORT).show();

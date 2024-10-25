@@ -3,7 +3,6 @@ package net.hearnsoft.tcm.ui.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.text.method.LinkMovementMethod;
 import android.view.MenuItem;
 import android.widget.Toast;
 

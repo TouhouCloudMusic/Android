@@ -1,13 +1,11 @@
 package net.hearnsoft.tcm.ui.widgets;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.RenderEffect;
 import android.graphics.Shader;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -19,7 +17,7 @@ import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.imageview.ShapeableImageView;
 
 import net.hearnsoft.tcm.R;
-import net.hearnsoft.tcm.ui.activity.UserLoginActivity;
+import net.hearnsoft.tcm.utils.Logs;
 
 import java.util.Objects;
 
@@ -109,7 +107,7 @@ public class UserCardView extends LinearLayout {
     public void setUserAvatarFromRes(int avatarResId) {
         if (Objects.isNull(avatarResId)) {
             userAvatar.setImageResource(R.drawable.ic_account_circle);
-            Log.e(TAG, "avatarRes is null!");
+            Logs.e(TAG, "avatarRes is null!");
             return;
         }
         userAvatar.setImageResource(avatarResId);
@@ -122,7 +120,7 @@ public class UserCardView extends LinearLayout {
     public void setUserAvatarFromUrl(String avatarResUrl) {
         if (TextUtils.isEmpty(avatarResUrl)) {
             userAvatar.setImageResource(R.drawable.ic_account_circle);
-            Log.e(TAG, "avatarResUrl is empty!");
+            Logs.e(TAG, "avatarResUrl is empty!");
             return;
         }
         Glide.with(this)
@@ -139,7 +137,7 @@ public class UserCardView extends LinearLayout {
     public void setUserCardBackgroundFromRes(int backgroundResId) {
         if (Objects.isNull(backgroundResId)) {
             setBlurCardFromRes(R.drawable.test_res2);
-            Log.e(TAG, "backgroundRes is null!");
+            Logs.e(TAG, "backgroundRes is null!");
             return;
         }
         setBlurCardFromRes(backgroundResId);
@@ -152,7 +150,7 @@ public class UserCardView extends LinearLayout {
     public void setUserCardBackgroundFromUrl(String backgroundUrl) {
         if (TextUtils.isEmpty(backgroundUrl)) {
             setBlurCardFromRes(R.drawable.test_res2);
-            Log.e(TAG, "backgroundUrl is empty!");
+            Logs.e(TAG, "backgroundUrl is empty!");
             return;
         }
         setBlurCardFromUrl(backgroundUrl);

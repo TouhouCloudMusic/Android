@@ -20,6 +20,7 @@ import net.hearnsoft.tcm.api.UserAPI;
 import net.hearnsoft.tcm.databinding.FragmentUserRegisterBinding;
 import net.hearnsoft.tcm.misc.UserLoginType;
 import net.hearnsoft.tcm.ui.activity.UserLoginActivity;
+import net.hearnsoft.tcm.utils.Logs;
 import net.hearnsoft.tcm.utils.UserLoginPortal;
 
 
@@ -45,7 +46,7 @@ public class UserRegisterFragment extends Fragment {
         try {
             portal = (UserLoginPortal) requireActivity();
         } catch (ClassCastException e) {
-            Log.e(TAG, e.getMessage());
+            Logs.e(TAG, e.getMessage());
         }
     }
 
@@ -83,7 +84,7 @@ public class UserRegisterFragment extends Fragment {
                 @Override
                 public void onError(APICore.ApiError error) {
                     Snackbar.make(binding.getRoot(), error.getMessage(), Snackbar.LENGTH_SHORT).show();
-                    Log.e(TAG, error.getMessage());
+                    Logs.e(TAG, error.getMessage());
                     binding.userRegister.setEnabled(true);
                 }
             });

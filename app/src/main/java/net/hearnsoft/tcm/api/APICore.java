@@ -1,5 +1,6 @@
 package net.hearnsoft.tcm.api;
 
+import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.database.Cursor;
 import android.net.Uri;
@@ -20,6 +21,7 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
 import net.hearnsoft.tcm.utils.Constants;
+import net.hearnsoft.tcm.utils.Logs;
 
 import java.io.File;
 import java.io.IOException;
@@ -141,7 +143,7 @@ public class APICore {
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                Log.d(TAG, "Raw response: " + response);
+                Logs.d(TAG, "Raw response: " + response);
                 if (response.isSuccessful()) {
                     String responseBody = response.body().string();
                     callback.onSuccess(responseBody);
@@ -160,6 +162,7 @@ public class APICore {
         });
     }
 
+    @SuppressLint("Range")
     private String getFileNameFromUri(Uri uri, ContentResolver contentResolver) {
         String result = null;
         if (uri.getScheme().equals("content")) {
@@ -186,7 +189,7 @@ public class APICore {
     public <T> void callAPI(String endpoint, ApiMethod method, Object requestData, Class<T> responseType, APICallback<T> callback, boolean includeCookie) {
         String url = apiUrl + "/" + endpoint;
         Request.Builder requestBuilder = new Request.Builder().url(url);
-        Log.d(TAG, "request api url:"+ url);
+        Logs.d(TAG, "request api url:"+ url);
 
         if (includeCookie && sessionToken != null) {
             requestBuilder.addHeader("Cookie", "session_token=" + sessionToken);
@@ -216,7 +219,7 @@ public class APICore {
                 break;
         }
 
-        Log.d(TAG, requestBuilder.toString());
+        Logs.d(TAG, requestBuilder.toString());
 
         client.newCall(requestBuilder.build()).enqueue(new Callback() {
             @Override
@@ -228,7 +231,7 @@ public class APICore {
             public void onResponse(Call call, Response response) throws IOException {
                 String responseBody = response.body().string();
                 String newSessionToken = getSessionToken(response);
-                Log.d(TAG, "Raw response: " + responseBody);
+                Logs.d(TAG, "Raw response: " + responseBody);
 
                 try {
                     JsonElement jsonElement = JsonParser.parseString(responseBody);

@@ -1,7 +1,6 @@
 package net.hearnsoft.tcm.ui.activity;
 
 import android.os.Bundle;
-import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -18,6 +17,7 @@ import net.hearnsoft.tcm.ui.fragments.AccountFragment;
 import net.hearnsoft.tcm.ui.fragments.ExploreFragment;
 import net.hearnsoft.tcm.ui.fragments.LibraryFragment;
 import net.hearnsoft.tcm.ui.fragments.RadioFragment;
+import net.hearnsoft.tcm.utils.Logs;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (BuildConfig.DEBUG) { Log.d(TAG, "onApp: MainActivity: onCreate:"); }
+        if (BuildConfig.DEBUG) { Logs.d(TAG, "onApp: MainActivity: onCreate:"); }
         //设置Edge-to-Edge
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         binding = ActivityMainBinding.inflate(getLayoutInflater());

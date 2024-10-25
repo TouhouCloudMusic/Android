@@ -10,6 +10,7 @@ import com.google.gson.JsonObject;
 
 import net.hearnsoft.tcm.beans.UserProfile;
 import net.hearnsoft.tcm.utils.Constants;
+import net.hearnsoft.tcm.utils.Logs;
 import net.hearnsoft.tcm.utils.SettingsPrefUtils;
 
 public class UserAPI {
@@ -40,7 +41,7 @@ public class UserAPI {
         JsonObject requestData = new JsonObject();
         requestData.addProperty("username", username);
         requestData.addProperty("password", password);
-        Log.d(TAG, "login json:" + requestData);
+        Logs.d(TAG, "login json:" + requestData);
 
         apiCore.callAPI(Constants.API_LOGIN, ApiMethod.POST, requestData, String.class, new APICore.SessionTokenCallback<String>() {
             @Override
@@ -66,7 +67,7 @@ public class UserAPI {
         JsonObject requestData = new JsonObject();
         requestData.addProperty("username", username);
         requestData.addProperty("password", password);
-        Log.d(TAG, "register json:" + requestData);
+        Logs.d(TAG, "register json:" + requestData);
 
         apiCore.callAPI(Constants.API_REGISTER, ApiMethod.POST, requestData, String.class, new APICore.SessionTokenCallback<String>() {
             @Override

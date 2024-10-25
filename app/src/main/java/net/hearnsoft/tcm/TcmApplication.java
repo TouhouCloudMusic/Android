@@ -1,7 +1,8 @@
 package net.hearnsoft.tcm;
 
 import android.app.Application;
-import android.util.Log;
+
+import net.hearnsoft.tcm.utils.Logs;
 
 
 public class TcmApplication extends Application {
@@ -11,6 +12,6 @@ public class TcmApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d(TAG, "onApplicationInit:");
+        Logs.d(TAG, "onApplicationInit:");
     }
 }

@@ -33,6 +33,7 @@ import net.hearnsoft.tcm.ui.activity.UserLoginActivity;
 import net.hearnsoft.tcm.ui.activity.UserProfileActivity;
 import net.hearnsoft.tcm.ui.widgets.UserCardView;
 import net.hearnsoft.tcm.utils.Constants;
+import net.hearnsoft.tcm.utils.Logs;
 import net.hearnsoft.tcm.utils.SettingsPrefUtils;
 
 public class AccountFragment extends Fragment {
@@ -110,7 +111,7 @@ public class AccountFragment extends Fragment {
     }
 
     private void refreshUserProfile() {
-        Log.d(TAG, "refreshUserProfile: ");
+        Logs.d(TAG, "refreshUserProfile: ");
         String userToken = SettingsPrefUtils.getInstance(requireContext())
                 .readStringSettings(Constants.KEY_USER_TOKEN);
         if (TextUtils.isEmpty(userToken)) {

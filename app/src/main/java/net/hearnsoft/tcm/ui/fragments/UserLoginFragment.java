@@ -3,7 +3,6 @@ package net.hearnsoft.tcm.ui.fragments;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.method.LinkMovementMethod;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +19,7 @@ import net.hearnsoft.tcm.api.UserAPI;
 import net.hearnsoft.tcm.databinding.FragmentUserLoginBinding;
 import net.hearnsoft.tcm.misc.UserLoginType;
 import net.hearnsoft.tcm.ui.activity.UserLoginActivity;
+import net.hearnsoft.tcm.utils.Logs;
 import net.hearnsoft.tcm.utils.UserLoginPortal;
 
 public class UserLoginFragment extends Fragment {
@@ -44,7 +44,7 @@ public class UserLoginFragment extends Fragment {
         try {
             portal = (UserLoginPortal) requireActivity();
         } catch (ClassCastException e) {
-            Log.e(TAG, e.getMessage());
+            Logs.e(TAG, e.getMessage());
         }
     }
 
@@ -82,7 +82,7 @@ public class UserLoginFragment extends Fragment {
                 @Override
                 public void onError(APICore.ApiError error) {
                     Snackbar.make(binding.getRoot(), error.getMessage(), Snackbar.LENGTH_SHORT).show();
-                    Log.e(TAG, error.getMessage());
+                    Logs.e(TAG, error.getMessage());
                     binding.userLogin.setEnabled(true);
                 }
             });

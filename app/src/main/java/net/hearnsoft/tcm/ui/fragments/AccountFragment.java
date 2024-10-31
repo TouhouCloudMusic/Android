@@ -123,13 +123,13 @@ public class AccountFragment extends Fragment {
                         public void onSuccess(UserProfile data) {
                             setUserCardInfo(data.getName(),
                                     data.getCreated_at().toString(),
-                                    getAvatarUrl(data.getAvatar().getFilename()));
+                                    getAvatarUrl(data.getAvatar()));
                             userCard.setOnUserCardClickListener(v -> {
                                 // empty click
                             });
                             userCard.setUserCardEditClickListener(v -> openUserProfile());
                             userCard.setUserCardBackgroundFromUrl(
-                                    getAvatarUrl(data.getAvatar().getFilename()));
+                                    getAvatarUrl(data.getAvatar()));
                             Toast.makeText(requireContext(), R.string.toast_refresh_profile_succ,
                                     Toast.LENGTH_SHORT).show();
                         }

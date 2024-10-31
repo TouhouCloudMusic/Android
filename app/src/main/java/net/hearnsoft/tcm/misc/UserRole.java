@@ -1,32 +1,26 @@
 package net.hearnsoft.tcm.misc;
 
 public enum UserRole {
-    ADMIN(1, "Admin"),
-    MODERATOR(2, "Moderator"),
-    USER(3, "User");
+    ADMIN("Admin"),
+    MODERATOR("Moderator"),
+    USER("User");
 
-    private final int id;
     private final String name;
 
-    UserRole(int id, String name) {
-        this.id = id;
+    UserRole(String name) {
         this.name = name;
-    }
-
-    public int getId() {
-        return id;
     }
 
     public String getName() {
         return name;
     }
 
-    public static UserRole fromId(int id) {
+    public static UserRole fromString(String name) {
         for (UserRole role : values()) {
-            if (role.getId() == id) {
+            if (role.getName().equalsIgnoreCase(name)) {
                 return role;
             }
         }
-        return null;
+        return null; // 如果没有匹配的角色，返回 null
     }
 }

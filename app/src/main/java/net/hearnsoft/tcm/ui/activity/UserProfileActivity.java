@@ -112,7 +112,7 @@ public class UserProfileActivity extends AppCompatActivity {
             public void onSuccess(UserProfile data) {
                 List<ProfileItem> items = new ArrayList<>();
                 items.add(new ProfileItem(ProfileItem.TYPE_AVATAR, getString(R.string.profile_title_avatar),
-                        getAvatarUrl(data.getAvatar().getFilename()), true, item -> {
+                        getAvatarUrl(data.getAvatar()), true, item -> {
                     // 处理头像点击事件，例如打开图片选择器
                     openImagePicker();
                 }));
@@ -145,13 +145,13 @@ public class UserProfileActivity extends AppCompatActivity {
         });
     }
 
-    private String getRolesString(UserProfile.Role[] roles) {
+    private String getRolesString(String[] roles) {
         if (roles == null || roles.length == 0) {
             return getString(R.string.role_unknown);
         }
         StringBuilder rolesString = new StringBuilder();
-        for (UserProfile.Role role : roles) {
-            UserRole userRole = UserRole.fromId(role.getId());
+        for (String roleName : roles) {
+            UserRole userRole = UserRole.fromString(roleName);
             if (userRole != null) {
                 if (rolesString.length() > 0) {
                     rolesString.append(", ");

@@ -30,6 +30,11 @@
         <item name="cornerSize">50%</item>
     </style>
 
+    <style name="BannerImageRoundRect">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">10%</item>
+    </style>
+
     <style name="UserCard_UserSubText">
         <item name="android:textColor">@color/white</item>
         <item name="android:textSize">12sp</item>

@@ -2,6 +2,7 @@
 <resources>
     <dimen name="main_explore_banner_height">160dp</dimen>
     <dimen name="main_explore_banner_margin">12dp</dimen>
+    <dimen name="main_explore_banner_image_margin">6dp</dimen>
     <dimen name="activity_login_margin">16dp</dimen>
     <dimen name="account_cardview_avatar_height">80dp</dimen>
     <dimen name="account_cardview_avatar_width">@dimen/account_cardview_avatar_height</dimen>

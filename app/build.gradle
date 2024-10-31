@@ -13,6 +13,15 @@ android {
         versionCode 1
         versionName "1.0"
 
+        def serverPropsFile = rootProject.file('server.properties')
+        if (serverPropsFile.exists()) {
+            def serverProps = new Properties()
+            serverProps.load(new FileInputStream(serverPropsFile))
+            buildConfigField "String", "REMOTE_SERVER", "\"${serverProps['REMOTE_SERVER']}\""
+        } else {
+            throw new GradleException("server.properties file not found")
+        }
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 

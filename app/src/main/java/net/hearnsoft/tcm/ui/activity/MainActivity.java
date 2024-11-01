@@ -61,23 +61,44 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPageSelected(int position) {
                 binding.navBar.getMenu().getItem(position).setChecked(true);
+                updateToolbarTitle(position);
             }
         });
     }
 
     private void initNavBar() {
         binding.navBar.setOnItemSelectedListener(menuItem -> {
+            int position = 0;
             if (menuItem.getItemId() == R.id.nav_explore) {
-                binding.mainView.setCurrentItem(0, true);
+                position = 0;
             } else if (menuItem.getItemId() == R.id.nav_radio) {
-                binding.mainView.setCurrentItem(1, true);
+                position = 1;
             } else if (menuItem.getItemId() == R.id.nav_music_library) {
-                binding.mainView.setCurrentItem(2, true);
+                position = 2;
             } else if (menuItem.getItemId() == R.id.nav_account) {
-                binding.mainView.setCurrentItem(3, true);
+                position = 3;
             }
+            binding.mainView.setCurrentItem(position, true);
+            updateToolbarTitle(position); // 更新标题
             return true;
         });
+    }
+
+    private void updateToolbarTitle(int position) {
+        switch (position) {
+            case 0:
+                binding.topAppbar.setTitle(R.string.nav_explore_title);
+                break;
+            case 1:
+                binding.topAppbar.setTitle(R.string.nav_radio_title);
+                break;
+            case 2:
+                binding.topAppbar.setTitle(R.string.nav_library_title);
+                break;
+            case 3:
+                binding.topAppbar.setTitle(R.string.nav_account_title);
+                break;
+        }
     }
 
     @Override

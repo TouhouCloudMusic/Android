@@ -8,13 +8,18 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.zhpan.bannerview.BannerViewPager;
 
 import net.hearnsoft.tcm.R;
 import net.hearnsoft.tcm.beans.BannerDataBean;
+import net.hearnsoft.tcm.beans.RecommendSongBean;
 import net.hearnsoft.tcm.databinding.FragmentExploreBinding;
 import net.hearnsoft.tcm.ui.adapter.AppBannerAdapter;
+import net.hearnsoft.tcm.ui.adapter.OnItemClickListener;
+import net.hearnsoft.tcm.ui.adapter.RecommendSongListAdapter;
+import net.hearnsoft.tcm.utils.HorizontalSpaceItemDecoration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +41,7 @@ public class ExploreFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         setUpBanner();
+        setUpRecommendSongList();
         super.onViewCreated(view, savedInstanceState);
     }
 
@@ -51,5 +57,57 @@ public class ExploreFragment extends Fragment {
                 .setAutoPlay(true)
                 .create();
         mBanner.refreshData(list);
+    }
+
+    private void setUpRecommendSongList() {
+        List<RecommendSongBean> sampleList = new ArrayList<>();
+        sampleList.add(new RecommendSongBean(
+                106939,
+                "郷愁",
+                "カナタノート",
+                "https://gensokyoradio.net/images/albums/500/KNTN-0002_f51dcd99c0.png"
+        ));
+        sampleList.add(new RecommendSongBean(
+                116573,
+                "U・R・A",
+                "ランコ",
+                "https://gensokyoradio.net/images/albums/500/AREZ-0007_f5cc895200.jpg"
+        ));
+        sampleList.add(new RecommendSongBean(
+                106031,
+                "ユア･トリップ★ガールフレンド",
+                "めらみぽっぷ",
+                "https://gensokyoradio.net/images/albums/500/10611_2hPor8MshZ.png"
+        ));
+        sampleList.add(new RecommendSongBean(
+                101296,
+                "Twinkle Twinkle",
+                "KUMI",
+                "https://gensokyoradio.net/images/albums/500/AMRC-0011_849f5451d2.jpg"
+        ));
+
+        RecommendSongListAdapter adapter = new RecommendSongListAdapter();
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(
+                requireContext(),
+                LinearLayoutManager.HORIZONTAL,
+                false
+        );
+        binding.exploreRecommendList.setLayoutManager(layoutManager);
+        binding.exploreRecommendList.setAdapter(adapter);
+        binding.exploreRecommendList.addItemDecoration(new HorizontalSpaceItemDecoration(
+                getResources().getDimensionPixelSize(R.dimen.card_spacing)
+        ));
+
+        adapter.setOnItemClickListener((item, position) -> {
+            handleRecommendClick(item);
+        });
+
+        adapter.setData(sampleList);
+
+    }
+
+    private void handleRecommendClick(RecommendSongBean item) {
+        // TODO: Handle click
     }
 }

@@ -13,6 +13,8 @@
     <string name="role_user">用户</string>
     <string name="role_unknown">未知角色</string>
 
+    <string name="main_explore_title_recommend_song">今天来点不一样的! 🎉</string>
+
     <string name="activity_user_login_title">用户登录</string>
     <string name="activity_user_register_title">用户注册</string>
     <string name="inputbox_hint_username">用户名</string>

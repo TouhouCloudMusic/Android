@@ -12,6 +12,8 @@
     <string name="role_user">User</string>
     <string name="role_unknown">Unknown role</string>
 
+    <string name="main_explore_title_recommend_song">Let\'s have different songs today! 🎉</string>
+
     <string name="activity_user_login_title">User Login</string>
     <string name="activity_user_register_title">User Register</string>
     <string name="inputbox_hint_username">Username</string>

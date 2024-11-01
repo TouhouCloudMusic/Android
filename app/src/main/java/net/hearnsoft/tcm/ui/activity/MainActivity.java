@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
         // 设置当前页面以及是否启用丝滑滚动
         binding.mainView.setCurrentItem(0,true);
         // 设置是否启用用户切换手势
-        binding.mainView.setUserInputEnabled(true);
+        binding.mainView.setUserInputEnabled(false);
         // 设置onPageChangeCallback
         binding.mainView.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override

@@ -39,6 +39,8 @@
 
     <string name="menu_profile_edit">编辑个人信息</string>
     <string name="menu_profile_edit_done">完成编辑</string>
+    <string name="menu_search">搜索</string>
+    <string name="menu_settings">设置</string>
     <string name="toast_user_register_succ">注册成功！</string>
     <string name="toast_user_login_succ">登录成功！</string>
     <string name="toast_refresh_profile_succ">刷新用户信息成功！</string>

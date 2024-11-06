@@ -1,23 +1,40 @@
 package net.hearnsoft.tcm.ui.activity;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.viewpager2.widget.ViewPager2;
+
+import com.bumptech.glide.Glide;
 
 import net.hearnsoft.tcm.BuildConfig;
 import net.hearnsoft.tcm.R;
+import net.hearnsoft.tcm.api.APICore;
+import net.hearnsoft.tcm.api.UserAPI;
+import net.hearnsoft.tcm.beans.UserProfile;
 import net.hearnsoft.tcm.databinding.ActivityMainBinding;
 import net.hearnsoft.tcm.ui.adapter.AppViewPagerAdapter;
 import net.hearnsoft.tcm.ui.fragments.AccountFragment;
 import net.hearnsoft.tcm.ui.fragments.ExploreFragment;
 import net.hearnsoft.tcm.ui.fragments.LibraryFragment;
 import net.hearnsoft.tcm.ui.fragments.RadioFragment;
+import net.hearnsoft.tcm.utils.Constants;
 import net.hearnsoft.tcm.utils.Logs;
+import net.hearnsoft.tcm.utils.SettingsPrefUtils;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -25,6 +42,9 @@ public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
     private AppViewPagerAdapter adapter;
+    private UserAPI userAPI;
+    private BroadcastReceiver refreshReceiver;
+    private boolean isAccountPage = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,9 +59,13 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(0, statusBar.top, 0, 0);
             return insets;
         });
+        setupBroadcast();
         adapter = new AppViewPagerAdapter(this);
+        setSupportActionBar(binding.topAppbar);
+        userAPI = UserAPI.getInstance(this);
         initPager();
         initNavBar();
+        loadAvatar();
     }
 
     private void initPager() {
@@ -60,10 +84,47 @@ public class MainActivity extends AppCompatActivity {
         binding.mainView.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
+                isAccountPage = (position == 3);
+                binding.toolbarProfile.setVisibility(isAccountPage ? View.GONE : View.VISIBLE);
                 binding.navBar.getMenu().getItem(position).setChecked(true);
                 updateToolbarTitle(position);
             }
         });
+
+        binding.toolbarProfile.setOnClickListener(v -> {
+            binding.mainView.setCurrentItem(3, true);
+        });
+    }
+
+    private void setupBroadcast() {
+        refreshReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                loadAvatar();
+            }
+        };
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(this).registerReceiver(refreshReceiver,
+                new IntentFilter("net.hearnsoft.tcm.ACTION_REFRESH_USER_PROFILE"));
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.menu_settings) {
+            // 处理设置菜单点击事件
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void initNavBar() {
@@ -101,6 +162,34 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void loadAvatar() {
+        String token = SettingsPrefUtils.getInstance(this)
+                .readStringSettings(Constants.KEY_USER_TOKEN);
+        if (!TextUtils.isEmpty(token)) {
+            userAPI.getUserProfile(token, new APICore.APICallback<UserProfile>() {
+                @Override
+                public void onSuccess(UserProfile data) {
+                    Glide.with(MainActivity.this)
+                            .load(getAvatarUrl(data.getAvatar()))
+                            .placeholder(R.drawable.test_avatar)
+                            .into(binding.toolbarProfile);
+                }
+
+                @Override
+                public void onError(APICore.ApiError error) {
+                    Logs.e(TAG, "loadAvatarErr: " + error.getMessage());
+                }
+            });
+        }
+    }
+
+    private String getAvatarUrl(String fileName) {
+        if (TextUtils.isEmpty(fileName)) {
+            return "";
+        }
+        return Constants.API_HOST + "/image/" + fileName;
+    }
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -109,5 +198,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(refreshReceiver);
     }
 }

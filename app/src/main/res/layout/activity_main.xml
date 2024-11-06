@@ -22,7 +22,17 @@
             android:id="@+id/top_appbar"
             android:background="@android:color/transparent"
             app:title="@string/app_name"
-            app:titleCentered="false"/>
+            app:titleCentered="false">
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/toolbar_profile"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="end"
+                android:layout_marginEnd="16dp"
+                android:visibility="visible"
+                app:shapeAppearanceOverlay="@style/UserAvatarCircle"
+                android:src="@drawable/ic_account_circle"/>
+        </com.google.android.material.appbar.MaterialToolbar>
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.viewpager2.widget.ViewPager2

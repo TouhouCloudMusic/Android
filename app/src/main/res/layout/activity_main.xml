@@ -29,6 +29,7 @@
                 android:layout_gravity="end"
                 android:layout_marginEnd="16dp"
                 android:visibility="visible"
+                android:background="@drawable/rp_buttons"
                 app:shapeAppearanceOverlay="@style/UserAvatarCircle"
                 android:src="@drawable/ic_account_circle"/>
         </com.google.android.material.appbar.MaterialToolbar>

@@ -51,7 +51,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="4dp">
+            android:padding="4dp"
+            android:minHeight="56dp">
 
             <!-- 歌曲名称 -->
             <TextView
@@ -62,6 +63,7 @@
                 android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
                 android:maxLines="1"
                 android:layout_marginStart="4dp"
+                android:lineHeight="24dp"
                 android:ellipsize="end"/>
 
             <!-- 歌手名称 -->
@@ -74,6 +76,7 @@
                 android:layout_marginBottom="4dp"
                 android:textAppearance="@style/TextAppearance.Material3.BodySmall"
                 android:maxLines="1"
+                android:lineHeight="20dp"
                 android:ellipsize="end"/>
         </LinearLayout>
     </LinearLayout>

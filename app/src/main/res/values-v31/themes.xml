@@ -30,4 +30,11 @@
         <item name="android:windowSplashScreenBackground">@color/icon_background</item>
     </style>
 
+    <style name="Theme.TouhouCloudMusic.Search" parent="Theme.TouhouCloudMusic">
+        <!-- 启用内容过渡 -->
+        <item name="android:windowContentTransitions">true</item>
+        <!-- 设置共享元素过渡动画 -->
+        <item name="android:windowSharedElementEnterTransition">@transition/search_transition</item>
+        <item name="android:windowSharedElementExitTransition">@transition/search_transition</item>
+    </style>
 </resources>

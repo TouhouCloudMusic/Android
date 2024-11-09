@@ -36,6 +36,12 @@
             android:exported="false"
             android:label="@string/activity_user_login_title"/>
 
+        <activity android:name=".ui.activity.SearchActivity"
+            android:exported="false"
+            android:label="@string/search_title"
+            android:theme="@style/Theme.TouhouCloudMusic.Search"
+            android:windowSoftInputMode="adjustResize"/>
+
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"
             android:screenOrientation="portrait"

@@ -1,5 +1,6 @@
 package net.hearnsoft.tcm.ui.activity;
 
+import android.app.ActivityOptions;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -122,6 +123,18 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.menu_settings) {
             // 处理设置菜单点击事件
+            return true;
+        } else if (item.getItemId() == R.id.menu_search) {
+            View searchMenuView = findViewById(R.id.menu_search);
+
+            ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(
+                    this,
+                    searchMenuView,
+                    "search_transition"
+            );
+
+            Intent intent = new Intent(this, SearchActivity.class);
+            startActivity(intent, options.toBundle());
             return true;
         }
         return super.onOptionsItemSelected(item);

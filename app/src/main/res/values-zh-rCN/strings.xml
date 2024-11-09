@@ -8,6 +8,9 @@
 
     <string name="date_format_str">yyyy-MM-dd HH:mm:ss E</string>
 
+    <string name="search_title">搜索</string>
+    <string name="search_bar_hint">搜点什么呢…</string>
+
     <string name="role_admin">管理员</string>
     <string name="role_moderator">审核员</string>
     <string name="role_user">用户</string>

@@ -19,8 +19,7 @@
             android:layout_height="?attr/actionBarSize"
             android:background="@android:color/transparent"
             app:title="@string/app_name"
-            app:titleCentered="false"
-            app:layout_scrollFlags="scroll|enterAlways|snap">
+            app:titleCentered="false">
 
             <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/toolbar_profile"

@@ -20,7 +20,9 @@ import net.hearnsoft.tcm.api.UserAPI;
 import net.hearnsoft.tcm.databinding.FragmentUserRegisterBinding;
 import net.hearnsoft.tcm.misc.UserLoginType;
 import net.hearnsoft.tcm.ui.activity.UserLoginActivity;
+import net.hearnsoft.tcm.utils.Constants;
 import net.hearnsoft.tcm.utils.Logs;
+import net.hearnsoft.tcm.utils.SettingsPrefUtils;
 import net.hearnsoft.tcm.utils.UserLoginPortal;
 
 
@@ -72,6 +74,8 @@ public class UserRegisterFragment extends Fragment {
                     Snackbar.make(binding.getRoot(),
                             data + "," + getString(R.string.toast_user_register_succ),
                             Snackbar.LENGTH_SHORT).show();
+                    SettingsPrefUtils.getInstance(requireActivity())
+                            .writeStringSettings(Constants.KEY_USER_ID, username);
                     binding.userRegister.setEnabled(true);
                     ((UserLoginActivity) requireActivity()).onLoginSuccess(sessionToken,
                             UserLoginType.REGISTER);

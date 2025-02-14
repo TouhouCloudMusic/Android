@@ -32,9 +32,7 @@
     <string name="profile_title_avatar">头像</string>
     <string name="profile_title_avatar_content">点击以设置头像</string>
     <string name="profile_title_username">名字</string>
-    <string name="profile_title_user_label">标签</string>
-    <string name="profile_title_create_time">账户创建时间</string>
-    <string name="profile_title_modify_time">账户更新时间</string>
+    <string name="profile_title_last_login">上次登录</string>
     <string name="profile_title_user_permission">权限</string>
     <string name="profile_title_logout_content">你确定要注销登录吗？</string>
     <string name="profile_title_logout">注销登录</string>
@@ -58,4 +56,5 @@
     <string name="toast_profile_upload_avatar_err">上传头像失败，原因：</string>
     <string name="toast_profile_logout_succ">注销登录成功</string>
     <string name="toast_profile_logout_err">注销登录失败</string>
+    <string name="toast_api_reach_risk_control">触发风控保护，请稍后重试！ \n</string>
 </resources>

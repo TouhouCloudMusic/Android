@@ -19,7 +19,9 @@ import net.hearnsoft.tcm.api.UserAPI;
 import net.hearnsoft.tcm.databinding.FragmentUserLoginBinding;
 import net.hearnsoft.tcm.misc.UserLoginType;
 import net.hearnsoft.tcm.ui.activity.UserLoginActivity;
+import net.hearnsoft.tcm.utils.Constants;
 import net.hearnsoft.tcm.utils.Logs;
+import net.hearnsoft.tcm.utils.SettingsPrefUtils;
 import net.hearnsoft.tcm.utils.UserLoginPortal;
 
 public class UserLoginFragment extends Fragment {
@@ -70,6 +72,8 @@ public class UserLoginFragment extends Fragment {
                     Snackbar.make(binding.getRoot(),
                             data + "," + getString(R.string.toast_user_login_succ),
                             Snackbar.LENGTH_SHORT).show();
+                    SettingsPrefUtils.getInstance(requireActivity())
+                            .writeStringSettings(Constants.KEY_USER_ID, username);
                     binding.userLogin.setEnabled(true);
                     ((UserLoginActivity) requireActivity()).onLoginSuccess(sessionToken,
                             UserLoginType.LOGIN);

@@ -112,7 +112,7 @@ public class UserProfileActivity extends AppCompatActivity {
             public void onSuccess(UserProfile data) {
                 List<ProfileItem> items = new ArrayList<>();
                 items.add(new ProfileItem(ProfileItem.TYPE_AVATAR, getString(R.string.profile_title_avatar),
-                        getAvatarUrl(data.getAvatar()), true, item -> {
+                        getAvatarUrl(data.getAvatar_url()), true, item -> {
                     // 处理头像点击事件，例如打开图片选择器
                     openImagePicker();
                 }));
@@ -120,14 +120,9 @@ public class UserProfileActivity extends AppCompatActivity {
                     // 处理名字点击事件，例如打开编辑对话框
                     openEditNameDialog(item.getContent());
                 }));
-                items.add(new ProfileItem(ProfileItem.TYPE_INFO, getString(R.string.profile_title_user_label),
-                        TextUtils.isEmpty(data.getLocation()) ? getString(R.string.profile_label_unset) : data.getLocation()));
-                items.add(new ProfileItem(ProfileItem.TYPE_INFO, "E-mail",
-                        TextUtils.isEmpty(data.getEmail()) ? getString(R.string.profile_label_unset) : data.getEmail()));
                 SimpleDateFormat dateFormat = new SimpleDateFormat(getString(R.string.date_format_str), Locale.CHINA);
-                items.add(new ProfileItem(ProfileItem.TYPE_INFO, getString(R.string.profile_title_create_time), dateFormat.format(data.getCreated_at())));
-                items.add(new ProfileItem(ProfileItem.TYPE_INFO, getString(R.string.profile_title_modify_time), dateFormat.format(data.getUpdated_at())));
-                items.add(new ProfileItem(ProfileItem.TYPE_INFO, getString(R.string.profile_title_user_permission), getRolesString(data.getRole())));
+                items.add(new ProfileItem(ProfileItem.TYPE_INFO, getString(R.string.profile_title_last_login), dateFormat.format(data.getLast_login())));
+                items.add(new ProfileItem(ProfileItem.TYPE_INFO, getString(R.string.profile_title_user_permission), ""));
                 items.add(new ProfileItem(ProfileItem.TYPE_BUTTON,
                         getString(R.string.profile_title_logout), "", true, item -> logout()));
                 adapter.setItems(items);
@@ -233,7 +228,7 @@ public class UserProfileActivity extends AppCompatActivity {
         if (TextUtils.isEmpty(fileName)) {
             return "";
         }
-        return Constants.API_HOST + "/image/" + fileName;
+        return Constants.API_STATIC_IMAGE_URL + fileName;
     }
 
     private void logout() {

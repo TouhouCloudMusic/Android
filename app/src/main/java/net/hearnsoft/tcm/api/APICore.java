@@ -8,7 +8,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.OpenableColumns;
 import android.text.TextUtils;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,24 +19,25 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
+import net.hearnsoft.tcm.beans.DefaultResponse;
 import net.hearnsoft.tcm.utils.Constants;
+import net.hearnsoft.tcm.enums.ErrorCode;
 import net.hearnsoft.tcm.utils.Logs;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+import lombok.Getter;
+import lombok.Setter;
 import okhttp3.Call;
 import okhttp3.Callback;
-import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import okhttp3.internal.http2.Header;
 import okio.BufferedSink;
 import okio.Okio;
 
@@ -84,11 +84,18 @@ public class APICore {
     public void uploadImage(String endpoint, Uri imageUri, ContentResolver resolver, APICallback<String> callback) {
         String url = apiUrl + "/" + endpoint;
         if (imageUri == null) {
-            callback.onError(new ApiError("Image URI is null", "Image URI is null"));
+            callback.onError(new ApiError(
+                    "Image URI is null",
+                    "Image URI is null",
+                    ErrorCode.FileURINull));
             return;
         }
         if (TextUtils.isEmpty(sessionToken)) {
-            callback.onError(new ApiError("Unauthorized", "No session token available"));
+            callback.onError(new ApiError(
+                    "Unauthorized",
+                    "No session token available",
+                    ErrorCode.InvalidToken)
+            );
             return;
         }
 
@@ -104,7 +111,7 @@ public class APICore {
             public MediaType contentType() {
                 String mimeType = resolver.getType(imageUri);
                 if (mimeType == null) {
-                    mimeType = "images/*";
+                    mimeType = "image/*";
                 }
                 return MediaType.parse(mimeType);
             }
@@ -116,7 +123,11 @@ public class APICore {
                         bufferedSink.writeAll(Okio.source(inputStream));
                     }
                 } catch (Exception e) {
-                    callback.onError(new ApiError("File read error", e.getMessage()));
+                    callback.onError(new ApiError(
+                            "File read error",
+                            e.getMessage(),
+                            ErrorCode.FileReadError)
+                    );
                 }
             }
         };
@@ -138,7 +149,11 @@ public class APICore {
         client.newCall(requestBuilder.build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                callback.onError(new ApiError("Network error", e.getMessage()));
+                callback.onError(new ApiError(
+                        "Network error",
+                        e.getMessage(),
+                        ErrorCode.NetworkError)
+                );
             }
 
             @Override
@@ -152,10 +167,18 @@ public class APICore {
                     String responseBody = response.body().string();
                     try {
                         JsonObject jsonResponse = JsonParser.parseString(responseBody).getAsJsonObject();
-                        String errorMessage = jsonResponse.has("message") ? jsonResponse.get("message").getAsString() : "Unknown error";
-                        callback.onError(new ApiError("Upload failed", errorMessage));
+                        DefaultResponse errorResponse = gson.fromJson(jsonResponse, DefaultResponse.class);
+                        callback.onError(new ApiError(
+                            errorResponse.getStatus(),
+                            errorResponse.getMessage(),
+                                ErrorCode.fromCode(errorResponse.getError_code())
+                        ));
                     } catch (JsonSyntaxException e) {
-                        callback.onError(new ApiError("JSON parsing error", "Received malformed JSON: " + responseBody));
+                        callback.onError(new ApiError(
+                                "JSON parsing error",
+                                "Received malformed JSON: " + responseBody,
+                                ErrorCode.JSONParseError)
+                        );
                     }
                 }
             }
@@ -224,44 +247,72 @@ public class APICore {
         client.newCall(requestBuilder.build()).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                handleError(new ApiError("Network error", e.getMessage()), callback);
+                handleError(new ApiError(
+                        "Network error",
+                        e.getMessage(),
+                        ErrorCode.NetworkError), callback);
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 String responseBody = response.body().string();
                 String newSessionToken = getSessionToken(response);
-                Logs.d(TAG, "Raw response: " + responseBody);
+                Logs.d(TAG, "Raw response: " + responseBody + ", code:" + response.code());
+
+                if (responseBody.contains(Constants.REACH_RISK_CONTROL_STRING)) {
+                    handleError(new ApiError(
+                            "Too Many Requests!",
+                            responseBody,
+                            ErrorCode.RiskControlError), callback);
+                }
 
                 try {
                     JsonElement jsonElement = JsonParser.parseString(responseBody);
+                    DefaultResponse defaultResponse = gson.fromJson(jsonElement, DefaultResponse.class);
+
                     if (jsonElement.isJsonObject()) {
                         JsonObject jsonResponse = jsonElement.getAsJsonObject();
-                        String state = jsonResponse.has("state") ? jsonResponse.get("state").getAsString() : "error";
 
-                        if ("success".equals(state)) {
-                            T result;
-                            if (responseType == String.class) {
-                                result = (T) (jsonResponse.has("data") ? jsonResponse.get("data").getAsString() : responseBody);
+                        // 处理成功响应
+                        if ("Ok".equals(defaultResponse.getStatus())) {
+                            if (jsonResponse.has("data")) {
+                                // 处理status + data结构
+                                T result;
+                                if (responseType == String.class) {
+                                    result = (T) jsonResponse.get("data").getAsString();
+                                } else {
+                                    JsonElement data = jsonResponse.get("data");
+                                    result = gson.fromJson(data, responseType);
+                                }
+                                handleSuccess(result, newSessionToken, callback);
                             } else {
-                                JsonObject data = jsonResponse.getAsJsonObject("data");
-                                result = gson.fromJson(data, responseType);
+                                // 处理status + message结构
+                                handleSuccess((T) defaultResponse.getMessage(), newSessionToken, callback);
                             }
-                            handleSuccess(result, newSessionToken, callback);
                         } else {
-                            String errorMessage = jsonResponse.has("message") ? jsonResponse.get("message").getAsString() : "Unknown error";
-                            ApiError error = new ApiError(state, errorMessage);
+                            ApiError error = new ApiError(
+                                defaultResponse.getStatus(),
+                                defaultResponse.getMessage(),
+                                ErrorCode.fromCode(defaultResponse.getError_code())
+                            );
                             handleError(error, callback);
                         }
                     } else {
                         // 处理非 JSON 对象的响应
-                        handleError(new ApiError("Non-JSON response", responseBody), callback);
+                        handleError(new ApiError(
+                                "Non-JSON response",
+                                responseBody,
+                                ErrorCode.NonJSONResponse), callback);
                     }
                 } catch (JsonSyntaxException e) {
                     // 处理 JSON 解析错误
-                    handleError(new ApiError("JSON parsing error", "Received malformed JSON: " + responseBody), callback);
+                    handleError(new ApiError(
+                            "JSON parsing error",
+                            "Received malformed JSON: " + responseBody,
+                            ErrorCode.JSONParseError), callback);
                 } catch (Exception e) {
-                    handleError(new ApiError("Unexpected error", e.getMessage() + ". Response: " + responseBody), callback);
+                    handleError(new ApiError("Unexpected error", e.getMessage() + ". Response: " + responseBody,
+                            ErrorCode.UnexpectedError), callback);
                 }
             }
         });
@@ -302,21 +353,17 @@ public class APICore {
         void onSuccess(T data, String sessionToken);
     }
 
+    @Getter
+    @Setter
     public static class ApiError {
         private String state;
         private String message;
+        private ErrorCode error_code;
 
-        public ApiError(String state, String message) {
+        public ApiError(String state, String message, ErrorCode errorCode) {
             this.state = state;
             this.message = message;
-        }
-
-        public String getState() {
-            return state;
-        }
-
-        public String getMessage() {
-            return message;
+            this.error_code = errorCode;
         }
     }
 

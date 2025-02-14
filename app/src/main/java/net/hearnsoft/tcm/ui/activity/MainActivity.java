@@ -183,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(UserProfile data) {
                     Glide.with(MainActivity.this)
-                            .load(getAvatarUrl(data.getAvatar()))
+                            .load(getAvatarUrl(data.getAvatar_url()))
                             .placeholder(R.drawable.test_avatar)
                             .into(binding.toolbarProfile);
                 }
@@ -200,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
         if (TextUtils.isEmpty(fileName)) {
             return "";
         }
-        return Constants.API_HOST + "/image/" + fileName;
+        return Constants.API_STATIC_IMAGE_URL + fileName;
     }
 
     @Override

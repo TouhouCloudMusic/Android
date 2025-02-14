@@ -31,9 +31,7 @@
     <string name="profile_title_avatar">Avatar</string>
     <string name="profile_title_avatar_content">Click to set avatar</string>
     <string name="profile_title_username">Username</string>
-    <string name="profile_title_user_label">Label</string>
-    <string name="profile_title_create_time">Account created at</string>
-    <string name="profile_title_modify_time">Account modified at</string>
+    <string name="profile_title_last_login">Last login</string>
     <string name="profile_title_user_permission">Permission</string>
     <string name="profile_title_logout_content">Are you sure to logout?</string>
     <string name="profile_title_logout">Logout</string>
@@ -57,4 +55,5 @@
     <string name="toast_profile_upload_avatar_err">Failed to upload avatar, reason:</string>
     <string name="toast_profile_logout_succ">Logout successful</string>
     <string name="toast_profile_logout_err">Logout error</string>
+    <string name="toast_api_reach_risk_control">Reach risk control! \n</string>
 </resources>

@@ -64,7 +64,11 @@ dependencies {
     implementation libs.ucrop
     // MPAndroidChart
     implementation libs.mpandroidchart
+    // Lombok
+    implementation libs.lombok
     testImplementation libs.junit
+    // Lombok annotation processor
+    annotationProcessor libs.lombok
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
 }

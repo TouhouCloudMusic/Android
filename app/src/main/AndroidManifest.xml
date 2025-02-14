@@ -32,6 +32,7 @@
 
         <activity android:name=".ui.activity.UserProfileActivity"
             android:exported="false"
+            android:enableOnBackInvokedCallback="true"
             android:label="@string/profile_title"/>
 
         <activity android:name=".ui.activity.UserLoginActivity"

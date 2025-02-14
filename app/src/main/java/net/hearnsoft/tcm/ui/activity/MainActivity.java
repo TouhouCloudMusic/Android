@@ -183,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(UserProfile data) {
                     Glide.with(MainActivity.this)
-                            .load(getAvatarUrl(data.getAvatar()))
+                            .load(getAvatarUrl(null))
                             .placeholder(R.drawable.test_avatar)
                             .into(binding.toolbarProfile);
                 }

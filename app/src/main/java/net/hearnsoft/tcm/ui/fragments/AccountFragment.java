@@ -122,20 +122,21 @@ public class AccountFragment extends Fragment {
                         @Override
                         public void onSuccess(UserProfile data) {
                             setUserCardInfo(data.getName(),
-                                    data.getCreated_at().toString(),
-                                    getAvatarUrl(data.getAvatar()));
+                                    data.getLast_login().toString(),
+                                    null);
                             userCard.setOnUserCardClickListener(v -> {
                                 // empty click
                             });
                             userCard.setUserCardEditClickListener(v -> openUserProfile());
                             userCard.setUserCardBackgroundFromUrl(
-                                    getAvatarUrl(data.getAvatar()));
+                                    getAvatarUrl(null));
                             Toast.makeText(requireContext(), R.string.toast_refresh_profile_succ,
                                     Toast.LENGTH_SHORT).show();
                         }
 
                         @Override
                         public void onError(APICore.ApiError error) {
+                            Logs.e(TAG, "refreshUserProfile error: " + error.getMessage());
                             setUserCardForLoggedOutState();
                         }
                     });

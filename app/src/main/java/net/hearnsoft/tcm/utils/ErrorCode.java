@@ -1,6 +1,14 @@
 package net.hearnsoft.tcm.utils;
 
 public enum ErrorCode {
+    // Local
+    NonJSONResponse(10000),
+    JSONParseError(10001),
+    UnexpectedError(10002),
+    NetworkError(10003),
+    InvalidToken(10004),
+    FileURINull(10005),
+    FileReadError(10006),
     // Common
     InvalidField(40000),
     IncorrectCorrectionType(40001),

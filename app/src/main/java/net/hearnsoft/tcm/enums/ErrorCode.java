@@ -1,4 +1,4 @@
-package net.hearnsoft.tcm.utils;
+package net.hearnsoft.tcm.enums;
 
 public enum ErrorCode {
     // Local
@@ -9,6 +9,7 @@ public enum ErrorCode {
     InvalidToken(10004),
     FileURINull(10005),
     FileReadError(10006),
+    RiskControlError(10007),
     // Common
     InvalidField(40000),
     IncorrectCorrectionType(40001),
@@ -41,5 +42,14 @@ public enum ErrorCode {
 
     public int getCode() {
         return code;
+    }
+
+    public static ErrorCode fromCode(int code) {
+        for (ErrorCode e : values()) {
+            if (e.code == code) {
+                return e;
+            }
+        }
+        return UnknownError; // 处理未匹配情况
     }
 }

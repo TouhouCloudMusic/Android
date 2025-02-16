@@ -56,4 +56,5 @@
     <string name="toast_profile_upload_avatar_err">上传头像失败，原因：</string>
     <string name="toast_profile_logout_succ">注销登录成功</string>
     <string name="toast_profile_logout_err">注销登录失败</string>
+    <string name="toast_api_reach_risk_control">触发风控保护，请稍后重试！ \n</string>
 </resources>

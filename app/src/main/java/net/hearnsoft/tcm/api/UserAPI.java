@@ -4,13 +4,12 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.google.gson.JsonObject;
 
 import net.hearnsoft.tcm.beans.UserProfile;
 import net.hearnsoft.tcm.utils.Constants;
-import net.hearnsoft.tcm.utils.ErrorCode;
+import net.hearnsoft.tcm.enums.ErrorCode;
 import net.hearnsoft.tcm.utils.Logs;
 import net.hearnsoft.tcm.utils.SettingsPrefUtils;
 
@@ -94,7 +93,7 @@ public class UserAPI {
         // 首先检查token是否为空
         if (token == null || TextUtils.isEmpty(token)) {
             callback.onError(new APICore.ApiError("Unauthorized", "No session token available",
-                    ErrorCode.Unauthorized.getCode()));
+                    ErrorCode.Unauthorized));
             return;
         }
 
@@ -106,6 +105,7 @@ public class UserAPI {
                         callback.onSuccess(data);
                         // 清除存储的 token
                         preferences.writeStringSettings(Constants.KEY_USER_TOKEN, null);
+                        preferences.writeStringSettings(Constants.KEY_USER_ID, null);
                     }
 
                     @Override
@@ -125,13 +125,13 @@ public class UserAPI {
         if (token == null || TextUtils.isEmpty(token)) {
             callback.onError(new APICore.ApiError("Unauthorized",
                     "No session token available",
-                    ErrorCode.Unauthorized.getCode()));
+                    ErrorCode.Unauthorized));
             return;
         }
         if (username == null || TextUtils.isEmpty(username)) {
             callback.onError(new APICore.ApiError("Bad Request",
                     "Username is required",
-                    ErrorCode.UnexpectedError.getCode()));
+                    ErrorCode.UnexpectedError));
             return;
         }
 
@@ -149,14 +149,14 @@ public class UserAPI {
         if (token == null || TextUtils.isEmpty(token)) {
             callback.onError(new APICore.ApiError("Unauthorized",
                     "No session token available",
-                    ErrorCode.Unauthorized.getCode()));
+                    ErrorCode.Unauthorized));
             return;
         }
         // 检查用户名是否为空
         if (username == null || TextUtils.isEmpty(username)) {
             callback.onError(new APICore.ApiError("Bad Request",
                     "Username is required",
-                    ErrorCode.UnexpectedError.getCode()));
+                    ErrorCode.UnexpectedError));
             return;
         }
 
@@ -172,19 +172,19 @@ public class UserAPI {
 
             @Override
             public void onError(APICore.ApiError error) {
-                if (error.getError_code() == ErrorCode.Unauthorized.getCode()) {
+                if (error.getError_code() == ErrorCode.Unauthorized) {
                     // 如果未授权，可能是 token 过期，清除存储的 token
                     preferences.writeStringSettings(Constants.KEY_USER_TOKEN, null);
                 }
                 callback.onError(error);
             }
-        }, true);
+        });
     }
 
     public void uploadAvatar(String token, Uri imageUri, ContentResolver resolver, APICore.APICallback<String> callback) {
         if (TextUtils.isEmpty(token)){
             callback.onError(new APICore.ApiError("Unauthorized", "No session token available",
-                    ErrorCode.Unauthorized.getCode()));
+                    ErrorCode.Unauthorized));
             return;
         }
         apiCore.setSessionToken(token);

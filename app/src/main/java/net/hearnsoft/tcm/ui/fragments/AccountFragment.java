@@ -29,12 +29,16 @@ import net.hearnsoft.tcm.api.UserAPI;
 import net.hearnsoft.tcm.beans.UserProfile;
 import net.hearnsoft.tcm.databinding.FragmentAccountBinding;
 import net.hearnsoft.tcm.databinding.UserCardBinding;
+import net.hearnsoft.tcm.enums.ErrorCode;
 import net.hearnsoft.tcm.ui.activity.UserLoginActivity;
 import net.hearnsoft.tcm.ui.activity.UserProfileActivity;
 import net.hearnsoft.tcm.ui.widgets.UserCardView;
 import net.hearnsoft.tcm.utils.Constants;
 import net.hearnsoft.tcm.utils.Logs;
 import net.hearnsoft.tcm.utils.SettingsPrefUtils;
+
+import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 public class AccountFragment extends Fragment {
 
@@ -121,8 +125,11 @@ public class AccountFragment extends Fragment {
                     .getUserProfile(userToken, new APICore.APICallback<UserProfile>() {
                         @Override
                         public void onSuccess(UserProfile data) {
+                            SimpleDateFormat dateFormat = new SimpleDateFormat(getString(R.string.date_format_str), Locale.CHINA);
+                            String lastLoginDate = "上次登录时间：" +
+                                    dateFormat.format(data.getLast_login());
                             setUserCardInfo(data.getName(),
-                                    data.getLast_login().toString(),
+                                    lastLoginDate,
                                     null);
                             userCard.setOnUserCardClickListener(v -> {
                                 // empty click
@@ -137,7 +144,13 @@ public class AccountFragment extends Fragment {
                         @Override
                         public void onError(APICore.ApiError error) {
                             Logs.e(TAG, "refreshUserProfile error: " + error.getMessage());
-                            setUserCardForLoggedOutState();
+                            if (error.getError_code() == ErrorCode.RiskControlError) {
+                                Toast.makeText(requireContext(),
+                                        R.string.toast_api_reach_risk_control + error.getMessage(),
+                                        Toast.LENGTH_SHORT).show();
+                            } else {
+                                setUserCardForLoggedOutState();
+                            }
                         }
                     });
         }

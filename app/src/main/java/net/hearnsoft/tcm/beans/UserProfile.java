@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 public class UserProfile {
     private String name;
-    private String avatar_name;
+    private String avatar_url;
     private Date last_login;
     private int[] roles;
 }

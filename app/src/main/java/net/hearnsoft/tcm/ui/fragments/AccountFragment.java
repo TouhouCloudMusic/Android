@@ -135,8 +135,9 @@ public class AccountFragment extends Fragment {
                                 // empty click
                             });
                             userCard.setUserCardEditClickListener(v -> openUserProfile());
+                            userCard.setUserAvatarFromUrl(getAvatarUrl(data.getAvatar_url()));
                             userCard.setUserCardBackgroundFromUrl(
-                                    getAvatarUrl(null));
+                                    getAvatarUrl(data.getAvatar_url()));
                             Toast.makeText(requireContext(), R.string.toast_refresh_profile_succ,
                                     Toast.LENGTH_SHORT).show();
                         }
@@ -160,7 +161,7 @@ public class AccountFragment extends Fragment {
         if (TextUtils.isEmpty(fileName)) {
             return "";
         }
-        return Constants.API_HOST + "/image/" + fileName;
+        return Constants.API_STATIC_IMAGE_URL + fileName;
     }
 
     private void setUserCardForLoggedOutState() {

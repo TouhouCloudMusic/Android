@@ -13,6 +13,9 @@ public class Constants {
     public static final String API_USER_PROFILE = "profile";
     public static final String API_USER_AVATAR = "avatar";
 
+    // API字段
+    public static final String API_STATIC_IMAGE_URL = API_HOST + "/public/image/";
+
     // 常用shared-pref key
     public static final String KEY_USER_ID = "user_id";
     public static final String KEY_USER_TOKEN = "session_token";

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name">东方同音鉴 Demo</string>
     <string name="nav_explore_title">发现</string>
     <string name="nav_radio_title">电台</string>
@@ -50,6 +50,7 @@
     <string name="toast_refresh_profile_succ">刷新用户信息成功！</string>
     <string name="usercard_default_name">点击登录</string>
     <string name="usercard_default_desc">登录以继续使用</string>
+    <string name="usercard_last_login_desc">上次登录: <xliff:g id="date">%s</xliff:g></string>
     <string name="toast_err_image_wrong">请选择 JPG、JPEG 或 PNG 格式的图片!!</string>
     <string name="profile_label_unset">未设置</string>
     <string name="profile_dialog_err_title">出错了！</string>

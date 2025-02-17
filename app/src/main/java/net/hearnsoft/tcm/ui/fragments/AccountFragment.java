@@ -126,8 +126,8 @@ public class AccountFragment extends Fragment {
                         @Override
                         public void onSuccess(UserProfile data) {
                             SimpleDateFormat dateFormat = new SimpleDateFormat(getString(R.string.date_format_str), Locale.CHINA);
-                            String lastLoginDate = "上次登录时间：" +
-                                    dateFormat.format(data.getLast_login());
+                            String lastLoginDate = getString(R.string.usercard_last_login_desc,
+                                    dateFormat.format(data.getLast_login()));
                             setUserCardInfo(data.getName(),
                                     lastLoginDate,
                                     null);

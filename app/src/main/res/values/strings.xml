@@ -37,6 +37,9 @@
     <string name="profile_title_logout">Logout</string>
     <string name="profile_title_logout_title">@string/profile_title_logout</string>
 
+    <string name="error_username_empty">Username must not be empty</string>
+    <string name="error_password_empty">Password must not be empty</string>
+
     <string name="menu_profile_edit">Edit profile</string>
     <string name="menu_profile_edit_done">Done</string>
     <string name="menu_search">Search</string>

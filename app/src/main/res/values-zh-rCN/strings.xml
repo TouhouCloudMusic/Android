@@ -38,6 +38,9 @@
     <string name="profile_title_logout">注销登录</string>
     <string name="profile_title_logout_title">@string/profile_title_logout</string>
 
+    <string name="error_username_empty">用户名不得为空</string>
+    <string name="error_password_empty">密码不得为空</string>
+
     <string name="menu_profile_edit">编辑个人信息</string>
     <string name="menu_profile_edit_done">完成编辑</string>
     <string name="menu_search">搜索</string>

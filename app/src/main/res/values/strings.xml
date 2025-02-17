@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name">TouhouCloudMusic</string>
     <string name="nav_explore_title">Explore</string>
     <string name="nav_radio_title">Radio</string>
@@ -49,6 +49,7 @@
     <string name="toast_refresh_profile_succ">Profile refresh successful!</string>
     <string name="usercard_default_name">Click to login</string>
     <string name="usercard_default_desc">login to continue</string>
+    <string name="usercard_last_login_desc">Last login: <xliff:g id="date">%s</xliff:g></string>
     <string name="toast_err_image_wrong">Please select JPG,JPEG or PNG image!</string>
     <string name="profile_label_unset">Unset</string>
     <string name="profile_dialog_err_title">Error!</string>

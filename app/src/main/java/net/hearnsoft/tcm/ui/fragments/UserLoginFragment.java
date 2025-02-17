@@ -64,6 +64,14 @@ public class UserLoginFragment extends Fragment {
     private void loginUser() {
         String username = binding.username.getText().toString();
         String password = binding.password.getText().toString();
+        if (username.isEmpty()) {
+            binding.username.setError(getString(R.string.error_username_empty));
+            binding.username.requestFocus();
+        }
+        if (password.isEmpty()) {
+            binding.password.setError(getString(R.string.error_password_empty));
+            binding.password.requestFocus();
+        }
         if (!username.isEmpty() && !password.isEmpty()) {
             binding.userLogin.setEnabled(false);
             userAPI.login(username, password, new APICore.SessionTokenCallback<String>() {

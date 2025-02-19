@@ -173,7 +173,7 @@ public class APICore {
                             errorResponse.getMessage(),
                                 ErrorCode.fromCode(errorResponse.getError_code())
                         ));
-                    } catch (JsonSyntaxException e) {
+                    } catch (JsonSyntaxException | IllegalStateException e) {
                         callback.onError(new ApiError(
                                 "JSON parsing error",
                                 "Received malformed JSON: " + responseBody,

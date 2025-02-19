@@ -98,19 +98,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupBroadcast() {
-        refreshReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                loadAvatar();
-            }
-        };
+        if (refreshReceiver == null) { // 增加空判断
+            refreshReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    loadAvatar();
+                }
+            };
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        LocalBroadcastManager.getInstance(this).registerReceiver(refreshReceiver,
-                new IntentFilter("net.hearnsoft.tcm.ACTION_REFRESH_USER_PROFILE"));
+        if (refreshReceiver != null) { // 增加空判断
+            LocalBroadcastManager.getInstance(this).registerReceiver(refreshReceiver,
+                    new IntentFilter("net.hearnsoft.tcm.ACTION_REFRESH_USER_PROFILE"));
+        }
     }
 
     @Override
@@ -211,6 +215,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(refreshReceiver);
+        try {
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(refreshReceiver);
+        } catch (IllegalArgumentException ignored) {
+        }
     }
 }

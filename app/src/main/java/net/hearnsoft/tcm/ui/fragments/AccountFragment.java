@@ -61,8 +61,10 @@ public class AccountFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(refreshReceiver,
-                new IntentFilter("net.hearnsoft.tcm.ACTION_REFRESH_USER_PROFILE"));
+        if (refreshReceiver != null) {
+            LocalBroadcastManager.getInstance(requireContext()).registerReceiver(refreshReceiver,
+                    new IntentFilter("net.hearnsoft.tcm.ACTION_REFRESH_USER_PROFILE"));
+        }
     }
 
     @Override

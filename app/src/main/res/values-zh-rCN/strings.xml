@@ -11,9 +11,6 @@
     <string name="search_title">搜索</string>
     <string name="search_bar_hint">搜点什么呢…</string>
 
-    <string name="role_admin">管理员</string>
-    <string name="role_moderator">审核员</string>
-    <string name="role_user">用户</string>
     <string name="role_unknown">未知角色</string>
 
     <string name="main_explore_title_recommend_song">今天来点不一样的! 🎉</string>

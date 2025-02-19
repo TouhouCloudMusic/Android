@@ -181,6 +181,10 @@ public class UserAPI {
         });
     }
 
+    public void getUserRoleList(APICore.APICallback<String[]> callback) {
+        apiCore.callAPI(Constants.API_USER_ROLES, ApiMethod.GET, null, String[].class, callback);
+    }
+
     public void uploadAvatar(String token, Uri imageUri, ContentResolver resolver, APICore.APICallback<String> callback) {
         if (TextUtils.isEmpty(token)){
             callback.onError(new APICore.ApiError("Unauthorized", "No session token available",

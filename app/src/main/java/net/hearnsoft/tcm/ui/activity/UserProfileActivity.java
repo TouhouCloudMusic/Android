@@ -36,7 +36,6 @@ import net.hearnsoft.tcm.api.APICore;
 import net.hearnsoft.tcm.api.UserAPI;
 import net.hearnsoft.tcm.beans.UserProfile;
 import net.hearnsoft.tcm.databinding.ActivityUserProfileBinding;
-import net.hearnsoft.tcm.misc.UserRole;
 import net.hearnsoft.tcm.ui.widgets.ProfileItem;
 import net.hearnsoft.tcm.utils.Constants;
 import net.hearnsoft.tcm.utils.Logs;
@@ -44,6 +43,7 @@ import net.hearnsoft.tcm.utils.SettingsPrefUtils;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -56,6 +56,7 @@ public class UserProfileActivity extends AppCompatActivity {
     private UserProfileAdapter adapter;
     private ActivityResultLauncher<PickVisualMediaRequest> pickAvatar;
 
+    private String[] userRoles;
     private String userToken;
     private boolean isEditMode = false;
     private boolean isProfileUpdated = false; // 用于跟踪资料是否更新
@@ -99,12 +100,12 @@ public class UserProfileActivity extends AppCompatActivity {
                         Logs.d(TAG, "No media selected");
                     }
                 });
-
+        loadUserRolesList();
         loadUserProfile(userToken);
     }
 
     private void loadUserProfile(String userToken) {
-        if (adapter != null && adapter.items.size() != 0) {
+        if (adapter != null && !adapter.items.isEmpty()) {
             adapter.items.clear();
         }
         userAPI.getUserProfile(userToken, new APICore.APICallback<UserProfile>() {
@@ -122,7 +123,7 @@ public class UserProfileActivity extends AppCompatActivity {
                 }));
                 SimpleDateFormat dateFormat = new SimpleDateFormat(getString(R.string.date_format_str), Locale.CHINA);
                 items.add(new ProfileItem(ProfileItem.TYPE_INFO, getString(R.string.profile_title_last_login), dateFormat.format(data.getLast_login())));
-                items.add(new ProfileItem(ProfileItem.TYPE_INFO, getString(R.string.profile_title_user_permission), ""));
+                items.add(new ProfileItem(ProfileItem.TYPE_INFO, getString(R.string.profile_title_user_permission), getUserRoleString(data.getRoles())));
                 items.add(new ProfileItem(ProfileItem.TYPE_BUTTON,
                         getString(R.string.profile_title_logout), "", true, item -> logout()));
                 adapter.setItems(items);
@@ -140,34 +141,31 @@ public class UserProfileActivity extends AppCompatActivity {
         });
     }
 
-    private String getRolesString(String[] roles) {
-        if (roles == null || roles.length == 0) {
-            return getString(R.string.role_unknown);
-        }
-        StringBuilder rolesString = new StringBuilder();
-        for (String roleName : roles) {
-            UserRole userRole = UserRole.fromString(roleName);
-            if (userRole != null) {
-                if (rolesString.length() > 0) {
-                    rolesString.append(", ");
-                }
-                rolesString.append(getString(getRoleStringResource(userRole)));
+    private void loadUserRolesList() {
+        userAPI.getUserRoleList(new APICore.APICallback<String[]>() {
+            @Override
+            public void onSuccess(String[] data) {
+                Logs.d(TAG, "loadUserRolesList: " + Arrays.toString(data));
+                userRoles = data;
             }
-        }
-        return rolesString.toString();
+
+            @Override
+            public void onError(APICore.ApiError error) {
+                Logs.e(TAG, "loadUserRolesListErr: " + error.getMessage());
+                userRoles = new String[]{};
+            }
+        });
     }
 
-    private int getRoleStringResource(UserRole role) {
-        switch (role) {
-            case ADMIN:
-                return R.string.role_admin;
-            case MODERATOR:
-                return R.string.role_moderator;
-            case USER:
-                return R.string.role_user;
-            default:
-                return R.string.role_unknown;
+    private String getUserRoleString(int[] rolesList) {
+        StringBuilder sb = new StringBuilder();
+        for (int role : rolesList) {
+            if (role < userRoles.length) {
+                // 用户权限索引从1开始
+                sb.append(userRoles[role-1]).append(",");
+            }
         }
+        return sb.length() > 0 ? sb.substring(0, sb.length() - 1) : "";
     }
 
     private void openImagePicker() {

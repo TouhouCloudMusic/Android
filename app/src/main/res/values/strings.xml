@@ -10,9 +10,6 @@
     <string name="search_title">Search</string>
     <string name="search_bar_hint">Search anything…</string>
 
-    <string name="role_admin">Admin</string>
-    <string name="role_moderator">Moderator</string>
-    <string name="role_user">User</string>
     <string name="role_unknown">Unknown role</string>
 
     <string name="main_explore_title_recommend_song">Let\'s have different songs today! 🎉</string>

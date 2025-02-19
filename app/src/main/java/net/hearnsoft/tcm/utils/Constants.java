@@ -12,6 +12,7 @@ public class Constants {
     public static final String API_LOGOUT = "sign_out";
     public static final String API_USER_PROFILE = "profile";
     public static final String API_USER_AVATAR = "avatar";
+    public static final String API_USER_ROLES = "user_roles";
 
     // API字段
     public static final String API_STATIC_IMAGE_URL = API_HOST + "/public/image/";

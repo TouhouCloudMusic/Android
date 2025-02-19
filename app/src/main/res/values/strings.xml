@@ -33,6 +33,8 @@
     <string name="profile_title_logout_content">Are you sure to logout?</string>
     <string name="profile_title_logout">Logout</string>
     <string name="profile_title_logout_title">@string/profile_title_logout</string>
+    <string name="profile_title_admin_mode">Admin mode</string>
+    <string name="admin_mode_notice">Admin mode is enabled, you can manage users and roles or test API.</string>
 
     <string name="error_username_empty">Username must not be empty</string>
     <string name="error_password_empty">Password must not be empty</string>

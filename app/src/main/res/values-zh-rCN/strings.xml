@@ -34,6 +34,9 @@
     <string name="profile_title_logout_content">你确定要注销登录吗？</string>
     <string name="profile_title_logout">注销登录</string>
     <string name="profile_title_logout_title">@string/profile_title_logout</string>
+    <string name="profile_title_admin_mode">管理员功能</string>
+    <string name="admin_mode_notice">管理员模式已启用，您可以管理用户和权限或进行API测试。</string>
+
 
     <string name="error_username_empty">用户名不得为空</string>
     <string name="error_password_empty">密码不得为空</string>

@@ -22,6 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -44,6 +45,7 @@ import net.hearnsoft.tcm.utils.SettingsPrefUtils;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -76,6 +78,8 @@ public class UserProfileActivity extends AppCompatActivity {
         adapter = new UserProfileAdapter();
         binding.recyclerView.setAdapter(adapter);
 
+        loadUserRolesList();
+
         userToken = SettingsPrefUtils.getInstance(this).readStringSettings(Constants.KEY_USER_TOKEN);
 
         pickAvatar = registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), uri -> {
@@ -100,7 +104,6 @@ public class UserProfileActivity extends AppCompatActivity {
                         Logs.d(TAG, "No media selected");
                     }
                 });
-        loadUserRolesList();
         loadUserProfile(userToken);
     }
 
@@ -124,6 +127,16 @@ public class UserProfileActivity extends AppCompatActivity {
                 SimpleDateFormat dateFormat = new SimpleDateFormat(getString(R.string.date_format_str), Locale.CHINA);
                 items.add(new ProfileItem(ProfileItem.TYPE_INFO, getString(R.string.profile_title_last_login), dateFormat.format(data.getLast_login())));
                 items.add(new ProfileItem(ProfileItem.TYPE_INFO, getString(R.string.profile_title_user_permission), getUserRoleString(data.getRoles())));
+
+                // 管理员功能
+                if(isAdminUser(data.getRoles())) {
+                    items.add(new ProfileItem(ProfileItem.TYPE_PREFERENCE_ITEM,
+                            getString(R.string.profile_title_admin_mode),
+                            null,
+                            true, item -> {
+                        Toast.makeText(UserProfileActivity.this, R.string.admin_mode_notice, Toast.LENGTH_SHORT).show();
+                    }));
+                }
                 items.add(new ProfileItem(ProfileItem.TYPE_BUTTON,
                         getString(R.string.profile_title_logout), "", true, item -> logout()));
                 adapter.setItems(items);
@@ -155,6 +168,18 @@ public class UserProfileActivity extends AppCompatActivity {
                 userRoles = new String[]{};
             }
         });
+    }
+
+    private boolean isAdminUser(int[] rolesList) {
+        if (rolesList == null) {
+            return false;
+        }
+        for (int role : rolesList) {
+            if (role == 1) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private String getUserRoleString(int[] rolesList) {
@@ -325,16 +350,28 @@ public class UserProfileActivity extends AppCompatActivity {
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            if (viewType == ProfileItem.TYPE_AVATAR) {
-                View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_user_profile_avatar, parent, false);
-                return new AvatarViewHolder(view);
-            } else if (viewType == ProfileItem.TYPE_BUTTON) {
-                View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_user_profile_button, parent, false);
-                return new ButtonViewHolder(view);
-            } else {
-                View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_user_profile, parent, false);
-                return new InfoViewHolder(view);
+            View view;
+            RecyclerView.ViewHolder holder;
+            switch (viewType) {
+                case ProfileItem.TYPE_AVATAR:
+                    view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_user_profile_avatar, parent, false);
+                    holder =  new AvatarViewHolder(view);
+                    break;
+                case ProfileItem.TYPE_BUTTON:
+                    view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_user_profile_button, parent, false);
+                    holder = new ButtonViewHolder(view);
+                    break;
+                case ProfileItem.TYPE_INFO:
+                    view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_user_profile, parent, false);
+                    holder = new InfoViewHolder(view);
+                    break;
+                case ProfileItem.TYPE_PREFERENCE_ITEM:
+                default:
+                    view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_user_profile_preference, parent, false);
+                    holder = new PreferenceViewHolder(view);
+                    break;
             }
+            return holder;
         }
 
         @Override
@@ -373,11 +410,23 @@ public class UserProfileActivity extends AppCompatActivity {
                 ButtonViewHolder buttonHolder = (ButtonViewHolder) holder;
                 buttonHolder.button.setText(item.getTitle());
                 setItemClickListener(buttonHolder.button, item, false);
+            } else if (holder instanceof PreferenceViewHolder) {
+                PreferenceViewHolder preferenceHolder = (PreferenceViewHolder) holder;
+                preferenceHolder.titleTextView.setText(item.getTitle());
+                if (TextUtils.isEmpty(item.getContent())) {
+                    preferenceHolder.contentTextView.setVisibility(View.GONE);
+                } else {
+                    preferenceHolder.contentTextView.setVisibility(View.VISIBLE);
+                    preferenceHolder.contentTextView.setText(item.getContent());
+                }
+                preferenceHolder.itemView.setBackgroundResource(R.drawable.bg_preference_item);
+                preferenceHolder.itemView.setOnClickListener(v -> item.getClickListener().onItemClick(item));
             }
         }
 
         private void setItemClickListener(View itemView, ProfileItem item, boolean editMode) {
-            if (item.isClickable() && item.getClickListener() != null && (editMode || item.getType() == ProfileItem.TYPE_BUTTON)) {
+            if (item.isClickable() && item.getClickListener() != null &&
+                    (editMode || item.getType() == ProfileItem.TYPE_BUTTON)) {
                 itemView.setOnClickListener(v -> item.getClickListener().onItemClick(item));
                 itemView.setClickable(true);
             } else {
@@ -408,6 +457,17 @@ public class UserProfileActivity extends AppCompatActivity {
                 super(itemView);
                 titleTextView = itemView.findViewById(R.id.titleTextView);
                 contentTextView = itemView.findViewById(R.id.contentTextView);
+            }
+        }
+
+        class PreferenceViewHolder extends RecyclerView.ViewHolder {
+            TextView titleTextView;
+            TextView contentTextView;
+
+            PreferenceViewHolder(View itemView) {
+                super(itemView);
+                titleTextView = itemView.findViewById(R.id.titlePrefTextView);
+                contentTextView = itemView.findViewById(R.id.contentPrefTextView);
             }
         }
 

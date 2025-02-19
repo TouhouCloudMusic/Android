@@ -17,6 +17,7 @@
 
     <string name="activity_user_login_title">用户登录</string>
     <string name="activity_user_register_title">用户注册</string>
+    <string name="activity_admin_mode_title">管理员功能</string>
     <string name="inputbox_hint_username">用户名</string>
     <string name="inputbox_hint_password">密码</string>
     <string name="login_header_tips">如需继续，请登录使用。登录即表示您同意我们的<a href="https://www.bilibili.com">隐私政策</a>以及<a href="https://www.bilibili.com">使用条例</a>。</string>

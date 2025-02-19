@@ -16,6 +16,7 @@
 
     <string name="activity_user_login_title">User Login</string>
     <string name="activity_user_register_title">User Register</string>
+    <string name="activity_admin_mode_title">Admin Mode</string>
     <string name="inputbox_hint_username">Username</string>
     <string name="inputbox_hint_password">Password</string>
     <string name="login_header_tips">To continue, please log in to use. By logging in, you agree to our <a href="https://www.bilibili.com">Privacy Policy</a> and <a href="https://www.bilibili.com">Terms of Use</a>.</string>

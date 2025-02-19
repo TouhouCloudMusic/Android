@@ -135,6 +135,9 @@ public class UserProfileActivity extends AppCompatActivity {
                             null,
                             true, item -> {
                         Toast.makeText(UserProfileActivity.this, R.string.admin_mode_notice, Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(UserProfileActivity.this, AdminModeActivity.class);
+                        intent.putExtra("user_token", userToken);
+                        startActivity(intent);
                     }));
                 }
                 items.add(new ProfileItem(ProfileItem.TYPE_BUTTON,

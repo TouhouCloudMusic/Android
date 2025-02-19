@@ -159,6 +159,9 @@ public class UserProfileActivity extends AppCompatActivity {
 
     private String getUserRoleString(int[] rolesList) {
         StringBuilder sb = new StringBuilder();
+        if (rolesList == null || rolesList.length == 0 || userRoles == null) {
+            return "";
+        }
         for (int role : rolesList) {
             if (role < userRoles.length) {
                 // 用户权限索引从1开始

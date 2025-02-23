@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<api-config>
+    <api>
+        <name>Artist</name>
+        <fragment>net.hearnsoft.tcm.ui.fragments.apitest.ArtistApiFragment</fragment>
+    </api>
+    <api>
+        <name>User</name>
+        <fragment>net.hearnsoft.tcm.ui.fragments.apitest.UserApiFragment</fragment>
+    </api>
+    <api>
+        <name>Correction</name>
+        <fragment>net.hearnsoft.tcm.ui.fragments.apitest.CorrectionApiFragment</fragment>
+    </api>
+    <api>
+        <name>Label</name>
+        <fragment>net.hearnsoft.tcm.ui.fragments.apitest.LabelApiFragment</fragment>
+    </api>
+    <api>
+        <name>default</name>
+        <fragment>net.hearnsoft.tcm.ui.fragments.apitest.DefaultApiFragment</fragment>
+    </api>
+    <api>
+        <name>Release</name>
+        <fragment>net.hearnsoft.tcm.ui.fragments.apitest.ReleaseApiFragment</fragment>
+    </api>
+</api-config>

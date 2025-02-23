@@ -15,6 +15,7 @@ public class Constants {
     public static final String API_USER_ROLES = "user_roles";
 
     // API字段
+    public static final String API_DOCS = API_HOST + "/docs";
     public static final String API_STATIC_IMAGE_URL = API_HOST + "/public/image/";
 
     // 常用shared-pref key

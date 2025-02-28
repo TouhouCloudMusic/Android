@@ -2,6 +2,8 @@ package net.hearnsoft.tcm.ui.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -60,21 +62,78 @@ public class UserRegisterFragment extends Fragment {
             portal.switchPages(0);
             portal.setActivityTitle(requireContext().getString(R.string.activity_user_login_title));
         });
+        binding.username.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (!s.toString().isEmpty()) {
+                    binding.username.setError(null);
+                }
+            }
+            // 其他回调方法保持空实现
+        });
+
+        binding.password.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (!s.toString().isEmpty()) {
+                    binding.password.setError(null);
+                }
+            }
+            // 其他回调方法保持空实现
+        });
         binding.userRegister.setOnClickListener(v -> registerUser());
     }
 
     private void registerUser() {
         String username = binding.username.getText().toString();
         String password = binding.password.getText().toString();
-        if (username.isEmpty()) {
+        boolean hasError = false;
+
+        // 清除旧错误提示
+        binding.username.setError(null);
+        binding.password.setError(null);
+
+        // 双重空值检查
+        if (username.isEmpty() && password.isEmpty()) {
             binding.username.setError(getString(R.string.error_username_empty));
-            binding.username.requestFocus();
-        }
-        if (password.isEmpty()) {
             binding.password.setError(getString(R.string.error_password_empty));
-            binding.password.requestFocus();
+            hasError = true;
+        } else {
+            // 单独字段检查
+            if (username.isEmpty()) {
+                binding.username.setError(getString(R.string.error_username_empty));
+                binding.username.requestFocus();
+                hasError = true;
+            }
+            if (password.isEmpty()) {
+                binding.password.setError(getString(R.string.error_password_empty));
+                if (!hasError) { // 避免覆盖前一个焦点
+                    binding.password.requestFocus();
+                }
+                hasError = true;
+            }
         }
-        if (!username.isEmpty() && !password.isEmpty()) {
+        if (!hasError) {
             binding.userRegister.setEnabled(false);
             userAPI.register(username, password, new APICore.SessionTokenCallback<String>() {
                 @Override

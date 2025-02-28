@@ -17,13 +17,17 @@ import net.hearnsoft.tcm.misc.UserLoginType;
 import net.hearnsoft.tcm.ui.adapter.AppViewPagerAdapter;
 import net.hearnsoft.tcm.ui.fragments.UserLoginFragment;
 import net.hearnsoft.tcm.ui.fragments.UserRegisterFragment;
+import net.hearnsoft.tcm.ui.model.AuthStateViewModel;
 import net.hearnsoft.tcm.utils.Constants;
 import net.hearnsoft.tcm.utils.SettingsPrefUtils;
 import net.hearnsoft.tcm.utils.UserLoginPortal;
+import net.hearnsoft.tcm.utils.ViewModelUtils;
 
 public class UserLoginActivity extends AppCompatActivity implements UserLoginPortal {
 
     private static final String TAG = UserLoginActivity.class.getSimpleName();
+
+    public static UserLoginActivity loginActivity;
 
     private ActivityUserLoginBinding binding;
     private AppViewPagerAdapter adapter;
@@ -41,6 +45,7 @@ public class UserLoginActivity extends AppCompatActivity implements UserLoginPor
             actionBar.setHomeButtonEnabled(true);
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
+        loginActivity = this;
     }
 
     private void initUserLoginPage() {
@@ -91,8 +96,12 @@ public class UserLoginActivity extends AppCompatActivity implements UserLoginPor
         }
 
         // 发送广播通知 AccountFragment 刷新
-        Intent intent = new Intent("net.hearnsoft.tcm.ACTION_REFRESH_USER_PROFILE");
+        Intent intent = new Intent(Constants.ACTION_REFRESH_USER_PROFILE);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+
+        // 重置ViewModel处理状态
+        AuthStateViewModel authStateViewModel = ViewModelUtils.getViewModel(this, AuthStateViewModel.class);
+        authStateViewModel.finishHandling401();
 
         // 关闭登录活动
         finish();

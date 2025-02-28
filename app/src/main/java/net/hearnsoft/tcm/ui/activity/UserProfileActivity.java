@@ -22,7 +22,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -249,7 +248,7 @@ public class UserProfileActivity extends AppCompatActivity {
     }
 
     private void sendRefreshBroadcast() {
-        Intent intent = new Intent("net.hearnsoft.tcm.ACTION_REFRESH_USER_PROFILE");
+        Intent intent = new Intent(Constants.ACTION_REFRESH_USER_PROFILE);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
@@ -274,7 +273,7 @@ public class UserProfileActivity extends AppCompatActivity {
                             R.string.toast_profile_logout_succ,
                             Toast.LENGTH_SHORT).show();
                     // 发送广播通知 AccountFragment 刷新
-                    Intent intent = new Intent("net.hearnsoft.tcm.ACTION_REFRESH_USER_PROFILE");
+                    Intent intent = new Intent(Constants.ACTION_REFRESH_USER_PROFILE);
                     LocalBroadcastManager.getInstance(UserProfileActivity.this)
                             .sendBroadcast(intent);
                     dialog.dismiss();

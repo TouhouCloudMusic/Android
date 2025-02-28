@@ -10,6 +10,7 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -109,12 +110,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onStart() {
+        super.onStart();
         if (refreshReceiver != null) { // 增加空判断
             LocalBroadcastManager.getInstance(this).registerReceiver(refreshReceiver,
-                    new IntentFilter("net.hearnsoft.tcm.ACTION_REFRESH_USER_PROFILE"));
+                    new IntentFilter(Constants.ACTION_REFRESH_USER_PROFILE));
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     @Override

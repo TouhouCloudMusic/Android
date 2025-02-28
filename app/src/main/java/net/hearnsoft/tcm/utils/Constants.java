@@ -22,6 +22,11 @@ public class Constants {
     public static final String KEY_USER_ID = "user_id";
     public static final String KEY_USER_TOKEN = "session_token";
 
+    // App Action
+    public static final String ACTION_REFRESH_USER_PROFILE = "ACTION_REFRESH_USER_PROFILE";
+    public static final String ACTION_UNAUTHORIZED = "ACTION_UNAUTHORIZED";
+
+    // 错误信息字符串
     public static final String REACH_RISK_CONTROL_STRING = "Too Many Requests!";
 
 

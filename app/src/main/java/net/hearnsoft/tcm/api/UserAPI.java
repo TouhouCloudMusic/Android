@@ -21,7 +21,7 @@ public class UserAPI {
 
     private UserAPI(Context context){
         String baseApiUrl = Constants.API_HOST;
-        this.apiCore = new APICore(baseApiUrl);
+        this.apiCore = new APICore(context, baseApiUrl);
         this.preferences = SettingsPrefUtils.getInstance(context);
 
         String storedToken = preferences.readStringSettings("session_token");

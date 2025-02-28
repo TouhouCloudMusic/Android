@@ -63,7 +63,7 @@ public class AccountFragment extends Fragment {
         super.onResume();
         if (refreshReceiver != null) {
             LocalBroadcastManager.getInstance(requireContext()).registerReceiver(refreshReceiver,
-                    new IntentFilter("net.hearnsoft.tcm.ACTION_REFRESH_USER_PROFILE"));
+                    new IntentFilter(Constants.ACTION_REFRESH_USER_PROFILE));
         }
     }
 

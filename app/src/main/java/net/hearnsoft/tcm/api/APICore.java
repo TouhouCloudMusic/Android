@@ -2,6 +2,9 @@ package net.hearnsoft.tcm.api;
 
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Handler;
@@ -11,6 +14,9 @@ import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelStoreOwner;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -20,6 +26,7 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
 import net.hearnsoft.tcm.beans.DefaultResponse;
+import net.hearnsoft.tcm.ui.model.AuthStateViewModel;
 import net.hearnsoft.tcm.utils.Constants;
 import net.hearnsoft.tcm.enums.ErrorCode;
 import net.hearnsoft.tcm.utils.Logs;
@@ -44,15 +51,16 @@ import okio.Okio;
 public class APICore {
     private final String TAG = this.getClass().getSimpleName();
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
+    private Context context;
     private String apiUrl;
     private final OkHttpClient client;
     private final Handler mainHandler;
     private final Gson gson;
     private String sessionToken;
 
-
-    public APICore() {
+    public APICore(Context context) {
         this.apiUrl = Constants.API_HOST;
+        this.context = context;
         this.client = new OkHttpClient();
         this.mainHandler = new Handler(Looper.getMainLooper());
         this.gson = new GsonBuilder()
@@ -64,9 +72,10 @@ public class APICore {
                 .create();
     }
 
-    public APICore(String baseHostUrl) {
+    public APICore(Context context, String baseHostUrl) {
         this.apiUrl = baseHostUrl;
         this.client = new OkHttpClient();
+        this.context = context;
         this.mainHandler = new Handler(Looper.getMainLooper());
         this.gson = new GsonBuilder()
                 .disableHtmlEscaping()
@@ -264,6 +273,17 @@ public class APICore {
                             "Too Many Requests!",
                             responseBody,
                             ErrorCode.RiskControlError), callback);
+                    return;
+                }
+
+                if (response.code() == 401) {
+                    clearSessionToken();
+                    sendUnauthorizedBroadcast();
+                    handleError(new ApiError(
+                            "Unauthorized",
+                            "Session expired, please re-login",
+                            ErrorCode.Unauthorized), callback);
+                    return;
                 }
 
                 try {
@@ -342,6 +362,30 @@ public class APICore {
 
     private <T> void handleError(final ApiError error, final APICallback<T> callback) {
         mainHandler.post(() -> callback.onError(error));
+    }
+
+    private void clearSessionToken() {
+        // 清除内存中的token
+        setSessionToken(null);
+
+        // 清除SharedPreferences中的token
+        SharedPreferences pref = context.getSharedPreferences(
+                Constants.PREF_GLOBAL_NAME,
+                Context.MODE_PRIVATE
+        );
+        pref.edit().remove(Constants.KEY_USER_TOKEN).apply();
+    }
+
+    private void sendUnauthorizedBroadcast() {
+        // 通过ViewModel判断处理状态
+        AuthStateViewModel viewModel = new ViewModelProvider(
+                (ViewModelStoreOwner) context).get(AuthStateViewModel.class);
+
+        if (viewModel.getIsHandling401().getValue() != Boolean.TRUE) {
+            viewModel.startHandling401();
+            Intent intent = new Intent(Constants.ACTION_UNAUTHORIZED);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+        }
     }
 
     public interface APICallback<T> {

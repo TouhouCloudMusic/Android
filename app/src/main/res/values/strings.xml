@@ -55,6 +55,7 @@
     <string name="profile_dialog_err_title">Error!</string>
     <string name="profile_dialog_err_msg">Failed to load user profile!</string>
     <string name="toast_profile_err_crop_avatar">Failed to crop avatar image</string>
+    <string name="toast_profile_err_session_expired">Session expired, please re-login</string>
     <string name="toast_profile_upload_avatar_succ">Upload avatar successful!</string>
     <string name="toast_profile_upload_avatar_err">Failed to upload avatar, reason:</string>
     <string name="toast_profile_logout_succ">Logout successful</string>

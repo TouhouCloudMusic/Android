@@ -226,7 +226,7 @@ public class MainActivity extends AppCompatActivity implements OnScrollStateChan
     @Override
     public void hideBottomNav() {
         if (isBottomNavVisible) {
-            binding.navBar.animate()
+            binding.bottomContainer.animate()
                     .translationY(binding.navBar.getHeight())
                     .setDuration(200)
                     .withEndAction(() -> isBottomNavVisible = false)
@@ -237,7 +237,7 @@ public class MainActivity extends AppCompatActivity implements OnScrollStateChan
     @Override
     public void showBottomNav() {
         if (!isBottomNavVisible) {
-            binding.navBar.animate()
+            binding.bottomContainer.animate()
                     .translationY(0)
                     .setDuration(200)
                     .withEndAction(() -> isBottomNavVisible = true)

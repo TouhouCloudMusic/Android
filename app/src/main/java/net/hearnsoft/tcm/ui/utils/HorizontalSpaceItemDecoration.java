@@ -1,4 +1,4 @@
-package net.hearnsoft.tcm.utils;
+package net.hearnsoft.tcm.ui.utils;
 
 import android.graphics.Rect;
 import android.view.View;

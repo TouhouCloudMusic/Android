@@ -34,19 +34,26 @@ import net.hearnsoft.tcm.ui.fragments.AccountFragment;
 import net.hearnsoft.tcm.ui.fragments.ExploreFragment;
 import net.hearnsoft.tcm.ui.fragments.LibraryFragment;
 import net.hearnsoft.tcm.ui.fragments.RadioFragment;
+import net.hearnsoft.tcm.ui.interfaces.OnScrollStateChangeListener;
 import net.hearnsoft.tcm.utils.Constants;
 import net.hearnsoft.tcm.utils.Logs;
 import net.hearnsoft.tcm.utils.SettingsPrefUtils;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements OnScrollStateChangeListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
+
+    public OnScrollStateChangeListener getScrollListener() {
+        return this;
+    }
 
     private ActivityMainBinding binding;
     private AppViewPagerAdapter adapter;
     private UserAPI userAPI;
     private BroadcastReceiver refreshReceiver;
     private boolean isAccountPage = false;
+    //默认当前导航栏可见
+    private boolean isBottomNavVisible = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +97,9 @@ public class MainActivity extends AppCompatActivity {
                 binding.toolbarProfile.setVisibility(isAccountPage ? View.GONE : View.VISIBLE);
                 binding.navBar.getMenu().getItem(position).setChecked(true);
                 updateToolbarTitle(position);
+
+                // 确保在页面切换时始终显示底部导航栏
+                showBottomNav();
             }
         });
 
@@ -211,6 +221,39 @@ public class MainActivity extends AppCompatActivity {
             return "";
         }
         return Constants.API_STATIC_IMAGE_URL + fileName;
+    }
+
+    @Override
+    public void hideBottomNav() {
+        if (isBottomNavVisible) {
+            binding.navBar.animate()
+                    .translationY(binding.navBar.getHeight())
+                    .setDuration(200)
+                    .withEndAction(() -> isBottomNavVisible = false)
+                    .start();
+        }
+    }
+
+    @Override
+    public void showBottomNav() {
+        if (!isBottomNavVisible) {
+            binding.navBar.animate()
+                    .translationY(0)
+                    .setDuration(200)
+                    .withEndAction(() -> isBottomNavVisible = true)
+                    .start();
+        }
+    }
+
+    // 实现新增的接口方法
+    @Override
+    public int getBottomNavHeight() {
+        return binding.navBar.getHeight();
+    }
+
+    @Override
+    public boolean isBottomNavVisible() {
+        return isBottomNavVisible;
     }
 
     @Override

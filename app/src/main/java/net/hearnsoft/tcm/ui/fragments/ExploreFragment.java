@@ -17,9 +17,8 @@ import net.hearnsoft.tcm.beans.BannerDataBean;
 import net.hearnsoft.tcm.beans.RecommendSongBean;
 import net.hearnsoft.tcm.databinding.FragmentExploreBinding;
 import net.hearnsoft.tcm.ui.adapter.AppBannerAdapter;
-import net.hearnsoft.tcm.ui.adapter.OnItemClickListener;
 import net.hearnsoft.tcm.ui.adapter.RecommendSongListAdapter;
-import net.hearnsoft.tcm.utils.HorizontalSpaceItemDecoration;
+import net.hearnsoft.tcm.ui.utils.HorizontalSpaceItemDecoration;
 
 import java.util.ArrayList;
 import java.util.List;

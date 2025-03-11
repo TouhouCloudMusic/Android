@@ -17,7 +17,7 @@ import net.hearnsoft.tcm.databinding.FragmentMainAdminBinding;
 import net.hearnsoft.tcm.ui.adapter.ApiTestItemAdapter;
 import net.hearnsoft.tcm.utils.ApiConfigParser;
 import net.hearnsoft.tcm.utils.Constants;
-import net.hearnsoft.tcm.utils.HorizontalSpaceItemDecoration;
+import net.hearnsoft.tcm.ui.utils.HorizontalSpaceItemDecoration;
 import net.hearnsoft.tcm.utils.Logs;
 
 import java.io.IOException;

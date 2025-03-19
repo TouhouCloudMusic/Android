@@ -64,12 +64,14 @@ public class MainFragment extends Fragment {
             int position = 0;
             if (menuItem.getItemId() == R.id.nav_explore) {
                 position = 0;
-            } else if (menuItem.getItemId() == R.id.nav_radio) {
-                position = 1;
             } else if (menuItem.getItemId() == R.id.nav_music_library) {
+                position = 1;
+            } else if (menuItem.getItemId() == R.id.nav_statistics) {
                 position = 2;
-            } else if (menuItem.getItemId() == R.id.nav_account) {
+            } else if (menuItem.getItemId() == R.id.nav_music) {
                 position = 3;
+            } else if (menuItem.getItemId() == R.id.nav_account) {
+                position = 4;
             }
             binding.mainView.setCurrentItem(position, true);
             return true;

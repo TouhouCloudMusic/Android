@@ -165,12 +165,14 @@ public class MainActivity extends AppCompatActivity implements OnScrollStateChan
             int position = 0;
             if (menuItem.getItemId() == R.id.nav_explore) {
                 position = 0;
-            } else if (menuItem.getItemId() == R.id.nav_radio) {
-                position = 1;
             } else if (menuItem.getItemId() == R.id.nav_music_library) {
+                position = 1;
+            } else if (menuItem.getItemId() == R.id.nav_statistics) {
                 position = 2;
-            } else if (menuItem.getItemId() == R.id.nav_account) {
+            } else if (menuItem.getItemId() == R.id.nav_music) {
                 position = 3;
+            } else if (menuItem.getItemId() == R.id.nav_account) {
+                position = 4;
             }
             binding.mainView.setCurrentItem(position, true);
             updateToolbarTitle(position); // 更新标题
@@ -184,7 +186,7 @@ public class MainActivity extends AppCompatActivity implements OnScrollStateChan
                 binding.topAppbar.setTitle(R.string.nav_explore_title);
                 break;
             case 1:
-                binding.topAppbar.setTitle(R.string.nav_radio_title);
+                //binding.topAppbar.setTitle(R.string.nav_radio_title);
                 break;
             case 2:
                 binding.topAppbar.setTitle(R.string.nav_library_title);

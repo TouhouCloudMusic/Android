@@ -6,14 +6,18 @@
         android:icon="@drawable/ic_explore"/>
 
     <item
-        android:id="@+id/nav_radio"
-        android:title="@string/nav_radio_title"
-        android:icon="@drawable/ic_radio"/>
-
-    <item
         android:id="@+id/nav_music_library"
         android:title="@string/nav_library_title"
         android:icon="@drawable/ic_library_music"/>
+
+    <item
+        android:id="@+id/nav_statistics"
+        android:title="@string/nav_statistics_title"
+        android:icon="@drawable/ic_nav_chart"/>
+
+    <item android:id="@+id/nav_music"
+        android:title="@string/nav_music_title"
+        android:icon="@drawable/ic_nav_music"/>
 
     <item
         android:id="@+id/nav_account"

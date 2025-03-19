@@ -2,8 +2,9 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name">东方同音鉴 Demo</string>
     <string name="nav_explore_title">发现</string>
-    <string name="nav_radio_title">电台</string>
-    <string name="nav_library_title">曲库</string>
+    <string name="nav_music_title">音乐</string>
+    <string name="nav_statistics_title">统计</string>
+    <string name="nav_library_title">音乐库</string>
     <string name="nav_account_title">个人</string>
 
     <string name="date_format_str">yyyy-MM-dd HH:mm:ss E</string>

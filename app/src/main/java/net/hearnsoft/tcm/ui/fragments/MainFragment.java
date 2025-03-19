@@ -36,6 +36,7 @@ public class MainFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         initPager();
         initNavBar();
+        binding.nowPlayingBar.setVisibility(View.GONE);
     }
 
     private void initPager() {

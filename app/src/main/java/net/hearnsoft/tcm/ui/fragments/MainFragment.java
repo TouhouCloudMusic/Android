@@ -17,7 +17,6 @@ import net.hearnsoft.tcm.ui.adapter.AppViewPagerAdapter;
 public class MainFragment extends Fragment {
     private FragmentMainBinding binding;
     private AppViewPagerAdapter adapter;
-    private boolean isAccountPage = false;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -55,15 +54,8 @@ public class MainFragment extends Fragment {
         binding.mainView.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
-                isAccountPage = (position == 3);
-                binding.toolbarProfile.setVisibility(isAccountPage ? View.GONE : View.VISIBLE);
                 binding.navBar.getMenu().getItem(position).setChecked(true);
-                updateToolbarTitle(position);
             }
-        });
-
-        binding.toolbarProfile.setOnClickListener(v -> {
-            binding.mainView.setCurrentItem(3, true);
         });
     }
 
@@ -80,25 +72,7 @@ public class MainFragment extends Fragment {
                 position = 3;
             }
             binding.mainView.setCurrentItem(position, true);
-            updateToolbarTitle(position); // 更新标题
             return true;
         });
-    }
-
-    private void updateToolbarTitle(int position) {
-        switch (position) {
-            case 0:
-                binding.topAppbar.setTitle(R.string.nav_explore_title);
-                break;
-            case 1:
-                binding.topAppbar.setTitle(R.string.nav_radio_title);
-                break;
-            case 2:
-                binding.topAppbar.setTitle(R.string.nav_library_title);
-                break;
-            case 3:
-                binding.topAppbar.setTitle(R.string.nav_account_title);
-                break;
-        }
     }
 }

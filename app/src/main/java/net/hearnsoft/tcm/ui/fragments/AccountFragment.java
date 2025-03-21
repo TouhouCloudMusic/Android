@@ -53,7 +53,9 @@ public class AccountFragment extends Fragment {
         refreshReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                refreshUserProfile();
+                if (isAdded()) {
+                    refreshUserProfile();
+                }
             }
         };
     }
@@ -112,7 +114,9 @@ public class AccountFragment extends Fragment {
 
         // 测试信息设置，非实际用户 Yuyuko1024 add code start
         // 上线时需移除该测试代码为实际代码
-        refreshUserProfile();
+        if (isAdded()) {
+            refreshUserProfile();
+        }
         // Yuyuko1024 add code end
     }
 
@@ -167,8 +171,10 @@ public class AccountFragment extends Fragment {
     }
 
     private void setUserCardForLoggedOutState() {
-        setUserCardInfo(getString(R.string.usercard_default_name),
-                getString(R.string.usercard_default_desc),  null);
+        if (isAdded()) {
+            setUserCardInfo(getString(R.string.usercard_default_name),
+                    getString(R.string.usercard_default_desc),  null);
+        }
         userCard.setOnUserCardClickListener(v -> {
             Intent loginPage = new Intent(getContext(), UserLoginActivity.class);
             getContext().startActivity(loginPage);

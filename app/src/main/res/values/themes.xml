@@ -56,6 +56,33 @@
         <item name="android:layout_margin">4dp</item>
     </style>
 
+    <!-- No elements styles -->
+    <style name="Theme.TouhouCloudMusic.NoElements" />
+
+    <style name="Theme.TouhouCloudMusic.NoElements.LinearLayout">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <style name="Theme.TouhouCloudMusic.NoElements.ImageView">
+        <item name="android:layout_width">140dp</item>
+        <item name="android:layout_height">140dp</item>
+    </style>
+
+    <style name="Theme.TouhouCloudMusic.NoElements.Space">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">8dp</item>
+    </style>
+
+    <style name="Theme.TouhouCloudMusic.NoElements.TextView" parent="Widget.AppCompat.TextView">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textAppearance">@style/TextAppearance.Material3.BodyLarge</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
+    </style>
+
     <!-- Now playing bar -->
     <style name="Theme.TouhouCloudMusic.NowPlayingBar.CardView" parent="@style/Widget.Material3.CardView.Filled">
         <item name="shapeAppearanceOverlay">
@@ -68,5 +95,22 @@
         <item name="cornerFamily">rounded</item>
         <item name="cornerSizeTopLeft">12dp</item>
         <item name="cornerSizeTopRight">12dp</item>
+    </style>
+
+    <!-- RatingBar -->
+    <style name="Theme.TouhouCloudMusic.RatingBar" parent="@style/Widget.AppCompat.RatingBar.Indicator">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:numStars">5</item>
+        <item name="android:stepSize">0.5</item>
+        <item name="android:scaleX">0.8</item>
+        <item name="android:scaleY">0.8</item>
+        <item name="android:isIndicator">false</item>
+        <item name="android:tint">@color/system_accent</item>
+        <item name="minHeight">40dp</item>
+        <item name="maxHeight">40dp</item>
+        <item name="minWidth">10dp</item>
+        <item name="maxWidth">10dp</item>
+        <item name="android:padding">0dp</item>
     </style>
 </resources>

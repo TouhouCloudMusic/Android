@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingHorizontal="24dp"
+    android:paddingVertical="8dp">
+
+    <TextView
+        style="@style/TextAppearance.Material3.TitleMedium"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/full_player_music_title"
+        android:maxLines="1"
+        android:ellipsize="marquee"
+        android:text="光の三妖精のHouseにハマってる方 feat. モリモリあつし"
+        tools:text="光の三妖精のHouseにハマってる方 feat. モリモリあつし"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            style="@style/TextAppearance.Material3.BodyMedium"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center_vertical"
+            android:id="@+id/full_player_music_artist"
+            android:maxLines="1"
+            android:ellipsize="marquee"
+            android:text="モリモリあつし"
+            tools:text="モリモリあつし"/>
+
+        <com.google.android.material.button.MaterialButton
+            style="@style/Widget.Material3.Button.TextButton.Icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/full_player_music_artist_follow"
+            android:text="@string/full_player_artist_follow"
+            app:icon="@drawable/ic_add_24px"
+            android:layout_marginHorizontal="4dp"
+            android:layout_marginVertical="2dp"/>
+
+        <androidx.appcompat.widget.AppCompatRatingBar
+            android:id="@+id/full_player_music_rating"
+            style="@style/Theme.TouhouCloudMusic.RatingBar"
+            android:layout_gravity="center_vertical" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <HorizontalScrollView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+            <com.google.android.material.chip.ChipGroup
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:id="@+id/full_player_music_tags_group" />
+        </HorizontalScrollView>
+
+        <com.google.android.material.button.MaterialButton
+            style="@style/Widget.Material3.Button.IconButton"
+            android:id="@+id/full_player_music_tags_add"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="4dp"
+            android:layout_marginHorizontal="4dp"
+            android:layout_gravity="center_vertical"
+            android:contentDescription="@string/full_player_music_tags_add_desc"
+            android:tooltipText="@string/full_player_music_tags_add_desc"
+            app:icon="@drawable/ic_add_24px"/>
+
+    </LinearLayout>
+
+</LinearLayout>

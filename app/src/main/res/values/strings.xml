@@ -6,6 +6,9 @@
     <string name="nav_library_title">Library</string>
     <string name="nav_account_title">Account</string>
 
+    <string name="unknown">Unknown</string>
+    <string name="sort_by_unknown">Unknown</string>
+
     <string name="date_format_str">E HH:mm:ss MM-dd-yyyy</string>
 
     <string name="search_title">Search</string>
@@ -62,4 +65,14 @@
     <string name="toast_profile_logout_succ">Logout successful</string>
     <string name="toast_profile_logout_err">Logout error</string>
     <string name="toast_api_reach_risk_control">Reach risk control! \n</string>
+    <string name="music_tab_music_title">Music</string>
+    <string name="music_tab_artists_title">Artists</string>
+    <string name="music_tab_album_title">Album</string>
+    <string name="music_tab_playlist_title">Playlist</string>
+    <string name="no_music">No music found…</string>
+    <string name="full_player_tabs_music">Music</string>
+    <string name="full_player_tabs_lyrics">Lyrics</string>
+    <string name="full_player_tabs_info">Info</string>
+    <string name="full_player_artist_follow">Follow</string>
+    <string name="full_player_music_tags_add_desc">Add</string>
 </resources>

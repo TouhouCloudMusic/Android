@@ -5,6 +5,7 @@
     android:id="@+id/fragment_main"
     app:startDestination="@id/mainFragment">
 
+    <include app:graph="@navigation/fragment_now_playing"/>
 
     <fragment
         android:id="@+id/mainFragment"
@@ -12,6 +13,19 @@
         android:label="MainFragment"
         tools:layout="@layout/fragment_main">
 
+        <action
+            android:id="@+id/action_mainFragment_to_fragment_nowPlaying"
+            app:destination="@id/fragment_now_playing"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+
     </fragment>
+
+    <fragment
+        android:id="@+id/fullPlayerFragment"
+        android:name="net.hearnsoft.tcm.ui.fragments.FullPlayerFragment"
+        tools:layout="@layout/full_player" />
 
 </navigation>

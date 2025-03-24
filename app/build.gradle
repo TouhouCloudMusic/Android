@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.androidApplication)
+    alias(libs.plugins.kotlinAndroid)
 }
 
 android {
@@ -42,6 +43,9 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
 }
 
 dependencies {
@@ -50,6 +54,7 @@ dependencies {
     implementation libs.material
     implementation libs.activity
     implementation libs.constraintlayout
+    implementation libs.androidx.localbroadcastmanager
     // BannerViewPager
     implementation libs.bannerviewpager
     // Glide
@@ -77,6 +82,9 @@ dependencies {
     implementation libs.androidx.media3.exoplayer.smoothstreaming
     implementation libs.androidx.media3.session
     implementation libs.androidx.media3.ui
+    implementation libs.androidx.core.ktx
+    // LyricViewX
+    implementation libs.lyricviewx
     testImplementation libs.junit
     // Lombok annotation processor
     annotationProcessor libs.lombok

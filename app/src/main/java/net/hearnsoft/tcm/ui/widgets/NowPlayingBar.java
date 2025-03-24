@@ -1,14 +1,21 @@
 package net.hearnsoft.tcm.ui.widgets;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.util.AttributeSet;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.media3.common.MediaItem;
+import androidx.media3.common.MediaMetadata;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.button.MaterialButton;
@@ -16,6 +23,8 @@ import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 
 import net.hearnsoft.tcm.R;
+import net.hearnsoft.tcm.misc.ViewKt;
+import net.hearnsoft.tcm.utils.Logs;
 
 public class NowPlayingBar extends FrameLayout {
 
@@ -34,10 +43,10 @@ public class NowPlayingBar extends FrameLayout {
 
     public NowPlayingBar(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        init(context);
+        init(context, attrs);
     }
 
-    private void init(Context context) {
+    private void init(Context context, AttributeSet attrs) {
         inflate(context, R.layout.now_playing_bar, this);
         nowPlayingBarContainer = findViewById(R.id.nowPlayingBarContainer);
         circularProgressIndicator = findViewById(R.id.circularProgressIndicator);
@@ -45,6 +54,38 @@ public class NowPlayingBar extends FrameLayout {
         artistTextView = findViewById(R.id.artistNameTextView);
         coverImageView = findViewById(R.id.coverImageView);
         playPauseButton = findViewById(R.id.playPauseMaterialButton);
+
+        if (attrs != null) {
+            try (TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.NowPlayingBar, 0, 0)) {
+                isBottomNavigationBar = array.getBoolean(
+                        R.styleable.NowPlayingBar_isBottomNavigationBar,
+                        false
+                );
+                array.recycle();
+            } catch (Exception e) {
+                Logs.e("NowPlayingBar", "get TypedArray error, " + e.getMessage());
+            }
+        }
+
+        ViewCompat.setOnApplyWindowInsetsListener(this, (v, insets) -> {
+            Insets windowInsets = insets.getInsets(
+                    WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout()
+            );
+
+            ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) getLayoutParams();
+            layoutParams.leftMargin = windowInsets.left;
+            layoutParams.rightMargin = windowInsets.right;
+            setLayoutParams(layoutParams);
+
+            nowPlayingBarContainer.setContentPadding(
+                    0,
+                    0,
+                    0,
+                    isBottomNavigationBar ? windowInsets.bottom : 0
+            );
+
+            return insets;
+        });
 
         circularProgressIndicator.setMin(0);
     }
@@ -63,7 +104,7 @@ public class NowPlayingBar extends FrameLayout {
         }
         Glide.with(this)
                 .load(coverImageUrl)
-                .placeholder(R.drawable.ic_launcher_foreground)
+                .placeholder(R.mipmap.ic_launcher)
                 .into(coverImageView);
     }
 
@@ -72,6 +113,29 @@ public class NowPlayingBar extends FrameLayout {
                 isPlaying ? R.drawable.avd_play_to_pause : R.drawable.avd_pause_to_play);
         AnimatedVectorDrawable animatedVectorDrawable = (AnimatedVectorDrawable) playPauseButton.getIcon();
         animatedVectorDrawable.start();
+    }
+
+    public void updateMediaItem(MediaItem mediaItem) {
+        if (mediaItem != null) {
+            ViewKt.slideUp(this);
+        } else {
+            ViewKt.slideDown(this);
+        }
+    }
+
+    public void updateMediaMetadata(MediaMetadata metadata){
+        String title = metadata.title == null ?
+                getContext().getString(R.string.unknown) : (String) metadata.title;
+        String artist = metadata.artist == null ?
+                getContext().getString(R.string.unknown) : (String) metadata.artist;
+
+        if (titleTextView.getText() != title) {
+            titleTextView.setText(title);
+        }
+
+        if (artistTextView.getText() != artist) {
+            artistTextView.setText(artist);
+        }
     }
 
     public void updateDurationCurrentPositionMs(long durationMs, long currentPositionMs) {

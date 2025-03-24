@@ -1,5 +1,6 @@
 package net.hearnsoft.tcm.ui.fragments;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,16 +8,30 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
 import net.hearnsoft.tcm.R;
 import net.hearnsoft.tcm.databinding.FragmentMainBinding;
+import net.hearnsoft.tcm.ui.activity.NewMainActivity;
 import net.hearnsoft.tcm.ui.adapter.AppViewPagerAdapter;
+import net.hearnsoft.tcm.ui.interfaces.OnNowPlayingClickListener;
 
 public class MainFragment extends Fragment {
     private FragmentMainBinding binding;
     private AppViewPagerAdapter adapter;
+    private OnNowPlayingClickListener listener;
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        if (context instanceof NewMainActivity) {
+            listener = ((NewMainActivity) context).getNowPlayingClickListener();
+        }
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -34,9 +49,17 @@ public class MainFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), (v, insets) -> {
+            Insets statusBar = insets.getInsets(WindowInsetsCompat.Type.statusBars());
+            v.setPadding(0, statusBar.top, 0, 0);
+            return insets;
+        });
+        ViewCompat.requestApplyInsets(binding.getRoot());
+
         initPager();
         initNavBar();
-        binding.nowPlayingBar.setVisibility(View.GONE);
+        binding.nowPlayingBar.setVisibility(View.VISIBLE);
+        binding.nowPlayingBar.setOnPlayingBarClickListener(v -> {listener.onNowPlayingClick();});
     }
 
     private void initPager() {
@@ -45,6 +68,7 @@ public class MainFragment extends Fragment {
         adapter.addFragment(new ExploreFragment());
         adapter.addFragment(new RadioFragment());
         adapter.addFragment(new LibraryFragment());
+        adapter.addFragment(new MusicFragment());
         adapter.addFragment(new AccountFragment());
         // ViewPager2属性设置
         // 设置当前页面以及是否启用丝滑滚动

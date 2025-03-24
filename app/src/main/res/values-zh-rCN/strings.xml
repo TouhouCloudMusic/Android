@@ -7,6 +7,9 @@
     <string name="nav_library_title">音乐库</string>
     <string name="nav_account_title">个人</string>
 
+    <string name="unknown">未知</string>
+    <string name="sort_by_unknown">未知</string>
+
     <string name="date_format_str">yyyy-MM-dd HH:mm:ss E</string>
 
     <string name="search_title">搜索</string>
@@ -64,4 +67,14 @@
     <string name="toast_profile_logout_succ">注销登录成功</string>
     <string name="toast_profile_logout_err">注销登录失败</string>
     <string name="toast_api_reach_risk_control">触发风控保护，请稍后重试！ \n</string>
+    <string name="music_tab_music_title">歌曲</string>
+    <string name="music_tab_artists_title">艺术家</string>
+    <string name="music_tab_album_title">专辑</string>
+    <string name="music_tab_playlist_title">歌单</string>
+    <string name="no_music">好像完全没有音乐…</string>
+    <string name="full_player_tabs_music">歌曲</string>
+    <string name="full_player_tabs_lyrics">歌词</string>
+    <string name="full_player_tabs_info">信息</string>
+    <string name="full_player_artist_follow">关注</string>
+    <string name="full_player_music_tags_add_desc">添加</string>
 </resources>

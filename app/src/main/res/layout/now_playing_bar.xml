@@ -28,7 +28,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
-                android:src="@mipmap/ic_launcher"
+                android:src="@drawable/ic_nav_music"
                 tools:src="@drawable/test_cover"/>
 
         </com.google.android.material.card.MaterialCardView>
@@ -82,7 +82,6 @@
                 android:layout_gravity="center"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:padding="0dp"
-                app:icon="@drawable/avd_play_to_pause"
                 app:iconGravity="textStart"
                 app:iconSize="24dp"
                 app:iconTint="?attr/colorOnSurface" />

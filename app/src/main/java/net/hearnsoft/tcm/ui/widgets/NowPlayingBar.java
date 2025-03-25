@@ -35,6 +35,7 @@ public class NowPlayingBar extends FrameLayout {
     private MaterialCardView nowPlayingBarContainer;
     private MaterialButton playPauseButton;
 
+    private boolean previousPlayingState = false;
     private boolean isBottomNavigationBar = false;
 
     public NowPlayingBar(@NonNull Context context) {
@@ -104,15 +105,31 @@ public class NowPlayingBar extends FrameLayout {
         }
         Glide.with(this)
                 .load(coverImageUrl)
-                .placeholder(R.mipmap.ic_launcher)
+                .placeholder(R.drawable.ic_nav_music)
                 .into(coverImageView);
     }
 
     public void updateIsPlaying(boolean isPlaying) {
+        // 如果状态没有变化，不执行动画
+        if (isPlaying == previousPlayingState) {
+            return;
+        }
+
+        // 更新状态记录
+        previousPlayingState = isPlaying;
+
+        // 根据播放状态设置正确的图标
+        // 注意：avd_play_to_pause表示从播放图标变为暂停图标，最终显示暂停图标（对应isPlaying=true）
+        // avd_pause_to_play表示从暂停图标变为播放图标，最终显示播放图标（对应isPlaying=false）
         playPauseButton.setIconResource(
                 isPlaying ? R.drawable.avd_play_to_pause : R.drawable.avd_pause_to_play);
-        AnimatedVectorDrawable animatedVectorDrawable = (AnimatedVectorDrawable) playPauseButton.getIcon();
-        animatedVectorDrawable.start();
+
+        // 启动动画
+        AnimatedVectorDrawable animatedVectorDrawable =
+                (AnimatedVectorDrawable) playPauseButton.getIcon();
+        if (animatedVectorDrawable != null) {
+            animatedVectorDrawable.start();
+        }
     }
 
     public void updateMediaItem(MediaItem mediaItem) {

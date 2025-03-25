@@ -10,7 +10,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginVertical="8dp"
-        android:layout_marginHorizontal="8dp"
+        android:layout_marginHorizontal="16dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -34,13 +34,13 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
-            android:padding="8dp"
+            android:padding="2dp"
             android:visibility="gone"
             app:spanCount="1"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             tools:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             tools:listitem="@layout/item_music_item_list"
-            tools:visibility="gone" />
+            tools:visibility="visible" />
 
         <LinearLayout
             android:id="@+id/noElementsLinearLayout"
@@ -58,6 +58,7 @@
             <Space style="@style/Theme.TouhouCloudMusic.NoElements.Space" />
 
             <TextView
+                android:id="@+id/noElementsTextView"
                 style="@style/Theme.TouhouCloudMusic.NoElements.TextView"
                 android:text="@string/no_music" />
 

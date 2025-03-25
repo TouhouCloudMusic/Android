@@ -85,6 +85,8 @@ dependencies {
     implementation libs.androidx.core.ktx
     // LyricViewX
     implementation libs.lyricviewx
+    // Pinyin4J
+    implementation libs.pinyin4j
     testImplementation libs.junit
     // Lombok annotation processor
     annotationProcessor libs.lombok

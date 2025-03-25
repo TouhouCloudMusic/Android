@@ -75,4 +75,8 @@
     <string name="full_player_tabs_info">Info</string>
     <string name="full_player_artist_follow">Follow</string>
     <string name="full_player_music_tags_add_desc">Add</string>
+    <string name="sort_by_artist_name">Artist name</string>
+    <string name="sort_by_release_date">Release date</string>
+    <string name="sort_by_title">Title</string>
+    <string name="sort_by_play_count">Play count</string>
 </resources>

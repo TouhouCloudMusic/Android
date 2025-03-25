@@ -1,6 +1,7 @@
 package net.hearnsoft.tcm.ui.fragments;
 
 import android.os.Bundle;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +9,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.media3.common.util.UnstableApi;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.tabs.TabItem;
@@ -17,10 +19,16 @@ import net.hearnsoft.tcm.R;
 import net.hearnsoft.tcm.databinding.FragmentMusicBinding;
 import net.hearnsoft.tcm.ui.adapter.AppViewPagerAdapter;
 import net.hearnsoft.tcm.ui.fragments.music.MusicListFragment;
+import net.hearnsoft.tcm.utils.Logs;
 
+import java.util.ArrayList;
+import java.util.List;
+
+@UnstableApi
 public class MusicFragment extends Fragment {
     private FragmentMusicBinding binding;
     private AppViewPagerAdapter adapter;
+    private int currentTabPosition = 0;
 
     private static int[] tabs = {
             R.string.music_tab_music_title,
@@ -28,6 +36,22 @@ public class MusicFragment extends Fragment {
             R.string.music_tab_album_title,
             R.string.music_tab_playlist_title,
     };
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (binding != null) {
+            outState.putInt("selected_tab", binding.musicTab.getSelectedTabPosition());
+        }
+    }
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        if (savedInstanceState != null) {
+            currentTabPosition = savedInstanceState.getInt("selected_tab", 0);
+        }
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -38,7 +62,7 @@ public class MusicFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FragmentMusicBinding.inflate(inflater, container, false);
-        adapter = new AppViewPagerAdapter(requireActivity());
+        adapter = AppViewPagerAdapter.create(this);
         return binding.getRoot();
     }
 
@@ -53,11 +77,6 @@ public class MusicFragment extends Fragment {
         for (int tab : tabs) {
             TabLayout.Tab musicTab = binding.musicTab.newTab();
             musicTab.setText(tab);
-            ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-            );
-            musicTab.view.setLayoutParams(params);
             binding.musicTab.addTab(musicTab);
         }
         binding.musicTab.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -82,9 +101,14 @@ public class MusicFragment extends Fragment {
     private void initPager() {
         binding.musicViewPager.setAdapter(adapter);
 
-        adapter.addFragment(new MusicListFragment());
+        if (adapter.getItemCount() == 0) {
+            adapter.addFragment(new MusicListFragment());
+            adapter.addFragment(new Fragment());
+            adapter.addFragment(new Fragment());
+            adapter.addFragment(new Fragment());
+        }
 
-        binding.musicViewPager.setCurrentItem(0,true);
+        binding.musicViewPager.setCurrentItem(currentTabPosition,true);
         binding.musicViewPager.setUserInputEnabled(true);
         binding.musicViewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
@@ -92,5 +116,12 @@ public class MusicFragment extends Fragment {
                 binding.musicTab.getTabAt(position).select();
             }
         });
+
+        binding.musicTab.getTabAt(currentTabPosition).select();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
     }
 }

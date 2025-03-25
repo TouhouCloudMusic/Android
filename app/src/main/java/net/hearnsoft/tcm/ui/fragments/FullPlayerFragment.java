@@ -1,9 +1,13 @@
 package net.hearnsoft.tcm.ui.fragments;
 
+import android.graphics.drawable.AnimatedVectorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -11,20 +15,29 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.media3.common.MediaItem;
+import androidx.media3.common.util.UnstableApi;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.slider.Slider;
 import com.google.android.material.tabs.TabLayout;
 
 import net.hearnsoft.tcm.R;
 import net.hearnsoft.tcm.databinding.FullPlayerBinding;
+import net.hearnsoft.tcm.ui.activity.NewMainActivity;
 import net.hearnsoft.tcm.ui.adapter.AppViewPagerAdapter;
 import net.hearnsoft.tcm.ui.fragments.fullplayer.FullPlayerInfoFragment;
 import net.hearnsoft.tcm.ui.fragments.fullplayer.FullPlayerMusicFragment;
 import net.hearnsoft.tcm.ui.fragments.fullplayer.FullPlayerLyricsFragment;
+import net.hearnsoft.tcm.ui.model.PlaybackViewModel;
 import net.hearnsoft.tcm.utils.Logs;
 
+@UnstableApi
 public class FullPlayerFragment extends Fragment {
     private FullPlayerBinding binding;
     private static AppViewPagerAdapter adapter;
@@ -32,6 +45,29 @@ public class FullPlayerFragment extends Fragment {
             R.string.full_player_tabs_lyrics,
             R.string.full_player_tabs_music,
             R.string.full_player_tabs_info
+    };
+
+    private PlaybackViewModel viewModel;
+    // 控制UI元素
+    private FloatingActionButton playPauseButton;
+    private MaterialButton prevButton;
+    private MaterialButton nextButton;
+    private Slider timelineSlider;
+    private TextView currentTimeTextView;
+    private TextView durationTextView;
+
+    // 状态变量
+    private boolean userIsSeeking = false;
+    private boolean previousPlayingState = false;
+
+    // 用于定期更新进度的Handler和Runnable
+    private final Handler progressHandler = new Handler(Looper.getMainLooper());
+    private final Runnable progressRunnable = new Runnable() {
+        @Override
+        public void run() {
+            viewModel.updatePosition();
+            progressHandler.postDelayed(this, 1000); // 每秒更新一次
+        }
     };
 
     @Override
@@ -48,6 +84,15 @@ public class FullPlayerFragment extends Fragment {
     }
 
     @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        // Save tab position
+        if (binding != null) {
+            outState.putInt("selected_tab", binding.fullPlayerToolbarTabsContainer.getSelectedTabPosition());
+        }
+    }
+
+    @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
@@ -58,14 +103,50 @@ public class FullPlayerFragment extends Fragment {
         });
         ViewCompat.requestApplyInsets(binding.getRoot());
 
+        // 初始化标签页和ViewPager
+        // 若已添加则不再初始化，防止重复初始化
+        if (savedInstanceState != null) {
+            int tabPosition = savedInstanceState.getInt("selected_tab", 1);
+            if (binding.fullPlayerToolbarTabsContainer.getTabCount() > tabPosition) {
+                binding.fullPlayerToolbarTabsContainer.getTabAt(tabPosition).select();
+            }
+        } else {
+            initFullPlayerTabs();
+        }
+
+        initFullPlayerViewPager();
+        binding.fullPlayerToolbarTabsContainer.getTabAt(1).select();
+
+        // 初始化返回按钮
         binding.fullPlayerToolbar.setNavigationOnClickListener(v -> {
-            Logs.d("FullPlayerFragment", "onViewCreated");
-            NavController navController = Navigation.findNavController(requireView());
-            navController.navigateUp();
+            try {
+                // Use the activity's helper method for safe navigation
+                if (getActivity() instanceof NewMainActivity) {
+                    ((NewMainActivity) getActivity()).navigateUpSafely();
+                } else {
+                    // Fallback if not in NewMainActivity
+                    NavController navController = Navigation.findNavController(requireView());
+                    navController.navigateUp();
+                }
+            } catch (Exception e) {
+                Logs.e("FullPlayerFragment", "Navigation error: " + e.getMessage());
+                // Fallback to standard back press
+                requireActivity().onBackPressed();
+            }
         });
 
-        initFullPlayerTabs();
-        initFullPlayerViewPager();
+        // 初始化播放控制按钮
+        setupControlButtons();
+
+        // 设置Slider UI
+        setupTimelineSlider();
+
+        // 获取ViewModel并观察数据
+        viewModel = new ViewModelProvider(requireActivity()).get(PlaybackViewModel.class);
+        observeViewModel();
+
+        // 启动进度更新
+        startProgressTracking();
     }
 
     private void initFullPlayerTabs() {
@@ -100,7 +181,6 @@ public class FullPlayerFragment extends Fragment {
         adapter.addFragment(new FullPlayerMusicFragment());
         adapter.addFragment(new FullPlayerInfoFragment());
         binding.fullPlayerPager.setUserInputEnabled(true);
-        binding.fullPlayerPager.setCurrentItem(1, true);
         binding.fullPlayerPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
@@ -108,5 +188,159 @@ public class FullPlayerFragment extends Fragment {
                 binding.fullPlayerToolbarTabsContainer.getTabAt(position).select();
             }
         });
+        binding.fullPlayerPager.setCurrentItem(1, false);
+    }
+
+    private void setupControlButtons() {
+        playPauseButton = binding.fullPlayerControlsAction.fullPlayerControlsPlayPause;
+        prevButton = binding.fullPlayerControlsAction.fullPlayerControlsPrevious;
+        nextButton = binding.fullPlayerControlsAction.fullPlayerControlsNext;
+
+        // 设置播放/暂停按钮点击事件
+        playPauseButton.setOnClickListener(v -> {
+            viewModel.togglePlayPause();
+        });
+
+        // 设置上一曲按钮点击事件
+        prevButton.setOnClickListener(v -> {
+            viewModel.playPrevious();
+        });
+
+        // 设置下一曲按钮点击事件
+        nextButton.setOnClickListener(v -> {
+            viewModel.playNext();
+        });
+    }
+
+    private void setupTimelineSlider() {
+        timelineSlider = binding.fullPlayerControlsSlider.fullPlayerSlider;
+        currentTimeTextView = binding.fullPlayerControlsSlider.currentTimestampTextView;
+        durationTextView = binding.fullPlayerControlsSlider.durationTimestampTextView;
+
+        // Initialize with default values
+        currentTimeTextView.setText(formatTime(0));
+        durationTextView.setText(formatTime(0));
+
+        // Set up the slider listeners
+        timelineSlider.addOnSliderTouchListener(new Slider.OnSliderTouchListener() {
+            @Override
+            public void onStartTrackingTouch(@NonNull Slider slider) {
+                userIsSeeking = true;
+
+                viewModel.togglePlayPause(false);
+            }
+
+            @Override
+            public void onStopTrackingTouch(@NonNull Slider slider) {
+                viewModel.seekTo((long) (slider.getValue() * 1000));
+                userIsSeeking = false;
+
+                // Resume playback if it was playing before
+                viewModel.togglePlayPause(true);
+            }
+        });
+
+        // Update time display during slider movement
+        timelineSlider.addOnChangeListener((slider, value, fromUser) -> {
+            if (fromUser) {
+                // Update current time text view with the dragged position
+                currentTimeTextView.setText(formatTime((long) (value * 1000)));
+            }
+        });
+
+        // Set the slider's label formatter to show time instead of numeric value
+        timelineSlider.setLabelFormatter(value -> formatTime((long) (value * 1000)));
+    }
+
+    private void observeViewModel() {
+        // 观察当前媒体项变化
+        viewModel.getCurrentMediaItem().observe(getViewLifecycleOwner(), this::updateMediaInfo);
+
+        // 观察播放状态变化
+        viewModel.getIsPlaying().observe(getViewLifecycleOwner(), this::updatePlayPauseButton);
+
+        // 观察播放进度
+        viewModel.getCurrentPosition().observe(getViewLifecycleOwner(), position -> {
+            if (!userIsSeeking) {
+                updatePlaybackPosition(position);
+            }
+        });
+
+        // 观察总时长变化
+        viewModel.getDuration().observe(getViewLifecycleOwner(), duration -> {
+            // 更新总时长显示
+            durationTextView.setText(formatTime(duration));
+            // 如果用户不在拖动进度条，则同时更新当前进度
+            if (!userIsSeeking) {
+                Long position = viewModel.getCurrentPosition().getValue();
+                if (position != null) {
+                    updatePlaybackPosition(position);
+                }
+            }
+        });
+    }
+
+    private void updateMediaInfo(MediaItem mediaItem) {
+        if (mediaItem == null) return;
+
+        // FullPlayerFragment主要负责控制，
+        // 媒体信息的显示由FullPlayerMusicFragment负责
+    }
+
+    private void updatePlayPauseButton(boolean isPlaying) {
+        // 如果状态没有变化，不执行动画
+        if (isPlaying == previousPlayingState) {
+            return;
+        }
+
+        // 更新状态记录
+        previousPlayingState = isPlaying;
+
+        // 根据播放状态设置正确的图标
+        playPauseButton.setImageResource(
+                isPlaying ? R.drawable.avd_play_to_pause : R.drawable.avd_pause_to_play);
+
+        // 启动动画
+        AnimatedVectorDrawable animatedVectorDrawable =
+                (AnimatedVectorDrawable) playPauseButton.getDrawable();
+        if (animatedVectorDrawable != null) {
+            animatedVectorDrawable.start();
+        }
+    }
+
+    private void updatePlaybackPosition(long position) {
+        // 更新时间文本
+        currentTimeTextView.setText(formatTime(position));
+
+        // 获取总时长
+        Long duration = viewModel.getDuration().getValue();
+        if (duration != null && duration > 0) {
+            // 更新进度条位置 (注意转换为秒，因为Slider使用的单位是秒)
+            timelineSlider.setValue(position / 1000f);
+            timelineSlider.setValueTo(duration / 1000f);
+        }
+    }
+
+    private String formatTime(long timeMs) {
+        long totalSeconds = timeMs / 1000;
+        long minutes = totalSeconds / 60;
+        long seconds = totalSeconds % 60;
+        return String.format("%d:%02d", minutes, seconds);
+    }
+
+    private void startProgressTracking() {
+        progressHandler.removeCallbacks(progressRunnable);
+        progressHandler.post(progressRunnable);
+    }
+
+    private void stopProgressTracking() {
+        progressHandler.removeCallbacks(progressRunnable);
+    }
+
+    @Override
+    public void onDestroyView() {
+        stopProgressTracking();
+        super.onDestroyView();
+        binding = null;
     }
 }

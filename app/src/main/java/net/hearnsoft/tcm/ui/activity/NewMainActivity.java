@@ -1,25 +1,20 @@
 package net.hearnsoft.tcm.ui.activity;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.view.View;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.NavGraph;
 import androidx.navigation.NavOptions;
-import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
-import androidx.navigation.ui.NavigationUI;
 
 import net.hearnsoft.tcm.R;
 import net.hearnsoft.tcm.databinding.ActivityMainNewBinding;
 import net.hearnsoft.tcm.ui.interfaces.OnNowPlayingClickListener;
+import net.hearnsoft.tcm.utils.Logs;
 
 public class NewMainActivity extends AppCompatActivity implements OnNowPlayingClickListener {
     private static final String TAG = NewMainActivity.class.getSimpleName();
@@ -41,9 +36,20 @@ public class NewMainActivity extends AppCompatActivity implements OnNowPlayingCl
         setContentView(binding.getRoot());
 
         navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.navHostFragment);
-        navController = navHostFragment.getNavController();
+        /*navController = navHostFragment.getNavController();
         navGraph = navController.getNavInflater().inflate(R.navigation.fragment_main);
-        navController.setGraph(navGraph);
+        navController.setGraph(navGraph);*/
+        if (navHostFragment != null) {
+            navController = navHostFragment.getNavController();
+
+            // Only set the graph if this is the first creation, not a configuration change
+            if (savedInstanceState == null) {
+                navGraph = navController.getNavInflater().inflate(R.navigation.fragment_main);
+                navController.setGraph(navGraph);
+            }
+        } else {
+            Logs.e(TAG, "NavHostFragment not found");
+        }
     }
 
     @Override
@@ -55,5 +61,37 @@ public class NewMainActivity extends AppCompatActivity implements OnNowPlayingCl
                 .setPopEnterAnim(androidx.navigation.ui.R.anim.nav_default_pop_enter_anim)
                 .setPopExitAnim(androidx.navigation.ui.R.anim.nav_default_pop_exit_anim)
                 .build());
+    }
+
+    public void navigateUpSafely() {
+        try {
+            if (navController.getCurrentDestination() != null &&
+                    navController.getCurrentDestination().getId() == R.id.fullPlayerFragment) {
+                // We're on the FullPlayerFragment, navigate up safely
+                navController.navigateUp();
+            }
+        } catch (Exception e) {
+            Logs.e(TAG, "Navigation up error: " + e.getMessage());
+            // Fallback to default back behavior
+            onBackPressed();
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        // Save navigation state
+        if (navController != null) {
+            outState.putBundle("nav_controller_state", navController.saveState());
+        }
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        // Restore navigation state if it exists
+        if (navController != null && savedInstanceState.containsKey("nav_controller_state")) {
+            navController.restoreState(savedInstanceState.getBundle("nav_controller_state"));
+        }
     }
 }

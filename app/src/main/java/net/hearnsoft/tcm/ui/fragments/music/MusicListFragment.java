@@ -31,6 +31,7 @@ import net.hearnsoft.tcm.enums.SortingStrategy;
 import net.hearnsoft.tcm.ui.adapter.MusicItemAdapter;
 import net.hearnsoft.tcm.ui.adapter.OnMusicItemClickListener;
 import net.hearnsoft.tcm.ui.model.PlaybackViewModel;
+import net.hearnsoft.tcm.utils.LocalMusicSorter;
 import net.hearnsoft.tcm.utils.Logs;
 import net.hearnsoft.tcm.utils.MusicPlayerController;
 import net.sourceforge.pinyin4j.PinyinHelper;
@@ -100,8 +101,52 @@ public class MusicListFragment extends Fragment implements OnMusicItemClickListe
         // 获取ViewModel
         viewModel = new ViewModelProvider(requireActivity()).get(PlaybackViewModel.class);
 
+        setViewModelObserver();
+
         // 检查权限
         checkPermissionAndLoadMusic();
+    }
+
+    private void setViewModelObserver() {
+        // 观察排序进度
+        viewModel.getIsSorting().observe(getViewLifecycleOwner(), isSorting -> {
+            binding.linearProgressIndicator.setVisibility(isSorting ? View.VISIBLE : View.GONE);
+        });
+
+        // 观察扫描进度
+        viewModel.getIsScanning().observe(getViewLifecycleOwner(), isScanning -> {
+            binding.linearProgressIndicator.setVisibility(isScanning ? View.VISIBLE : View.GONE);
+
+            if (!isScanning) {
+                List<MediaItem> scannedMusic = viewModel.getPlaylist().getValue();
+                if (scannedMusic != null && !scannedMusic.isEmpty()) {
+                    musicList = scannedMusic;
+                    updateMusicListUI();
+                }
+            }
+        });
+
+        // 观察播放列表变化
+        viewModel.getPlaylist().observe(getViewLifecycleOwner(), playlist -> {
+            if (playlist != null && !playlist.isEmpty()) {
+                musicList = playlist;
+                adapter.setData(musicList);
+                adapter.notifyDataSetChanged();
+
+                if (binding.noElementsLinearLayout.getVisibility() == View.VISIBLE) {
+                    binding.noElementsLinearLayout.setVisibility(View.GONE);
+                    binding.recyclerView.setVisibility(View.VISIBLE);
+                }
+            } else {
+                binding.noElementsLinearLayout.setVisibility(View.VISIBLE);
+                binding.recyclerView.setVisibility(View.GONE);
+            }
+        });
+
+        // 观察当前排序规则
+        viewModel.getCurrentSortRule().observe(getViewLifecycleOwner(), rule -> {
+            binding.musicSortingChip.setSortingRule(rule);
+        });
     }
 
     private void setSortingChips() {
@@ -118,7 +163,10 @@ public class MusicListFragment extends Fragment implements OnMusicItemClickListe
         binding.musicSortingChip.setSortingRule(defaultRule);
 
         // 设置排序监听
-        binding.musicSortingChip.setOnSortingRuleSelectedListener(this::sortMusicList);
+        binding.musicSortingChip.setOnSortingRuleSelectedListener(rule -> {
+            // 调用ViewModel进行排序
+            viewModel.sortMusic(rule);
+        });
     }
 
     private void checkPermissionAndLoadMusic() {
@@ -152,37 +200,16 @@ public class MusicListFragment extends Fragment implements OnMusicItemClickListe
         binding.noElementsLinearLayout.setVisibility(View.GONE);
         binding.recyclerView.setVisibility(View.GONE);
 
-        // Check if music is already loaded
+        // 检查是否已加载音乐
         if (viewModel.getPlaylist().getValue() != null
                 && !viewModel.getPlaylist().getValue().isEmpty()) {
-            // Use existing playlist
-            Logs.d("MusicListFragment","Using existing playlist");
+            // 使用现有列表
+            Logs.d("MusicListFragment","使用已存在的播放列表");
             musicList = viewModel.getPlaylist().getValue();
             updateMusicListUI();
         } else {
-            // Let ViewModel handle scanning
+            // 让ViewModel处理扫描
             viewModel.scanAndLoadMusic(requireContext());
-
-            // Observe scanning state
-            viewModel.getIsScanning().observe(getViewLifecycleOwner(), isScanning -> {
-                if (!isScanning) {
-                    // When scanning is finished, get playlist from ViewModel
-                    List<MediaItem> scannedMusic = viewModel.getPlaylist().getValue();
-                    if (scannedMusic != null) {
-                        musicList = scannedMusic;
-                        updateMusicListUI();
-                    }
-                }
-            });
-
-            // Observe playlist changes
-            viewModel.getPlaylist().observe(getViewLifecycleOwner(), playlist -> {
-                if (playlist != null && !playlist.isEmpty()) {
-                    Logs.d("MusicListFragment","Playlist updated: " + playlist.size());
-                    musicList = playlist;
-                    updateMusicListUI();
-                }
-            });
         }
     }
 
@@ -197,96 +224,13 @@ public class MusicListFragment extends Fragment implements OnMusicItemClickListe
                 binding.noElementsLinearLayout.setVisibility(View.GONE);
                 binding.recyclerView.setVisibility(View.VISIBLE);
 
-                // Apply default sorting
-                SortingRule currentRule = new SortingRule(SortingStrategy.NAME, false);
-                sortMusicList(currentRule);
+                // 应用默认排序
+                viewModel.sortMusic(new SortingRule(SortingStrategy.NAME, false));
 
-                // Update UI to show current sort state
-                binding.musicSortingChip.setSortingRule(currentRule);
+                // 更新适配器数据
+                adapter.setData(musicList);
+                adapter.notifyDataSetChanged();
             }
-        }
-    }
-
-    /**
-     * 根据所选规则对音乐列表进行排序
-     * @param sortingRule 排序规则，包含排序策略和方向
-     */
-    private void sortMusicList(SortingRule sortingRule) {
-        if (musicList.isEmpty()) return;
-
-        // 显示进度条
-        binding.linearProgressIndicator.setVisibility(View.VISIBLE);
-
-        // 在后台线程中执行排序
-        new Thread(() -> {
-            SortingStrategy strategy = sortingRule.getStrategy();
-            boolean isReverse = sortingRule.isReverse();
-            Comparator<MediaItem> comparator = getComparatorForStrategy(strategy);
-
-            if (comparator != null) {
-                // 创建列表副本进行排序，避免并发修改问题
-                List<MediaItem> sortedList = new ArrayList<>(musicList);
-                Collections.sort(sortedList, isReverse ? comparator.reversed() : comparator);
-
-                // 更新UI需要在主线程执行
-                // 这里防止Fragment没有attach到activity
-                if (isAdded()) {
-                    requireActivity().runOnUiThread(() -> {
-                        musicList = sortedList;
-                        adapter.setData(musicList);
-                        adapter.notifyDataSetChanged();
-
-                        // 更新排序选项显示
-                        binding.musicSortingChip.setSortingRule(sortingRule);
-
-                        // 隐藏进度条
-                        binding.linearProgressIndicator.setVisibility(View.GONE);
-
-                        Logs.d("MusicListFragment", "Applied sorting: " + strategy +
-                                (isReverse ? " (descending)" : " (ascending)"));
-                    });
-                }
-            } else {
-                requireActivity().runOnUiThread(() -> {
-                    binding.linearProgressIndicator.setVisibility(View.GONE);
-                });
-            }
-        }).start();
-    }
-
-    private Comparator<MediaItem> getComparatorForStrategy(SortingStrategy strategy) {
-        switch (strategy) {
-            case ARTIST_NAME:
-                return (item1, item2) -> {
-                    String artist1 = item1.mediaMetadata.artist != null ?
-                            item1.mediaMetadata.artist.toString() : "";
-                    String artist2 = item2.mediaMetadata.artist != null ?
-                            item2.mediaMetadata.artist.toString() : "";
-                    return compareChinese(artist1, artist2);
-                };
-            case NAME:
-                return (item1, item2) -> {
-                    String title1 = item1.mediaMetadata.title != null ?
-                            item1.mediaMetadata.title.toString() : "";
-                    String title2 = item2.mediaMetadata.title != null ?
-                            item2.mediaMetadata.title.toString() : "";
-                    return compareChinese(title1, title2);
-                };
-            case CREATION_DATE:
-                return (item1, item2) -> {
-                    String id1 = item1.mediaId.substring(item1.mediaId.lastIndexOf("/") + 1);
-                    String id2 = item2.mediaId.substring(item2.mediaId.lastIndexOf("/") + 1);
-                    try {
-                        return Long.compare(Long.parseLong(id1), Long.parseLong(id2));
-                    } catch (NumberFormatException e) {
-                        return id1.compareTo(id2);
-                    }
-                };
-            case PLAY_COUNT:
-                Logs.d("MusicListFragment", "Play count sorting not implemented yet");
-                return null;
-            default:
-                return null;
         }
     }
 
@@ -303,81 +247,6 @@ public class MusicListFragment extends Fragment implements OnMusicItemClickListe
         Logs.d("MusicListFragment", "Song clicked: " + item.mediaMetadata.title);
         // 使用ViewModel播放音乐
         viewModel.playMusic(musicList, position);
-    }
-
-    /**
-     * 比较两个可能包含中文的字符串
-     * 先按拼音排序，如果拼音相同则按原字符串排序
-     */
-    private int compareChinese(String str1, String str2) {
-        try {
-            // 创建HanyuPinyinOutputFormat对象
-            HanyuPinyinOutputFormat format = new HanyuPinyinOutputFormat();
-            // 设置拼音输出格式
-            format.setCaseType(HanyuPinyinCaseType.LOWERCASE);
-            format.setToneType(HanyuPinyinToneType.WITHOUT_TONE);
-            format.setVCharType(HanyuPinyinVCharType.WITH_V);
-
-            // 获取字符串的拼音
-            String pinyin1 = getPinyin(str1, format);
-            String pinyin2 = getPinyin(str2, format);
-
-            // 先按拼音比较
-            int result = pinyin1.compareToIgnoreCase(pinyin2);
-
-            // 如果拼音相同则按原始字符串比较
-            if (result == 0) {
-                return str1.compareToIgnoreCase(str2);
-            }
-
-            return result;
-        } catch (Exception e) {
-            Logs.e("MusicListFragment", "Error comparing Chinese strings: " + e.getMessage());
-            // 如果出现异常，返回原始比较结果
-            return str1.compareToIgnoreCase(str2);
-        }
-    }
-
-    /**
-     * 获取字符串的拼音表示
-     */
-    /**
-     * 获取字符串的拼音表示（带缓存）
-     */
-    private String getPinyin(String str, HanyuPinyinOutputFormat format) throws BadHanyuPinyinOutputFormatCombination {
-        if (str == null || str.isEmpty()) {
-            return "";
-        }
-
-        // 检查缓存中是否已存在
-        if (pinyinCache.containsKey(str)) {
-            return pinyinCache.get(str);
-        }
-
-        StringBuilder pinyin = new StringBuilder();
-        char[] chars = str.toCharArray();
-
-        for (char c : chars) {
-            // 判断是否为汉字
-            if (Character.toString(c).matches("[\\u4E00-\\u9FA5]+")) {
-                // 中文字符，获取拼音
-                String[] pinyinArray = PinyinHelper.toHanyuPinyinStringArray(c, format);
-                if (pinyinArray != null && pinyinArray.length > 0) {
-                    pinyin.append(pinyinArray[0]);
-                } else {
-                    pinyin.append(c);
-                }
-            } else {
-                // 非中文字符，直接添加
-                pinyin.append(c);
-            }
-        }
-
-        String result = pinyin.toString();
-        // 存入缓存
-        pinyinCache.put(str, result);
-
-        return result;
     }
 
     @Override

@@ -12,6 +12,8 @@ import androidx.media3.common.MediaMetadata;
 import androidx.media3.common.Player;
 import androidx.media3.common.util.UnstableApi;
 
+import net.hearnsoft.tcm.beans.SortingRule;
+import net.hearnsoft.tcm.enums.SortingStrategy;
 import net.hearnsoft.tcm.utils.LocalMusicScanner;
 import net.hearnsoft.tcm.utils.Logs;
 import net.hearnsoft.tcm.utils.MusicPlayerController;
@@ -27,6 +29,8 @@ public class PlaybackViewModel extends AndroidViewModel {
     private final MutableLiveData<Long> currentPosition = new MutableLiveData<>(0L);
     private final MutableLiveData<Long> duration = new MutableLiveData<>(0L);
     private final MutableLiveData<Boolean> isScanning = new MutableLiveData<>(false);
+    private final MutableLiveData<Boolean> isSorting = new MutableLiveData<>(false);
+    private final MutableLiveData<SortingRule> currentSortRule = new MutableLiveData<>(new SortingRule(SortingStrategy.NAME, false));
 
     // 标记控制器是否已连接
     private boolean isControllerActive = false;
@@ -93,11 +97,37 @@ public class PlaybackViewModel extends AndroidViewModel {
     public void scanAndLoadMusic(Context context) {
         isScanning.postValue(true);
 
-        // Execute on background thread
+        // 在新线程中执行扫描操作
         new Thread(() -> {
             List<MediaItem> scannedMusic = LocalMusicScanner.scanDeviceMusic(context);
             playlist.postValue(scannedMusic);
             isScanning.postValue(false);
+        }).start();
+    }
+
+    // 排序方法
+    public void sortMusic(SortingRule rule) {
+        // 记录当前排序规则
+        currentSortRule.postValue(rule);
+
+        // 如果没有音乐项目，直接返回
+        if (playlist.getValue() == null || playlist.getValue().isEmpty()) {
+            return;
+        }
+
+        isSorting.postValue(true);
+
+        // 在后台线程执行排序
+        new Thread(() -> {
+            List<MediaItem> currentList = playlist.getValue();
+            List<MediaItem> sortedList = LocalMusicScanner.sortMusicList(currentList, rule);
+
+            // 更新排序后的列表
+            if (sortedList != null) {
+                playlist.postValue(sortedList);
+            }
+
+            isSorting.postValue(false);
         }).start();
     }
 
@@ -196,6 +226,15 @@ public class PlaybackViewModel extends AndroidViewModel {
 
     public LiveData<Boolean> getIsScanning() {
         return isScanning;
+    }
+
+    // Getter方法
+    public LiveData<Boolean> getIsSorting() {
+        return isSorting;
+    }
+
+    public LiveData<SortingRule> getCurrentSortRule() {
+        return currentSortRule;
     }
 
     @Override

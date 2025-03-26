@@ -8,6 +8,8 @@ import android.provider.MediaStore;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.MediaMetadata;
 
+import net.hearnsoft.tcm.beans.SortingRule;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,16 +19,14 @@ import java.util.List;
 public class LocalMusicScanner {
 
     /**
-     * 扫描设备中的音乐文件并返回媒体项列表
-     * <p>该方法会遍历设备存储中的音乐文件，解析媒体元数据，并生成对应的MediaItem对象集合</p>
-     *
-     * @param context 应用程序上下文对象，用于访问设备存储或媒体库服务
-     * @return List MediaItem 对象，包含所有扫描到的媒体项的列表，每个元素代表一个有效的音乐文件
+     * 扫描设备中的音乐文件并转换为MediaItems
+     * @param context 应用上下文
+     * @return 音乐MediaItems列表
      */
     public static List<MediaItem> scanDeviceMusic(Context context) {
         List<MediaItem> musicItems = new ArrayList<>();
 
-        // Define media store projection
+        // 定义媒体存储投影
         String[] projection = {
                 MediaStore.Audio.Media._ID,
                 MediaStore.Audio.Media.TITLE,
@@ -37,10 +37,10 @@ public class LocalMusicScanner {
                 MediaStore.Audio.Media.DATA
         };
 
-        // Filter to include only music files
+        // 过滤只包含音乐文件
         String selection = MediaStore.Audio.Media.IS_MUSIC + " != 0";
 
-        // Sort by title
+        // 按标题排序
         String sortOrder = MediaStore.Audio.Media.TITLE + " ASC";
 
         try (Cursor cursor = context.getContentResolver().query(
@@ -68,13 +68,13 @@ public class LocalMusicScanner {
                     long duration = cursor.getLong(durationColumn);
                     String path = cursor.getString(pathColumn);
 
-                    // Create album art URI
+                    // 创建专辑封面URI
                     Uri albumArtUri = Uri.parse("content://media/external/audio/albumart/" + albumId);
 
-                    // Create media item URI
+                    // 创建媒体项URI
                     Uri contentUri = Uri.withAppendedPath(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, String.valueOf(id));
 
-                    // Create MediaItem
+                    // 创建MediaItem
                     MediaItem mediaItem = new MediaItem.Builder()
                             .setUri(contentUri)
                             .setMediaMetadata(new MediaMetadata.Builder()
@@ -86,14 +86,24 @@ public class LocalMusicScanner {
                             .build();
 
                     musicItems.add(mediaItem);
-                    Logs.d("MusicScanner", "Song added: " + title);
+                    Logs.d("MusicScanner", "歌曲已添加: " + title);
                 }
             }
         } catch (Exception e) {
-            Logs.e("MusicScanner", "Error scanning music: " + e.getMessage());
+            Logs.e("MusicScanner", "扫描音乐时出错: " + e.getMessage());
         }
 
         return musicItems;
+    }
+
+    /**
+     * 对音乐列表进行排序（使用已有的LocalMusicSorter）
+     * @param items 要排序的音乐列表
+     * @param rule 排序规则
+     * @return 排序后的列表
+     */
+    public static List<MediaItem> sortMusicList(List<MediaItem> items, SortingRule rule) {
+        return LocalMusicSorter.sortMusicList(items, rule);
     }
 
 }

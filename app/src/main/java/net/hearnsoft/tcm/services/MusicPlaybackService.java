@@ -21,7 +21,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import net.hearnsoft.tcm.R;
-import net.hearnsoft.tcm.ui.activity.NewMainActivity;
+import net.hearnsoft.tcm.ui.activity.MainActivity;
 import net.hearnsoft.tcm.utils.Logs;
 
 import java.util.ArrayList;
@@ -71,7 +71,7 @@ public class MusicPlaybackService extends MediaLibraryService {
         PendingIntent sessionActivity = PendingIntent.getActivity(
                 this,
                 0,
-                new Intent(this, NewMainActivity.class),
+                new Intent(this, MainActivity.class),
                 PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT
         );
 

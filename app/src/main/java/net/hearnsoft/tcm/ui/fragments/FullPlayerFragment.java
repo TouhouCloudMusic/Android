@@ -29,7 +29,7 @@ import com.google.android.material.tabs.TabLayout;
 
 import net.hearnsoft.tcm.R;
 import net.hearnsoft.tcm.databinding.FullPlayerBinding;
-import net.hearnsoft.tcm.ui.activity.NewMainActivity;
+import net.hearnsoft.tcm.ui.activity.MainActivity;
 import net.hearnsoft.tcm.ui.adapter.AppViewPagerAdapter;
 import net.hearnsoft.tcm.ui.fragments.fullplayer.FullPlayerInfoFragment;
 import net.hearnsoft.tcm.ui.fragments.fullplayer.FullPlayerMusicFragment;
@@ -109,8 +109,8 @@ public class FullPlayerFragment extends Fragment {
         binding.fullPlayerToolbar.setNavigationOnClickListener(v -> {
             try {
                 // Use the activity's helper method for safe navigation
-                if (getActivity() instanceof NewMainActivity) {
-                    ((NewMainActivity) getActivity()).navigateUpSafely();
+                if (getActivity() instanceof MainActivity) {
+                    ((MainActivity) getActivity()).navigateUpSafely();
                 } else {
                     // Fallback if not in NewMainActivity
                     NavController navController = Navigation.findNavController(requireView());

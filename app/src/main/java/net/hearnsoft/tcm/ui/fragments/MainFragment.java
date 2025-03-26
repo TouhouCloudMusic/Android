@@ -21,13 +21,10 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import net.hearnsoft.tcm.R;
 import net.hearnsoft.tcm.databinding.FragmentMainBinding;
-import net.hearnsoft.tcm.ui.activity.NewMainActivity;
+import net.hearnsoft.tcm.ui.activity.MainActivity;
 import net.hearnsoft.tcm.ui.adapter.AppViewPagerAdapter;
 import net.hearnsoft.tcm.ui.interfaces.OnNowPlayingClickListener;
 import net.hearnsoft.tcm.ui.model.PlaybackViewModel;
-import net.hearnsoft.tcm.utils.Logs;
-
-import java.util.List;
 
 @UnstableApi
 public class MainFragment extends Fragment {
@@ -65,8 +62,8 @@ public class MainFragment extends Fragment {
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        if (context instanceof NewMainActivity) {
-            listener = ((NewMainActivity) context).getNowPlayingClickListener();
+        if (context instanceof MainActivity) {
+            listener = ((MainActivity) context).getNowPlayingClickListener();
         }
     }
 

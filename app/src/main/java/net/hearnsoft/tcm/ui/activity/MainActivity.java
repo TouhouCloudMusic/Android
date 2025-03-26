@@ -3,7 +3,6 @@ package net.hearnsoft.tcm.ui.activity;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
@@ -12,13 +11,13 @@ import androidx.navigation.NavOptions;
 import androidx.navigation.fragment.NavHostFragment;
 
 import net.hearnsoft.tcm.R;
-import net.hearnsoft.tcm.databinding.ActivityMainNewBinding;
+import net.hearnsoft.tcm.databinding.ActivityMainBinding;
 import net.hearnsoft.tcm.ui.interfaces.OnNowPlayingClickListener;
 import net.hearnsoft.tcm.utils.Logs;
 
-public class NewMainActivity extends AppCompatActivity implements OnNowPlayingClickListener {
-    private static final String TAG = NewMainActivity.class.getSimpleName();
-    private ActivityMainNewBinding binding;
+public class MainActivity extends AppCompatActivity implements OnNowPlayingClickListener {
+    private static final String TAG = MainActivity.class.getSimpleName();
+    private ActivityMainBinding binding;
 
     public OnNowPlayingClickListener getNowPlayingClickListener() {
         return this;
@@ -32,7 +31,7 @@ public class NewMainActivity extends AppCompatActivity implements OnNowPlayingCl
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        binding = ActivityMainNewBinding.inflate(getLayoutInflater());
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.navHostFragment);

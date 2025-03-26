@@ -132,6 +132,18 @@ public class NowPlayingBar extends FrameLayout {
         }
     }
 
+    public void forceUpdatePlayPauseIcon(boolean isPlaying) {
+        previousPlayingState = isPlaying;
+        playPauseButton.setIconResource(
+                isPlaying ? R.drawable.avd_play_to_pause : R.drawable.avd_pause_to_play);
+        // 启动动画
+        AnimatedVectorDrawable animatedVectorDrawable =
+                (AnimatedVectorDrawable) playPauseButton.getIcon();
+        if (animatedVectorDrawable != null) {
+            animatedVectorDrawable.start();
+        }
+    }
+
     public void updateMediaItem(MediaItem mediaItem) {
         if (mediaItem != null) {
             ViewKt.slideUp(this);

@@ -227,6 +227,12 @@ public class MainFragment extends Fragment {
         if (viewModel != null) {
             viewModel.ensureControllerConnected();
             viewModel.updatePosition();
+
+            // 确保播放状态正确同步
+            Boolean isPlaying = viewModel.getIsPlaying().getValue();
+            if (isPlaying != null && binding.nowPlayingBar.getVisibility() == View.VISIBLE) {
+                binding.nowPlayingBar.forceUpdatePlayPauseIcon(isPlaying);
+            }
         }
         startProgressTracking();
     }

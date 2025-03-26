@@ -31,6 +31,7 @@ public class PlaybackViewModel extends AndroidViewModel {
     private final MutableLiveData<Boolean> isScanning = new MutableLiveData<>(false);
     private final MutableLiveData<Boolean> isSorting = new MutableLiveData<>(false);
     private final MutableLiveData<SortingRule> currentSortRule = new MutableLiveData<>(new SortingRule(SortingStrategy.NAME, false));
+    private final MutableLiveData<Integer> currentIndex = new MutableLiveData<>(0);
 
     // 标记控制器是否已连接
     private boolean isControllerActive = false;
@@ -52,6 +53,12 @@ public class PlaybackViewModel extends AndroidViewModel {
             @Override
             public void onMediaItemTransition(@NonNull MediaItem mediaItem, int reason) {
                 currentMediaItem.postValue(mediaItem);
+
+                // 获取并更新当前索引
+                if (playerController.getMediaController() != null) {
+                    int currentIdx = playerController.getMediaController().getCurrentMediaItemIndex();
+                    currentIndex.postValue(currentIdx);
+                }
             }
 
             @Override
@@ -149,6 +156,21 @@ public class PlaybackViewModel extends AndroidViewModel {
         ensureControllerConnected();
         if (playerController.getMediaController() != null) {
             currentPosition.postValue(playerController.getMediaController().getCurrentPosition());
+
+            // 同时更新当前索引
+            int index = playerController.getMediaController().getCurrentMediaItemIndex();
+            if (currentIndex.getValue() == null || currentIndex.getValue() != index) {
+                currentIndex.postValue(index);
+            }
+        }
+    }
+
+    // 更新当前播放的媒体索引
+    public void updateCurrentIndex() {
+        ensureControllerConnected();
+        if (playerController.getMediaController() != null) {
+            int index = playerController.getMediaController().getCurrentMediaItemIndex();
+            currentIndex.postValue(index);
         }
     }
 
@@ -157,6 +179,7 @@ public class PlaybackViewModel extends AndroidViewModel {
         if (playerController.getMediaController() != null) {
             playerController.playMusic(playlist, startIndex);
             this.playlist.postValue(playlist);
+            this.currentIndex.postValue(startIndex);
         }
     }
 
@@ -187,6 +210,8 @@ public class PlaybackViewModel extends AndroidViewModel {
         if (playerController.getMediaController() != null) {
             if (playerController.getMediaController().hasNextMediaItem()) {
                 playerController.getMediaController().seekToNext();
+                // 更新索引
+                updateCurrentIndex();
             }
         }
     }
@@ -196,6 +221,8 @@ public class PlaybackViewModel extends AndroidViewModel {
         if (playerController.getMediaController() != null) {
             if (playerController.getMediaController().hasPreviousMediaItem()) {
                 playerController.getMediaController().seekToPrevious();
+                // 更新索引
+                updateCurrentIndex();
             } else {
                 // 如果没有上一首，就重头开始播放当前歌曲
                 playerController.getMediaController().seekTo(0);
@@ -235,6 +262,10 @@ public class PlaybackViewModel extends AndroidViewModel {
 
     public LiveData<SortingRule> getCurrentSortRule() {
         return currentSortRule;
+    }
+
+    public LiveData<Integer> getCurrentIndex() {
+        return currentIndex;
     }
 
     @Override

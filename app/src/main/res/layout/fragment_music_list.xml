@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <HorizontalScrollView
+    <LinearLayout
         android:id="@+id/sortContainer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -18,8 +18,26 @@
         <net.hearnsoft.tcm.ui.widgets.SortingChips
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginHorizontal="4dp"
+            android:layout_gravity="center_vertical"
             android:id="@+id/musicSortingChip"/>
-    </HorizontalScrollView>
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"/>
+
+        <com.google.android.material.button.MaterialButton
+            style="@style/Widget.Material3.Button.OutlinedButton.Icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="4dp"
+            android:layout_gravity="center_vertical"
+            android:id="@+id/musicLocationButton"
+            android:text="@string/button_locate_to_current"
+            app:icon="@drawable/ic_location_24px"/>
+
+    </LinearLayout>
 
     <FrameLayout
         android:layout_width="0dp"

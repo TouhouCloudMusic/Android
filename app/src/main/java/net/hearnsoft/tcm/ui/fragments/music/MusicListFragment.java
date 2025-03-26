@@ -26,6 +26,7 @@ import net.hearnsoft.tcm.enums.SortingStrategy;
 import net.hearnsoft.tcm.ui.adapter.MusicItemAdapter;
 import net.hearnsoft.tcm.ui.adapter.OnMusicItemClickListener;
 import net.hearnsoft.tcm.ui.model.PlaybackViewModel;
+import net.hearnsoft.tcm.ui.utils.LinearTopSmoothScroller;
 import net.hearnsoft.tcm.utils.Logs;
 
 import java.util.ArrayList;
@@ -77,6 +78,18 @@ public class MusicListFragment extends Fragment implements OnMusicItemClickListe
         viewModel = new ViewModelProvider(requireActivity()).get(PlaybackViewModel.class);
 
         setViewModelObserver();
+
+        binding.musicLocationButton.setOnClickListener(v -> {
+            if (!musicList.isEmpty()) {
+                LinearTopSmoothScroller scroller = new LinearTopSmoothScroller(requireContext(), true);
+                binding.recyclerView.post(() -> {
+                    int currentIndex = viewModel.getCurrentIndex().getValue() != null
+                            ? viewModel.getCurrentIndex().getValue() : 0;
+                    scroller.setTargetPosition(currentIndex);
+                    binding.recyclerView.getLayoutManager().startSmoothScroll(scroller);
+                });
+            }
+        });
 
         // 检查权限
         checkPermissionAndLoadMusic();

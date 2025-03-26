@@ -79,4 +79,5 @@
     <string name="sort_by_release_date">Release date</string>
     <string name="sort_by_title">Title</string>
     <string name="sort_by_play_count">Play count</string>
+    <string name="button_locate_to_current">Locate to current</string>
 </resources>

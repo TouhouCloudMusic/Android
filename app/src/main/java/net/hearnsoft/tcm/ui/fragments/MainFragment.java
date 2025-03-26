@@ -27,6 +27,8 @@ import net.hearnsoft.tcm.ui.interfaces.OnNowPlayingClickListener;
 import net.hearnsoft.tcm.ui.model.PlaybackViewModel;
 import net.hearnsoft.tcm.utils.Logs;
 
+import java.util.List;
+
 @UnstableApi
 public class MainFragment extends Fragment {
     private FragmentMainBinding binding;
@@ -177,6 +179,13 @@ public class MainFragment extends Fragment {
                 binding.nowPlayingBar.updateDurationCurrentPositionMs(duration, position);
             }
         });
+
+        //在启动时就进行媒体库扫描
+        // 检查是否已加载音乐
+        if (viewModel.getPlaylist().getValue() == null) {
+            // 让ViewModel处理扫描
+            viewModel.scanAndLoadMusic(requireContext());
+        }
     }
 
     private void updateNowPlayingBar(MediaItem mediaItem) {

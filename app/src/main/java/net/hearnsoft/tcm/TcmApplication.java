@@ -9,7 +9,6 @@ import android.widget.Toast;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import net.hearnsoft.tcm.ui.activity.MainActivity;
 import net.hearnsoft.tcm.ui.activity.UserLoginActivity;
 import net.hearnsoft.tcm.ui.model.AuthStateViewModel;
 import net.hearnsoft.tcm.utils.Constants;

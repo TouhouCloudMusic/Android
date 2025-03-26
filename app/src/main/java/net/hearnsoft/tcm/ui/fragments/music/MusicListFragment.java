@@ -54,7 +54,6 @@ public class MusicListFragment extends Fragment implements OnMusicItemClickListe
     private FragmentMusicListBinding binding;
     private MusicItemAdapter adapter;
     private List<MediaItem> musicList = new ArrayList<>();
-    private MusicPlayerController playerController;
     private PlaybackViewModel viewModel;
     // 拼音缓存
     private final Map<String, String> pinyinCache = new LinkedHashMap<String, String>(100, 0.75f, true) {
@@ -103,19 +102,6 @@ public class MusicListFragment extends Fragment implements OnMusicItemClickListe
 
         // 检查权限
         checkPermissionAndLoadMusic();
-
-        playerController = MusicPlayerController.getInstance(requireContext());
-        playerController.connect(new Player.Listener() {
-            @Override
-            public void onPlaybackStateChanged(int playbackState) {
-                Player.Listener.super.onPlaybackStateChanged(playbackState);
-            }
-
-            @Override
-            public void onMediaItemTransition(@Nullable MediaItem mediaItem, int reason) {
-                // 处理歌曲切换
-            }
-        });
     }
 
     private void setSortingChips() {
@@ -173,24 +159,26 @@ public class MusicListFragment extends Fragment implements OnMusicItemClickListe
             } else {
                 musicList = viewModel.getPlaylist().getValue();
             }
-            requireActivity().runOnUiThread(() -> {
-                binding.linearProgressIndicator.setVisibility(View.GONE);
+            if (isAdded() && !isRemoving()) {
+                requireActivity().runOnUiThread(() -> {
+                    binding.linearProgressIndicator.setVisibility(View.GONE);
 
-                if (musicList.isEmpty()) {
-                    binding.noElementsLinearLayout.setVisibility(View.VISIBLE);
-                    binding.recyclerView.setVisibility(View.GONE);
-                } else {
-                    binding.noElementsLinearLayout.setVisibility(View.GONE);
-                    binding.recyclerView.setVisibility(View.VISIBLE);
+                    if (musicList.isEmpty()) {
+                        binding.noElementsLinearLayout.setVisibility(View.VISIBLE);
+                        binding.recyclerView.setVisibility(View.GONE);
+                    } else {
+                        binding.noElementsLinearLayout.setVisibility(View.GONE);
+                        binding.recyclerView.setVisibility(View.VISIBLE);
 
-                    // 应用默认排序
-                    SortingRule currentRule = new SortingRule(SortingStrategy.NAME, false);
-                    sortMusicList(currentRule);
+                        // 应用默认排序
+                        SortingRule currentRule = new SortingRule(SortingStrategy.NAME, false);
+                        sortMusicList(currentRule);
 
-                    // 更新UI显示当前排序状态
-                    binding.musicSortingChip.setSortingRule(currentRule);
-                }
-            });
+                        // 更新UI显示当前排序状态
+                        binding.musicSortingChip.setSortingRule(currentRule);
+                    }
+                });
+            }
         }).start();
     }
 
@@ -442,7 +430,6 @@ public class MusicListFragment extends Fragment implements OnMusicItemClickListe
 
     @Override
     public void onDestroyView() {
-        playerController.release();
         super.onDestroyView();
     }
 }

@@ -93,10 +93,6 @@ public class MainFragment extends Fragment {
 
         initPager();
         initNavBar();
-        binding.nowPlayingBar.setOnPlayingBarClickListener(v -> {
-            listener.onNowPlayingClick();
-            onDestroyView();
-        });
 
         // Initially hide now playing bar
         binding.nowPlayingBar.setVisibility(View.GONE);
@@ -202,12 +198,35 @@ public class MainFragment extends Fragment {
     }
 
     private void startProgressTracking() {
-        progressHandler.removeCallbacks(progressRunnable);
-        progressHandler.post(progressRunnable);
+        // Clear any existing callbacks first
+        stopProgressTracking();
+
+        // Only start if we're attached to an activity
+        if (isAdded() && !isRemoving()) {
+            progressHandler.post(progressRunnable);
+        }
     }
 
     private void stopProgressTracking() {
         progressHandler.removeCallbacks(progressRunnable);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // 确保控制器已连接
+        if (viewModel != null) {
+            viewModel.ensureControllerConnected();
+            viewModel.updatePosition();
+        }
+        startProgressTracking();
+    }
+
+    @Override
+    public void onPause() {
+        // Always stop tracking when the fragment pauses
+        stopProgressTracking();
+        super.onPause();
     }
 
     @Override

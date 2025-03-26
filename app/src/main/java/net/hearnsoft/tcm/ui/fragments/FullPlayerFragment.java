@@ -79,17 +79,8 @@ public class FullPlayerFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FullPlayerBinding.inflate(inflater, container, false);
-        adapter = new AppViewPagerAdapter(requireActivity());
+        adapter = AppViewPagerAdapter.create(this);
         return binding.getRoot();
-    }
-
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        // Save tab position
-        if (binding != null) {
-            outState.putInt("selected_tab", binding.fullPlayerToolbarTabsContainer.getSelectedTabPosition());
-        }
     }
 
     @Override
@@ -103,16 +94,11 @@ public class FullPlayerFragment extends Fragment {
         });
         ViewCompat.requestApplyInsets(binding.getRoot());
 
+        // 获取ViewModel并观察数据
+        viewModel = new ViewModelProvider(requireActivity()).get(PlaybackViewModel.class);
+
         // 初始化标签页和ViewPager
-        // 若已添加则不再初始化，防止重复初始化
-        if (savedInstanceState != null) {
-            int tabPosition = savedInstanceState.getInt("selected_tab", 1);
-            if (binding.fullPlayerToolbarTabsContainer.getTabCount() > tabPosition) {
-                binding.fullPlayerToolbarTabsContainer.getTabAt(tabPosition).select();
-            }
-        } else {
-            initFullPlayerTabs();
-        }
+        initFullPlayerTabs();
 
         initFullPlayerViewPager();
         binding.fullPlayerToolbarTabsContainer.getTabAt(1).select();
@@ -141,8 +127,7 @@ public class FullPlayerFragment extends Fragment {
         // 设置Slider UI
         setupTimelineSlider();
 
-        // 获取ViewModel并观察数据
-        viewModel = new ViewModelProvider(requireActivity()).get(PlaybackViewModel.class);
+        // 监控播放状态和进度
         observeViewModel();
 
         // 启动进度更新
@@ -150,6 +135,9 @@ public class FullPlayerFragment extends Fragment {
     }
 
     private void initFullPlayerTabs() {
+        if (binding.fullPlayerToolbarTabsContainer.getTabCount() != 0) {
+            return;
+        }
         for (int fullPlayerTab : fullPlayerTabs) {
             TabLayout.Tab tab = binding.fullPlayerToolbarTabsContainer.newTab();
             tab.setText(fullPlayerTab);
@@ -177,9 +165,11 @@ public class FullPlayerFragment extends Fragment {
 
     private void initFullPlayerViewPager() {
         binding.fullPlayerPager.setAdapter(adapter);
-        adapter.addFragment(new FullPlayerLyricsFragment());
-        adapter.addFragment(new FullPlayerMusicFragment());
-        adapter.addFragment(new FullPlayerInfoFragment());
+        if (adapter.getItemCount() == 0) {
+            adapter.addFragment(new FullPlayerLyricsFragment());
+            adapter.addFragment(new FullPlayerMusicFragment());
+            adapter.addFragment(new FullPlayerInfoFragment());
+        }
         binding.fullPlayerPager.setUserInputEnabled(true);
         binding.fullPlayerPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
@@ -311,6 +301,7 @@ public class FullPlayerFragment extends Fragment {
     private void updatePlaybackPosition(long position) {
         // 更新时间文本
         currentTimeTextView.setText(formatTime(position));
+        Logs.d("updatePlaybackPosition: ", String.valueOf(position));
 
         // 获取总时长
         Long duration = viewModel.getDuration().getValue();
@@ -329,8 +320,13 @@ public class FullPlayerFragment extends Fragment {
     }
 
     private void startProgressTracking() {
-        progressHandler.removeCallbacks(progressRunnable);
-        progressHandler.post(progressRunnable);
+        // Clear any existing callbacks first
+        stopProgressTracking();
+
+        // Only start if we're attached to an activity
+        if (isAdded() && !isRemoving()) {
+            progressHandler.post(progressRunnable);
+        }
     }
 
     private void stopProgressTracking() {
@@ -338,9 +334,26 @@ public class FullPlayerFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        // 确保控制器已连接
+        if (viewModel != null) {
+            viewModel.ensureControllerConnected();
+            viewModel.updatePosition();
+        }
+        startProgressTracking();
+    }
+
+    @Override
+    public void onPause() {
+        // Always stop tracking when the fragment pauses
+        stopProgressTracking();
+        super.onPause();
+    }
+
+    @Override
     public void onDestroyView() {
         stopProgressTracking();
         super.onDestroyView();
-        binding = null;
     }
 }

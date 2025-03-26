@@ -36,31 +36,21 @@ public class NewMainActivity extends AppCompatActivity implements OnNowPlayingCl
         setContentView(binding.getRoot());
 
         navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.navHostFragment);
-        /*navController = navHostFragment.getNavController();
+        navController = navHostFragment.getNavController();
         navGraph = navController.getNavInflater().inflate(R.navigation.fragment_main);
-        navController.setGraph(navGraph);*/
-        if (navHostFragment != null) {
-            navController = navHostFragment.getNavController();
-
-            // Only set the graph if this is the first creation, not a configuration change
-            if (savedInstanceState == null) {
-                navGraph = navController.getNavInflater().inflate(R.navigation.fragment_main);
-                navController.setGraph(navGraph);
-            }
-        } else {
-            Logs.e(TAG, "NavHostFragment not found");
-        }
+        navController.setGraph(navGraph);
     }
 
     @Override
     public void onNowPlayingClick() {
-        NavController navController = navHostFragment.getNavController();
-        navController.navigate(R.id.fullPlayerFragment, null, new NavOptions.Builder()
-                .setEnterAnim(androidx.navigation.ui.R.anim.nav_default_enter_anim)
-                .setExitAnim(androidx.navigation.ui.R.anim.nav_default_exit_anim)
-                .setPopEnterAnim(androidx.navigation.ui.R.anim.nav_default_pop_enter_anim)
-                .setPopExitAnim(androidx.navigation.ui.R.anim.nav_default_pop_exit_anim)
-                .build());
+        if (navController != null) {
+            navController.navigate(R.id.fullPlayerFragment, null, new NavOptions.Builder()
+                    .setEnterAnim(androidx.navigation.ui.R.anim.nav_default_enter_anim)
+                    .setExitAnim(androidx.navigation.ui.R.anim.nav_default_exit_anim)
+                    .setPopEnterAnim(androidx.navigation.ui.R.anim.nav_default_pop_enter_anim)
+                    .setPopExitAnim(androidx.navigation.ui.R.anim.nav_default_pop_exit_anim)
+                    .build());
+        }
     }
 
     public void navigateUpSafely() {
@@ -74,24 +64,6 @@ public class NewMainActivity extends AppCompatActivity implements OnNowPlayingCl
             Logs.e(TAG, "Navigation up error: " + e.getMessage());
             // Fallback to default back behavior
             onBackPressed();
-        }
-    }
-
-    @Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        // Save navigation state
-        if (navController != null) {
-            outState.putBundle("nav_controller_state", navController.saveState());
-        }
-    }
-
-    @Override
-    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        // Restore navigation state if it exists
-        if (navController != null && savedInstanceState.containsKey("nav_controller_state")) {
-            navController.restoreState(savedInstanceState.getBundle("nav_controller_state"));
         }
     }
 }

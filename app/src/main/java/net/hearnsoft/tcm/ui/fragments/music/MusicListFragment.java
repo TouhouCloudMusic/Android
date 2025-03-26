@@ -152,107 +152,59 @@ public class MusicListFragment extends Fragment implements OnMusicItemClickListe
         binding.noElementsLinearLayout.setVisibility(View.GONE);
         binding.recyclerView.setVisibility(View.GONE);
 
-        new Thread(() -> {
-            if (viewModel.getPlaylist().getValue() == null
-                    || viewModel.getPlaylist().getValue().isEmpty()) {
-                musicList = scanDeviceMusic();
-            } else {
-                musicList = viewModel.getPlaylist().getValue();
-            }
-            if (isAdded() && !isRemoving()) {
-                requireActivity().runOnUiThread(() -> {
-                    binding.linearProgressIndicator.setVisibility(View.GONE);
+        // Check if music is already loaded
+        if (viewModel.getPlaylist().getValue() != null
+                && !viewModel.getPlaylist().getValue().isEmpty()) {
+            // Use existing playlist
+            Logs.d("MusicListFragment","Using existing playlist");
+            musicList = viewModel.getPlaylist().getValue();
+            updateMusicListUI();
+        } else {
+            // Let ViewModel handle scanning
+            viewModel.scanAndLoadMusic(requireContext());
 
-                    if (musicList.isEmpty()) {
-                        binding.noElementsLinearLayout.setVisibility(View.VISIBLE);
-                        binding.recyclerView.setVisibility(View.GONE);
-                    } else {
-                        binding.noElementsLinearLayout.setVisibility(View.GONE);
-                        binding.recyclerView.setVisibility(View.VISIBLE);
-
-                        // 应用默认排序
-                        SortingRule currentRule = new SortingRule(SortingStrategy.NAME, false);
-                        sortMusicList(currentRule);
-
-                        // 更新UI显示当前排序状态
-                        binding.musicSortingChip.setSortingRule(currentRule);
+            // Observe scanning state
+            viewModel.getIsScanning().observe(getViewLifecycleOwner(), isScanning -> {
+                if (!isScanning) {
+                    // When scanning is finished, get playlist from ViewModel
+                    List<MediaItem> scannedMusic = viewModel.getPlaylist().getValue();
+                    if (scannedMusic != null) {
+                        musicList = scannedMusic;
+                        updateMusicListUI();
                     }
-                });
-            }
-        }).start();
+                }
+            });
+
+            // Observe playlist changes
+            viewModel.getPlaylist().observe(getViewLifecycleOwner(), playlist -> {
+                if (playlist != null && !playlist.isEmpty()) {
+                    Logs.d("MusicListFragment","Playlist updated: " + playlist.size());
+                    musicList = playlist;
+                    updateMusicListUI();
+                }
+            });
+        }
     }
 
-    private List<MediaItem> scanDeviceMusic() {
-        List<MediaItem> musicItems = new ArrayList<>();
+    private void updateMusicListUI() {
+        if (isAdded() && !isRemoving()) {
+            binding.linearProgressIndicator.setVisibility(View.GONE);
 
-        // 定义查询媒体库的投影
-        String[] projection = {
-                MediaStore.Audio.Media._ID,
-                MediaStore.Audio.Media.TITLE,
-                MediaStore.Audio.Media.ARTIST,
-                MediaStore.Audio.Media.ALBUM,
-                MediaStore.Audio.Media.ALBUM_ID,
-                MediaStore.Audio.Media.DURATION,
-                MediaStore.Audio.Media.DATA
-        };
+            if (musicList.isEmpty()) {
+                binding.noElementsLinearLayout.setVisibility(View.VISIBLE);
+                binding.recyclerView.setVisibility(View.GONE);
+            } else {
+                binding.noElementsLinearLayout.setVisibility(View.GONE);
+                binding.recyclerView.setVisibility(View.VISIBLE);
 
-        // 筛选只查询音频文件
-        String selection = MediaStore.Audio.Media.IS_MUSIC + " != 0";
+                // Apply default sorting
+                SortingRule currentRule = new SortingRule(SortingStrategy.NAME, false);
+                sortMusicList(currentRule);
 
-        // 按照标题排序
-        String sortOrder = MediaStore.Audio.Media.TITLE + " ASC";
-
-        try (Cursor cursor = requireContext().getContentResolver().query(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                projection,
-                selection,
-                null,
-                sortOrder
-        )) {
-            if (cursor != null) {
-                int idColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID);
-                int titleColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE);
-                int artistColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST);
-                int albumColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM);
-                int albumIdColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID);
-                int durationColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION);
-                int pathColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA);
-
-                while (cursor.moveToNext()) {
-                    long id = cursor.getLong(idColumn);
-                    String title = cursor.getString(titleColumn);
-                    String artist = cursor.getString(artistColumn);
-                    String album = cursor.getString(albumColumn);
-                    long albumId = cursor.getLong(albumIdColumn);
-                    long duration = cursor.getLong(durationColumn);
-                    String path = cursor.getString(pathColumn);
-
-                    // 创建专辑封面Uri
-                    Uri albumArtUri = Uri.parse("content://media/external/audio/albumart/" + albumId);
-
-                    // 创建媒体项的Uri
-                    Uri contentUri = Uri.withAppendedPath(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, String.valueOf(id));
-
-                    // 创建MediaItem
-                    MediaItem mediaItem = new MediaItem.Builder()
-                            .setUri(contentUri)
-                            .setMediaMetadata(new MediaMetadata.Builder()
-                                    .setTitle(title)
-                                    .setArtist(artist)
-                                    .setAlbumTitle(album)
-                                    .setArtworkUri(albumArtUri)
-                                    .build())
-                            .build();
-
-                    musicItems.add(mediaItem);
-                    Logs.d("MusicListFragment", "Song added: " + title);
-                }
+                // Update UI to show current sort state
+                binding.musicSortingChip.setSortingRule(currentRule);
             }
-        } catch (Exception e) {
-            Logs.e("MusicListFragment", "Error scanning music: " + e.getMessage());
         }
-
-        return musicItems;
     }
 
     /**

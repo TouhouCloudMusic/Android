@@ -1,6 +1,7 @@
 package net.hearnsoft.tcm.ui.model;
 
 import android.app.Application;
+import android.content.Context;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -11,6 +12,7 @@ import androidx.media3.common.MediaMetadata;
 import androidx.media3.common.Player;
 import androidx.media3.common.util.UnstableApi;
 
+import net.hearnsoft.tcm.utils.LocalMusicScanner;
 import net.hearnsoft.tcm.utils.Logs;
 import net.hearnsoft.tcm.utils.MusicPlayerController;
 
@@ -24,6 +26,7 @@ public class PlaybackViewModel extends AndroidViewModel {
     private final MutableLiveData<List<MediaItem>> playlist = new MutableLiveData<>();
     private final MutableLiveData<Long> currentPosition = new MutableLiveData<>(0L);
     private final MutableLiveData<Long> duration = new MutableLiveData<>(0L);
+    private final MutableLiveData<Boolean> isScanning = new MutableLiveData<>(false);
 
     // 标记控制器是否已连接
     private boolean isControllerActive = false;
@@ -85,6 +88,17 @@ public class PlaybackViewModel extends AndroidViewModel {
         if (playerController.getMediaController() == null) {
             connectToService();
         }
+    }
+
+    public void scanAndLoadMusic(Context context) {
+        isScanning.postValue(true);
+
+        // Execute on background thread
+        new Thread(() -> {
+            List<MediaItem> scannedMusic = LocalMusicScanner.scanDeviceMusic(context);
+            playlist.postValue(scannedMusic);
+            isScanning.postValue(false);
+        }).start();
     }
 
     private void updatePlaylist() {
@@ -178,6 +192,10 @@ public class PlaybackViewModel extends AndroidViewModel {
 
     public LiveData<Long> getDuration() {
         return duration;
+    }
+
+    public LiveData<Boolean> getIsScanning() {
+        return isScanning;
     }
 
     @Override

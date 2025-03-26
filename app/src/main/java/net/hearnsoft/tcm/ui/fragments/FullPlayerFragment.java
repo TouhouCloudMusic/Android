@@ -309,7 +309,6 @@ public class FullPlayerFragment extends Fragment {
 
         // 更新时间文本
         currentTimeTextView.setText(formatTime(position));
-        Logs.d("updatePlaybackPosition: ", String.valueOf(position));
 
         // 获取总时长
         Long duration = viewModel.getDuration().getValue();

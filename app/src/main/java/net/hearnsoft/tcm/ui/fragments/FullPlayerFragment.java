@@ -37,6 +37,8 @@ import net.hearnsoft.tcm.ui.fragments.fullplayer.FullPlayerLyricsFragment;
 import net.hearnsoft.tcm.ui.model.PlaybackViewModel;
 import net.hearnsoft.tcm.utils.Logs;
 
+import java.util.Locale;
+
 @UnstableApi
 public class FullPlayerFragment extends Fragment {
     private FullPlayerBinding binding;
@@ -299,6 +301,12 @@ public class FullPlayerFragment extends Fragment {
     }
 
     private void updatePlaybackPosition(long position) {
+        // 检查position是否小于0
+        if (position < 0) {
+            Logs.e("FullPlayerFragment", "Invalid negative position: " + position);
+            position = 0;
+        }
+
         // 更新时间文本
         currentTimeTextView.setText(formatTime(position));
         Logs.d("updatePlaybackPosition: ", String.valueOf(position));
@@ -307,23 +315,52 @@ public class FullPlayerFragment extends Fragment {
         Long duration = viewModel.getDuration().getValue();
         if (duration != null && duration > 0) {
             // 更新进度条位置 (注意转换为秒，因为Slider使用的单位是秒)
-            timelineSlider.setValue(position / 1000f);
-            timelineSlider.setValueTo(duration / 1000f);
+            if (position <= duration) {
+                try {
+                    float positionValue = position / 1000f;
+                    float durationValue = duration / 1000f;
+
+                    // 如有需要，设置Slider控件范围
+                    if (timelineSlider.getValueTo() != durationValue) {
+                        timelineSlider.setValueTo(durationValue);
+                    }
+
+                    // 将当前位置设置在有效范围内
+                    timelineSlider.setValue(Math.min(positionValue, durationValue));
+                } catch (Exception e) {
+                    Logs.e("FullPlayerFragment", "Error updating slider: " + e.getMessage());
+                }
+            }
         }
     }
 
     private String formatTime(long timeMs) {
-        long totalSeconds = timeMs / 1000;
-        long minutes = totalSeconds / 60;
+        // 确保timeMs非负数
+        long safeTimeMs = Math.max(0, timeMs);
+
+        // 通过将其上限设定为最大合理值（10 小时）来处理溢出情况
+        if (safeTimeMs > 36000000) {
+            safeTimeMs = 36000000; // 10 小时的毫秒数表现
+        }
+
+        long totalSeconds = safeTimeMs / 1000;
+        long hours = totalSeconds / 3600;
+        long minutes = (totalSeconds % 3600) / 60;
         long seconds = totalSeconds % 60;
-        return String.format("%d:%02d", minutes, seconds);
+
+        // 根据是否包含小时数返回不同的格式
+        if (hours > 0) {
+            return String.format(Locale.CHINA, "%d:%02d:%02d", hours, minutes, seconds);
+        } else {
+            return String.format(Locale.CHINA, "%d:%02d", minutes, seconds);
+        }
     }
 
     private void startProgressTracking() {
-        // Clear any existing callbacks first
+        // 清除已有的进度跟踪状态
         stopProgressTracking();
 
-        // Only start if we're attached to an activity
+        // 只有在Fragment添加和非移除状态时，才启动进度跟踪
         if (isAdded() && !isRemoving()) {
             progressHandler.post(progressRunnable);
         }
@@ -346,7 +383,7 @@ public class FullPlayerFragment extends Fragment {
 
     @Override
     public void onPause() {
-        // Always stop tracking when the fragment pauses
+        // 进入onPause时始终停止进度跟踪
         stopProgressTracking();
         super.onPause();
     }

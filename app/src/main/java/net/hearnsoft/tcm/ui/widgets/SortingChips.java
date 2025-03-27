@@ -12,17 +12,17 @@ import com.google.android.material.chip.Chip;
 import com.google.android.material.color.MaterialColors;
 
 import net.hearnsoft.tcm.R;
-import net.hearnsoft.tcm.beans.SortingRule;
-import net.hearnsoft.tcm.enums.SortingStrategy;
+import net.hearnsoft.tcm.domain.model.song.SongSortingRule;
+import net.hearnsoft.tcm.domain.model.song.SongSortingStrategy;
 
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Consumer;
 
 public class SortingChips extends Chip {
-    private SortedMap<SortingStrategy, Integer> sortingStrategies = new TreeMap<>();
-    private SortingRule sortingRule;
-    private Consumer<SortingRule> onSortingRuleSelected;
+    private SortedMap<SongSortingStrategy, Integer> sortingStrategies = new TreeMap<>();
+    private SongSortingRule sortingRule;
+    private Consumer<SongSortingRule> onSortingRuleSelected;
     private PopupMenu popupMenu;
 
     public SortingChips(Context context) {
@@ -42,8 +42,8 @@ public class SortingChips extends Chip {
 
     private void init(Context context, AttributeSet attrs) {
         setChipBackgroundColor(MaterialColors.getColorStateListOrNull(
-                context,
-                com.google.android.material.R.attr.colorPrimaryContainer
+            context,
+            com.google.android.material.R.attr.colorPrimaryContainer
         ));
         setChipStrokeWidth(0f);
         setText(R.string.sort_by_unknown);
@@ -54,45 +54,45 @@ public class SortingChips extends Chip {
         popupMenu = new PopupMenu(context, this);
         popupMenu.setForceShowIcon(true);
         popupMenu.setOnMenuItemClickListener(item -> {
-            SortingStrategy strategy = SortingStrategy.values()[item.getItemId()];
+            SongSortingStrategy strategy = SongSortingStrategy.values()[item.getItemId()];
             boolean reverse = sortingRule != null && sortingRule.getStrategy() == strategy
-                    ? !sortingRule.isReverse()
-                    : sortingRule != null && sortingRule.isReverse();
+                ? !sortingRule.isReverse()
+                : sortingRule != null && sortingRule.isReverse();
 
             if (onSortingRuleSelected != null) {
-                onSortingRuleSelected.accept(new SortingRule(strategy, reverse));
+                onSortingRuleSelected.accept(new SongSortingRule(strategy, reverse));
             }
             return true;
         });
     }
 
-    public void setSortingStrategies(@NonNull SortedMap<SortingStrategy, Integer> sortingStrategies) {
+    public void setSortingStrategies(@NonNull SortedMap<SongSortingStrategy, Integer> sortingStrategies) {
         this.sortingStrategies = sortingStrategies;
 
         popupMenu.getMenu().clear();
-        for (SortingStrategy sortingStrategy : sortingStrategies.keySet()) {
+        for (SongSortingStrategy sortingStrategy : sortingStrategies.keySet()) {
             int stringResId = sortingStrategies.get(sortingStrategy);
             MenuItem item = popupMenu.getMenu().add(0, sortingStrategy.ordinal(), 0, stringResId);
             item.setIconTintList(MaterialColors.getColorStateListOrNull(
-                    getContext(),
-                    com.google.android.material.R.attr.colorOnSurface
+                getContext(),
+                com.google.android.material.R.attr.colorOnSurface
             ));
         }
     }
 
-    public void setOnSortingRuleSelectedListener(Consumer<SortingRule> listener) {
+    public void setOnSortingRuleSelectedListener(Consumer<SongSortingRule> listener) {
         this.onSortingRuleSelected = listener;
     }
 
-    public void setSortingRule(SortingRule sortingRule) {
+    public void setSortingRule(SongSortingRule sortingRule) {
         this.sortingRule = sortingRule;
 
         Integer textResId = sortingStrategies.get(sortingRule.getStrategy());
         setText(textResId != null ? textResId : R.string.sort_by_unknown);
 
         setChipIcon(sortingRule.isReverse()
-                ? R.drawable.ic_sort_alphabetical_descending
-                : R.drawable.ic_sort_alphabetical_ascending);
+            ? R.drawable.ic_sort_alphabetical_descending
+            : R.drawable.ic_sort_alphabetical_ascending);
 
         for (int i = 0; i < popupMenu.getMenu().size(); i++) {
             MenuItem item = popupMenu.getMenu().getItem(i);
@@ -100,8 +100,8 @@ public class SortingChips extends Chip {
 
             if (isCurrentStrategy) {
                 item.setIcon(sortingRule.isReverse()
-                        ? R.drawable.ic_sort_alphabetical_descending
-                        : R.drawable.ic_sort_alphabetical_ascending);
+                    ? R.drawable.ic_sort_alphabetical_descending
+                    : R.drawable.ic_sort_alphabetical_ascending);
             } else {
                 item.setIcon(null);
             }
@@ -112,8 +112,8 @@ public class SortingChips extends Chip {
         setChipIconResource(icon);
         setChipIconVisible(true);
         setChipIconTint(MaterialColors.getColorStateListOrNull(
-                getContext(),
-                com.google.android.material.R.attr.colorOnSurface
+            getContext(),
+            com.google.android.material.R.attr.colorOnSurface
         ));
     }
 
@@ -121,8 +121,8 @@ public class SortingChips extends Chip {
         setCloseIconResource(icon);
         setCloseIconVisible(true);
         setCloseIconTint(MaterialColors.getColorStateListOrNull(
-                getContext(),
-                com.google.android.material.R.attr.colorOnSurface
+            getContext(),
+            com.google.android.material.R.attr.colorOnSurface
         ));
     }
 
@@ -131,13 +131,13 @@ public class SortingChips extends Chip {
         if (size == 0) {
             return;
         } else if (size == 1) {
-            SortingStrategy strategy = sortingStrategies.keySet().iterator().next();
+            SongSortingStrategy strategy = sortingStrategies.keySet().iterator().next();
             boolean reverse = sortingRule != null && sortingRule.getStrategy() == strategy
-                    ? !sortingRule.isReverse()
-                    : sortingRule != null && sortingRule.isReverse();
+                ? !sortingRule.isReverse()
+                : sortingRule != null && sortingRule.isReverse();
 
             if (onSortingRuleSelected != null) {
-                onSortingRuleSelected.accept(new SortingRule(strategy, reverse));
+                onSortingRuleSelected.accept(new SongSortingRule(strategy, reverse));
             }
         } else {
             popupMenu.show();

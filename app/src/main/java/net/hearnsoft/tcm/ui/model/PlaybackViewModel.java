@@ -12,10 +12,9 @@ import androidx.media3.common.MediaMetadata;
 import androidx.media3.common.Player;
 import androidx.media3.common.util.UnstableApi;
 
-import net.hearnsoft.tcm.beans.SortingRule;
-import net.hearnsoft.tcm.enums.SortingStrategy;
+import net.hearnsoft.tcm.domain.model.song.SongSortingRule;
+import net.hearnsoft.tcm.domain.model.song.SongSortingStrategy;
 import net.hearnsoft.tcm.utils.LocalMusicScanner;
-import net.hearnsoft.tcm.utils.Logs;
 import net.hearnsoft.tcm.utils.MusicPlayerController;
 
 import java.util.List;
@@ -30,7 +29,7 @@ public class PlaybackViewModel extends AndroidViewModel {
     private final MutableLiveData<Long> duration = new MutableLiveData<>(0L);
     private final MutableLiveData<Boolean> isScanning = new MutableLiveData<>(false);
     private final MutableLiveData<Boolean> isSorting = new MutableLiveData<>(false);
-    private final MutableLiveData<SortingRule> currentSortRule = new MutableLiveData<>(new SortingRule(SortingStrategy.NAME, false));
+    private final MutableLiveData<SongSortingRule> currentSortRule = new MutableLiveData<>(new SongSortingRule(SongSortingStrategy.Title, false));
     private final MutableLiveData<Integer> currentIndex = new MutableLiveData<>(0);
 
     // 标记控制器是否已连接
@@ -113,7 +112,7 @@ public class PlaybackViewModel extends AndroidViewModel {
     }
 
     // 排序方法
-    public void sortMusic(SortingRule rule) {
+    public void sortMusic(SongSortingRule rule) {
         // 记录当前排序规则
         currentSortRule.postValue(rule);
 
@@ -260,7 +259,7 @@ public class PlaybackViewModel extends AndroidViewModel {
         return isSorting;
     }
 
-    public LiveData<SortingRule> getCurrentSortRule() {
+    public LiveData<SongSortingRule> getCurrentSortRule() {
         return currentSortRule;
     }
 

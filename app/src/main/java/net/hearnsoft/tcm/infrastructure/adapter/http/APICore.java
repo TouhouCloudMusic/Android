@@ -1,4 +1,4 @@
-package net.hearnsoft.tcm.api;
+package net.hearnsoft.tcm.infrastructure.adapter.http;
 
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
@@ -25,10 +25,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
-import net.hearnsoft.tcm.beans.DefaultResponse;
 import net.hearnsoft.tcm.ui.model.AuthStateViewModel;
-import net.hearnsoft.tcm.utils.Constants;
-import net.hearnsoft.tcm.enums.ErrorCode;
 import net.hearnsoft.tcm.utils.Logs;
 
 import java.io.IOException;
@@ -49,13 +46,14 @@ import okio.BufferedSink;
 import okio.Okio;
 
 public class APICore {
-    private final String TAG = this.getClass().getSimpleName();
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
-    private Context context;
-    private String apiUrl;
+    private final String TAG = this.getClass().getSimpleName();
     private final OkHttpClient client;
     private final Handler mainHandler;
     private final Gson gson;
+    private final Context context;
+    private final String apiUrl;
+    @Setter
     private String sessionToken;
 
     public APICore(Context context) {
@@ -63,13 +61,7 @@ public class APICore {
         this.context = context;
         this.client = new OkHttpClient();
         this.mainHandler = new Handler(Looper.getMainLooper());
-        this.gson = new GsonBuilder()
-                .disableHtmlEscaping()
-                .setLenient()
-                .serializeNulls()
-                .setPrettyPrinting()
-                .enableComplexMapKeySerialization()
-                .create();
+        this.gson = new GsonBuilder().disableHtmlEscaping().setLenient().serializeNulls().setPrettyPrinting().enableComplexMapKeySerialization().create();
     }
 
     public APICore(Context context, String baseHostUrl) {
@@ -77,42 +69,20 @@ public class APICore {
         this.client = new OkHttpClient();
         this.context = context;
         this.mainHandler = new Handler(Looper.getMainLooper());
-        this.gson = new GsonBuilder()
-                .disableHtmlEscaping()
-                .setLenient()
-                .serializeNulls()
-                .setPrettyPrinting()
-                .enableComplexMapKeySerialization()
-                .create();
-    }
-
-    public void setSessionToken(String sessionToken) {
-        this.sessionToken = sessionToken;
+        this.gson = new GsonBuilder().disableHtmlEscaping().setLenient().serializeNulls().setPrettyPrinting().enableComplexMapKeySerialization().create();
     }
 
     public void uploadImage(String endpoint, Uri imageUri, ContentResolver resolver, APICallback<String> callback) {
         String url = apiUrl + "/" + endpoint;
         if (imageUri == null) {
-            callback.onError(new ApiError(
-                    "Image URI is null",
-                    "Image URI is null",
-                    ErrorCode.FileURINull));
+            callback.onError(new ApiError("Image URI is null", "Image URI is null", ErrorCode.FileURINull));
             return;
         }
         if (TextUtils.isEmpty(sessionToken)) {
-            callback.onError(new ApiError(
-                    "Unauthorized",
-                    "No session token available",
-                    ErrorCode.InvalidToken)
-            );
+            callback.onError(new ApiError("Unauthorized", "No session token available", ErrorCode.InvalidToken));
             return;
         }
 
-        /*RequestBody body = new MultipartBody.Builder()
-                .setType(MultipartBody.FORM)
-                .addFormDataPart("data", "image.jpg",
-                        RequestBody.create(image, MediaType.parse("image/*")))
-                .build();*/
 
         RequestBody requestBody = new RequestBody() {
             @Nullable
@@ -132,11 +102,7 @@ public class APICore {
                         bufferedSink.writeAll(Okio.source(inputStream));
                     }
                 } catch (Exception e) {
-                    callback.onError(new ApiError(
-                            "File read error",
-                            e.getMessage(),
-                            ErrorCode.FileReadError)
-                    );
+                    callback.onError(new ApiError("File read error", e.getMessage(), ErrorCode.FileReadError));
                 }
             }
         };
@@ -144,10 +110,7 @@ public class APICore {
         String fileName = getFileNameFromUri(imageUri, resolver);
         MultipartBody.Part imagePart = MultipartBody.Part.createFormData("data", fileName, requestBody);
 
-        MultipartBody body = new MultipartBody.Builder()
-                .setType(MultipartBody.FORM)
-                .addPart(imagePart)
-                .build();
+        MultipartBody body = new MultipartBody.Builder().setType(MultipartBody.FORM).addPart(imagePart).build();
 
         Request.Builder requestBuilder = new Request.Builder().url(url);
         if (sessionToken != null) {
@@ -158,15 +121,11 @@ public class APICore {
         client.newCall(requestBuilder.build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                callback.onError(new ApiError(
-                        "Network error",
-                        e.getMessage(),
-                        ErrorCode.NetworkError)
-                );
+                callback.onError(new ApiError("Network error", e.getMessage(), ErrorCode.NetworkError));
             }
 
             @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException, ParseErrorCodeException {
                 Logs.d(TAG, "Raw response: " + response);
                 if (response.isSuccessful()) {
                     String responseBody = response.body().string();
@@ -177,17 +136,14 @@ public class APICore {
                     try {
                         JsonObject jsonResponse = JsonParser.parseString(responseBody).getAsJsonObject();
                         DefaultResponse errorResponse = gson.fromJson(jsonResponse, DefaultResponse.class);
-                        callback.onError(new ApiError(
-                            errorResponse.getStatus(),
-                            errorResponse.getMessage(),
-                                ErrorCode.fromCode(errorResponse.getError_code())
-                        ));
+                        ErrorCode code = ErrorCode.tryFromInt(errorResponse.getError_code()).fold(err -> {
+                            throw err;
+                        }, ok -> ok);
+
+                        callback.onError(new ApiError(errorResponse.getStatus(), errorResponse.getMessage(), code));
+
                     } catch (JsonSyntaxException | IllegalStateException e) {
-                        callback.onError(new ApiError(
-                                "JSON parsing error",
-                                "Received malformed JSON: " + responseBody,
-                                ErrorCode.JSONParseError)
-                        );
+                        callback.onError(new ApiError("JSON parsing error", "Received malformed JSON: " + responseBody, ErrorCode.JSONParseError));
                     }
                 }
             }
@@ -218,10 +174,11 @@ public class APICore {
         callAPI(endpoint, method, requestData, responseType, callback, true);
     }
 
+    @Deprecated
     public <T> void callAPI(String endpoint, ApiMethod method, Object requestData, Class<T> responseType, APICallback<T> callback, boolean includeCookie) {
         String url = apiUrl + "/" + endpoint;
         Request.Builder requestBuilder = new Request.Builder().url(url);
-        Logs.d(TAG, "request api url:"+ url);
+        Logs.d(TAG, "request api url:" + url);
 
         if (includeCookie && sessionToken != null) {
             requestBuilder.addHeader("Cookie", "session_token=" + sessionToken);
@@ -256,33 +213,24 @@ public class APICore {
         client.newCall(requestBuilder.build()).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                handleError(new ApiError(
-                        "Network error",
-                        e.getMessage(),
-                        ErrorCode.NetworkError), callback);
+                handleError(new ApiError("Network error", e.getMessage(), ErrorCode.NetworkError), callback);
             }
 
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException, ParseErrorCodeException {
                 String responseBody = response.body().string();
                 String newSessionToken = getSessionToken(response);
                 Logs.d(TAG, "Raw response: " + responseBody + ", code:" + response.code());
 
                 if (responseBody.contains(Constants.REACH_RISK_CONTROL_STRING)) {
-                    handleError(new ApiError(
-                            "Too Many Requests!",
-                            responseBody,
-                            ErrorCode.RiskControlError), callback);
+                    handleError(new ApiError("Too Many Requests!", responseBody, ErrorCode.RiskControlError), callback);
                     return;
                 }
 
                 if (response.code() == 401) {
                     clearSessionToken();
                     sendUnauthorizedBroadcast();
-                    handleError(new ApiError(
-                            "Unauthorized",
-                            "Session expired, please re-login",
-                            ErrorCode.Unauthorized), callback);
+                    handleError(new ApiError("Unauthorized", "Session expired, please re-login", ErrorCode.Unauthorized), callback);
                     return;
                 }
 
@@ -310,34 +258,34 @@ public class APICore {
                                 handleSuccess((T) defaultResponse.getMessage(), newSessionToken, callback);
                             }
                         } else {
+                            ErrorCode code =
+                                ErrorCode.tryFromInt(defaultResponse.getError_code())
+                                    .fold(
+                                        err -> {
+                                            throw err;
+                                        },
+                                        ok -> ok);
                             ApiError error = new ApiError(
                                 defaultResponse.getStatus(),
                                 defaultResponse.getMessage(),
-                                ErrorCode.fromCode(defaultResponse.getError_code())
-                            );
+                                code);
                             handleError(error, callback);
                         }
                     } else {
                         // 处理非 JSON 对象的响应
-                        handleError(new ApiError(
-                                "Non-JSON response",
-                                responseBody,
-                                ErrorCode.NonJSONResponse), callback);
+                        handleError(new ApiError("Non-JSON response", responseBody, ErrorCode.NonJSONResponse), callback);
                     }
                 } catch (JsonSyntaxException e) {
                     // 处理 JSON 解析错误
-                    handleError(new ApiError(
-                            "JSON parsing error",
-                            "Received malformed JSON: " + responseBody,
-                            ErrorCode.JSONParseError), callback);
+                    handleError(new ApiError("JSON parsing error", "Received malformed JSON: " + responseBody, ErrorCode.JSONParseError), callback);
                 } catch (Exception e) {
-                    handleError(new ApiError("Unexpected error", e.getMessage() + ". Response: " + responseBody,
-                            ErrorCode.UnexpectedError), callback);
+                    handleError(new ApiError("Unexpected error", e.getMessage() + ". Response: " + responseBody, ErrorCode.UnexpectedError), callback);
                 }
             }
         });
     }
 
+    @Deprecated
     private String getSessionToken(Response response) {
         String sessionToken = null;
         List<String> cookies = response.headers("Set-Cookie");
@@ -350,6 +298,7 @@ public class APICore {
         return sessionToken;
     }
 
+    @Deprecated
     private <T> void handleSuccess(final T data, final String sessionToken, final APICallback<T> callback) {
         mainHandler.post(() -> {
             if (callback instanceof SessionTokenCallback) {
@@ -360,6 +309,7 @@ public class APICore {
         });
     }
 
+    @Deprecated
     private <T> void handleError(final ApiError error, final APICallback<T> callback) {
         mainHandler.post(() -> callback.onError(error));
     }
@@ -369,17 +319,13 @@ public class APICore {
         setSessionToken(null);
 
         // 清除SharedPreferences中的token
-        SharedPreferences pref = context.getSharedPreferences(
-                Constants.PREF_GLOBAL_NAME,
-                Context.MODE_PRIVATE
-        );
+        SharedPreferences pref = context.getSharedPreferences(Constants.PREF_GLOBAL_NAME, Context.MODE_PRIVATE);
         pref.edit().remove(Constants.KEY_USER_TOKEN).apply();
     }
 
     private void sendUnauthorizedBroadcast() {
         // 通过ViewModel判断处理状态
-        AuthStateViewModel viewModel = new ViewModelProvider(
-                (ViewModelStoreOwner) context).get(AuthStateViewModel.class);
+        AuthStateViewModel viewModel = new ViewModelProvider((ViewModelStoreOwner) context).get(AuthStateViewModel.class);
 
         if (viewModel.getIsHandling401().getValue() != Boolean.TRUE) {
             viewModel.startHandling401();
@@ -390,6 +336,7 @@ public class APICore {
 
     public interface APICallback<T> {
         void onSuccess(T data);
+
         void onError(ApiError error);
     }
 

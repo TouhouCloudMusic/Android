@@ -32,26 +32,25 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.yalantis.ucrop.UCrop;
 
 import net.hearnsoft.tcm.R;
-import net.hearnsoft.tcm.api.APICore;
-import net.hearnsoft.tcm.api.UserAPI;
-import net.hearnsoft.tcm.beans.UserProfile;
 import net.hearnsoft.tcm.databinding.ActivityUserProfileBinding;
+import net.hearnsoft.tcm.domain.model.user.UserProfile;
+import net.hearnsoft.tcm.infrastructure.adapter.http.APICore;
+import net.hearnsoft.tcm.infrastructure.adapter.http.Constants;
+import net.hearnsoft.tcm.infrastructure.adapter.http.UserAPI;
 import net.hearnsoft.tcm.ui.widgets.ProfileItem;
-import net.hearnsoft.tcm.utils.Constants;
 import net.hearnsoft.tcm.utils.Logs;
 import net.hearnsoft.tcm.utils.SettingsPrefUtils;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
 public class UserProfileActivity extends AppCompatActivity {
 
-    private final String TAG = this.getClass().getSimpleName();
     private static final String tempAvatarImageName = "avatar.jpg";
+    private final String TAG = this.getClass().getSimpleName();
     private ActivityUserProfileBinding binding;
     private UserAPI userAPI;
     private UserProfileAdapter adapter;
@@ -82,27 +81,27 @@ public class UserProfileActivity extends AppCompatActivity {
         userToken = SettingsPrefUtils.getInstance(this).readStringSettings(Constants.KEY_USER_TOKEN);
 
         pickAvatar = registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), uri -> {
-                    if (uri != null) {
-                        String mimeType = getContentResolver().getType(uri);
-                        if (isValidImageType(mimeType)) {
-                            UCrop.Options options = new UCrop.Options();
-                            // 图片格式
-                            options.setCompressionFormat(Bitmap.CompressFormat.JPEG);
-                            // 设置图片压缩质量
-                            options.setCompressionQuality(100);
-                            UCrop.of(uri, Uri.fromFile(new File(getCacheDir(), tempAvatarImageName)))
-                                    .withAspectRatio(1, 1)
-                                    .withMaxResultSize(500, 500)
-                                    .withOptions(options)
-                                    .start(UserProfileActivity.this);
-                        } else {
-                            runOnUiThread(() -> Toast.makeText(this,
-                                    R.string.toast_err_image_wrong, Toast.LENGTH_SHORT).show());
-                        }
-                    } else {
-                        Logs.d(TAG, "No media selected");
-                    }
-                });
+            if (uri != null) {
+                String mimeType = getContentResolver().getType(uri);
+                if (isValidImageType(mimeType)) {
+                    UCrop.Options options = new UCrop.Options();
+                    // 图片格式
+                    options.setCompressionFormat(Bitmap.CompressFormat.JPEG);
+                    // 设置图片压缩质量
+                    options.setCompressionQuality(100);
+                    UCrop.of(uri, Uri.fromFile(new File(getCacheDir(), tempAvatarImageName)))
+                        .withAspectRatio(1, 1)
+                        .withMaxResultSize(500, 500)
+                        .withOptions(options)
+                        .start(UserProfileActivity.this);
+                } else {
+                    runOnUiThread(() -> Toast.makeText(this,
+                        R.string.toast_err_image_wrong, Toast.LENGTH_SHORT).show());
+                }
+            } else {
+                Logs.d(TAG, "No media selected");
+            }
+        });
         loadUserProfile(userToken);
     }
 
@@ -115,7 +114,7 @@ public class UserProfileActivity extends AppCompatActivity {
             public void onSuccess(UserProfile data) {
                 List<ProfileItem> items = new ArrayList<>();
                 items.add(new ProfileItem(ProfileItem.TYPE_AVATAR, getString(R.string.profile_title_avatar),
-                        getAvatarUrl(data.getAvatar_url()), true, item -> {
+                    getAvatarUrl(data.getAvatarUrl()), true, item -> {
                     // 处理头像点击事件，例如打开图片选择器
                     openImagePicker();
                 }));
@@ -124,15 +123,15 @@ public class UserProfileActivity extends AppCompatActivity {
                     openEditNameDialog(item.getContent());
                 }));
                 SimpleDateFormat dateFormat = new SimpleDateFormat(getString(R.string.date_format_str), Locale.CHINA);
-                items.add(new ProfileItem(ProfileItem.TYPE_INFO, getString(R.string.profile_title_last_login), dateFormat.format(data.getLast_login())));
+                items.add(new ProfileItem(ProfileItem.TYPE_INFO, getString(R.string.profile_title_last_login), dateFormat.format(data.getLastLogin())));
                 items.add(new ProfileItem(ProfileItem.TYPE_INFO, getString(R.string.profile_title_user_permission), getUserRoleString(data.getRoles())));
 
                 // 管理员功能
-                if(isAdminUser(data.getRoles())) {
+                if (isAdminUser(data.getRoles())) {
                     items.add(new ProfileItem(ProfileItem.TYPE_PREFERENCE_ITEM,
-                            getString(R.string.profile_title_admin_mode),
-                            null,
-                            true, item -> {
+                        getString(R.string.profile_title_admin_mode),
+                        null,
+                        true, item -> {
                         Toast.makeText(UserProfileActivity.this, R.string.admin_mode_notice, Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(UserProfileActivity.this, AdminModeActivity.class);
                         intent.putExtra("user_token", userToken);
@@ -140,7 +139,7 @@ public class UserProfileActivity extends AppCompatActivity {
                     }));
                 }
                 items.add(new ProfileItem(ProfileItem.TYPE_BUTTON,
-                        getString(R.string.profile_title_logout), "", true, item -> logout()));
+                    getString(R.string.profile_title_logout), "", true, item -> logout()));
                 adapter.setItems(items);
             }
 
@@ -148,10 +147,10 @@ public class UserProfileActivity extends AppCompatActivity {
             public void onError(APICore.ApiError error) {
                 Logs.e(TAG, "failed to load profile, msg: " + error.getMessage());
                 new MaterialAlertDialogBuilder(UserProfileActivity.this)
-                        .setTitle(R.string.profile_dialog_err_title)
-                        .setMessage(R.string.profile_dialog_err_msg)
-                        .setPositiveButton(android.R.string.ok, (dialog, which) -> finish())
-                        .show();
+                    .setTitle(R.string.profile_dialog_err_title)
+                    .setMessage(R.string.profile_dialog_err_msg)
+                    .setPositiveButton(android.R.string.ok, (dialog, which) -> finish())
+                    .show();
             }
         });
     }
@@ -192,7 +191,7 @@ public class UserProfileActivity extends AppCompatActivity {
         for (int role : rolesList) {
             if (role < userRoles.length) {
                 // 用户权限索引从1开始
-                sb.append(userRoles[role-1]).append(",");
+                sb.append(userRoles[role - 1]).append(",");
             }
         }
         return sb.length() > 0 ? sb.substring(0, sb.length() - 1) : "";
@@ -201,8 +200,8 @@ public class UserProfileActivity extends AppCompatActivity {
     private void openImagePicker() {
         // TODO: 待实现
         pickAvatar.launch(new PickVisualMediaRequest.Builder()
-                .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
-                .build());
+            .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
+            .build());
     }
 
     private boolean isValidImageType(String mimeType) {
@@ -219,7 +218,7 @@ public class UserProfileActivity extends AppCompatActivity {
             uploadAvatar(userToken, UCrop.getOutput(data));
         } else if (resultCode == UCrop.RESULT_ERROR) {
             Toast.makeText(UserProfileActivity.this,
-                    R.string.toast_profile_err_crop_avatar, Toast.LENGTH_SHORT).show();
+                R.string.toast_profile_err_crop_avatar, Toast.LENGTH_SHORT).show();
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -231,7 +230,7 @@ public class UserProfileActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(String data) {
                     runOnUiThread(() -> Toast.makeText(UserProfileActivity.this,
-                            R.string.toast_profile_upload_avatar_succ, Toast.LENGTH_SHORT).show());
+                        R.string.toast_profile_upload_avatar_succ, Toast.LENGTH_SHORT).show());
                     loadUserProfile(userToken);
                     isProfileUpdated = true; // 标记资料已更新
                 }
@@ -239,9 +238,9 @@ public class UserProfileActivity extends AppCompatActivity {
                 @Override
                 public void onError(APICore.ApiError error) {
                     Logs.e(TAG, error.getMessage());
-                    runOnUiThread(() ->Toast.makeText(UserProfileActivity.this,
-                            getString(R.string.toast_profile_upload_avatar_err)
-                                    +"\n"+ error.getMessage(), Toast.LENGTH_SHORT).show());
+                    runOnUiThread(() -> Toast.makeText(UserProfileActivity.this,
+                        getString(R.string.toast_profile_upload_avatar_err)
+                            + "\n" + error.getMessage(), Toast.LENGTH_SHORT).show());
                 }
             });
         }
@@ -261,7 +260,7 @@ public class UserProfileActivity extends AppCompatActivity {
 
     private void logout() {
         String token = SettingsPrefUtils.getInstance(this)
-                .readStringSettings(Constants.KEY_USER_TOKEN);
+            .readStringSettings(Constants.KEY_USER_TOKEN);
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
         builder.setTitle(R.string.profile_title_logout);
         builder.setMessage(R.string.profile_title_logout_content);
@@ -270,12 +269,12 @@ public class UserProfileActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(String data) {
                     Toast.makeText(UserProfileActivity.this,
-                            R.string.toast_profile_logout_succ,
-                            Toast.LENGTH_SHORT).show();
+                        R.string.toast_profile_logout_succ,
+                        Toast.LENGTH_SHORT).show();
                     // 发送广播通知 AccountFragment 刷新
                     Intent intent = new Intent(Constants.ACTION_REFRESH_USER_PROFILE);
                     LocalBroadcastManager.getInstance(UserProfileActivity.this)
-                            .sendBroadcast(intent);
+                        .sendBroadcast(intent);
                     dialog.dismiss();
                     finish();
                 }
@@ -284,8 +283,8 @@ public class UserProfileActivity extends AppCompatActivity {
                 public void onError(APICore.ApiError error) {
                     Logs.e(TAG, "failed to logout, msg: " + error.getMessage());
                     Toast.makeText(UserProfileActivity.this,
-                            R.string.toast_profile_logout_err,
-                            Toast.LENGTH_SHORT).show();
+                        R.string.toast_profile_logout_err,
+                        Toast.LENGTH_SHORT).show();
                     dialog.dismiss();
                 }
             });
@@ -357,7 +356,7 @@ public class UserProfileActivity extends AppCompatActivity {
             switch (viewType) {
                 case ProfileItem.TYPE_AVATAR:
                     view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_user_profile_avatar, parent, false);
-                    holder =  new AvatarViewHolder(view);
+                    holder = new AvatarViewHolder(view);
                     break;
                 case ProfileItem.TYPE_BUTTON:
                     view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_user_profile_button, parent, false);
@@ -387,9 +386,9 @@ public class UserProfileActivity extends AppCompatActivity {
             if (holder instanceof AvatarViewHolder) {
                 AvatarViewHolder avatarHolder = (AvatarViewHolder) holder;
                 Glide.with(avatarHolder.itemView.getContext())
-                        .load(item.getContent())
-                        .placeholder(R.drawable.test_avatar)
-                        .into(avatarHolder.avatarImageView);
+                    .load(item.getContent())
+                    .placeholder(R.drawable.test_avatar)
+                    .into(avatarHolder.avatarImageView);
                 setItemClickListener(avatarHolder.itemView, item, isEditMode);
                 // 根据编辑模式更新 UI
                 if (isEditMode && item.isClickable()) {
@@ -428,7 +427,7 @@ public class UserProfileActivity extends AppCompatActivity {
 
         private void setItemClickListener(View itemView, ProfileItem item, boolean editMode) {
             if (item.isClickable() && item.getClickListener() != null &&
-                    (editMode || item.getType() == ProfileItem.TYPE_BUTTON)) {
+                (editMode || item.getType() == ProfileItem.TYPE_BUTTON)) {
                 itemView.setOnClickListener(v -> item.getClickListener().onItemClick(item));
                 itemView.setClickable(true);
             } else {

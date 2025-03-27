@@ -20,9 +20,9 @@ import androidx.media3.common.util.UnstableApi;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import net.hearnsoft.tcm.R;
-import net.hearnsoft.tcm.beans.SortingRule;
 import net.hearnsoft.tcm.databinding.FragmentMusicListBinding;
-import net.hearnsoft.tcm.enums.SortingStrategy;
+import net.hearnsoft.tcm.domain.model.song.SongSortingRule;
+import net.hearnsoft.tcm.domain.model.song.SongSortingStrategy;
 import net.hearnsoft.tcm.ui.adapter.MusicItemAdapter;
 import net.hearnsoft.tcm.ui.adapter.OnMusicItemClickListener;
 import net.hearnsoft.tcm.ui.model.PlaybackViewModel;
@@ -42,13 +42,13 @@ public class MusicListFragment extends Fragment implements OnMusicItemClickListe
     private PlaybackViewModel viewModel;
 
     private ActivityResultLauncher<String> requestPermissionLauncher =
-            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-                if (isGranted) {
-                    loadMusic();
-                } else {
-                    showNoPermissionUI();
-                }
-            });
+        registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+            if (isGranted) {
+                loadMusic();
+            } else {
+                showNoPermissionUI();
+            }
+        });
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -138,16 +138,16 @@ public class MusicListFragment extends Fragment implements OnMusicItemClickListe
     }
 
     private void setSortingChips() {
-        SortedMap<SortingStrategy, Integer> sortingOptions = new TreeMap<>();
-        sortingOptions.put(SortingStrategy.ARTIST_NAME, R.string.sort_by_artist_name);
-        sortingOptions.put(SortingStrategy.CREATION_DATE, R.string.sort_by_release_date);
-        sortingOptions.put(SortingStrategy.NAME, R.string.sort_by_title);
-        sortingOptions.put(SortingStrategy.PLAY_COUNT, R.string.sort_by_play_count);
+        SortedMap<SongSortingStrategy, Integer> sortingOptions = new TreeMap<>();
+        sortingOptions.put(SongSortingStrategy.ArtistName, R.string.sort_by_artist_name);
+        sortingOptions.put(SongSortingStrategy.CreatedAt, R.string.sort_by_release_date);
+        sortingOptions.put(SongSortingStrategy.Title, R.string.sort_by_title);
+        sortingOptions.put(SongSortingStrategy.PlayCount, R.string.sort_by_play_count);
 
         binding.musicSortingChip.setSortingStrategies(sortingOptions);
 
         // 设置默认排序规则
-        SortingRule defaultRule = new SortingRule(SortingStrategy.NAME, false);
+        SongSortingRule defaultRule = new SongSortingRule(SongSortingStrategy.Title, false);
         binding.musicSortingChip.setSortingRule(defaultRule);
 
         // 设置排序监听
@@ -160,9 +160,9 @@ public class MusicListFragment extends Fragment implements OnMusicItemClickListe
     private void checkPermissionAndLoadMusic() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(
-                    requireContext(),
-                    Manifest.permission.READ_MEDIA_AUDIO) ==
-                    PackageManager.PERMISSION_GRANTED) {
+                requireContext(),
+                Manifest.permission.READ_MEDIA_AUDIO) ==
+                PackageManager.PERMISSION_GRANTED) {
                 // 已有权限
                 loadMusic();
             } else {
@@ -171,9 +171,9 @@ public class MusicListFragment extends Fragment implements OnMusicItemClickListe
             }
         } else {
             if (ContextCompat.checkSelfPermission(
-                    requireContext(),
-                    Manifest.permission.READ_EXTERNAL_STORAGE) ==
-                    PackageManager.PERMISSION_GRANTED) {
+                requireContext(),
+                Manifest.permission.READ_EXTERNAL_STORAGE) ==
+                PackageManager.PERMISSION_GRANTED) {
                 // 已有权限
                 loadMusic();
             } else {
@@ -190,9 +190,9 @@ public class MusicListFragment extends Fragment implements OnMusicItemClickListe
 
         // 检查是否已加载音乐
         if (viewModel.getPlaylist().getValue() != null
-                && !viewModel.getPlaylist().getValue().isEmpty()) {
+            && !viewModel.getPlaylist().getValue().isEmpty()) {
             // 使用现有列表
-            Logs.d("MusicListFragment","使用已存在的播放列表");
+            Logs.d("MusicListFragment", "使用已存在的播放列表");
             musicList = viewModel.getPlaylist().getValue();
             updateMusicListUI();
         } else {
@@ -213,7 +213,7 @@ public class MusicListFragment extends Fragment implements OnMusicItemClickListe
                 binding.recyclerView.setVisibility(View.VISIBLE);
 
                 // 应用默认排序
-                viewModel.sortMusic(new SortingRule(SortingStrategy.NAME, false));
+                viewModel.sortMusic(new SongSortingRule(SongSortingStrategy.Title, false));
 
                 // 更新适配器数据
                 adapter.setData(musicList);

@@ -15,16 +15,16 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 
-import net.hearnsoft.tcm.beans.RecommendSongBean;
-import net.hearnsoft.tcm.databinding.ItemRecommendSongBinding;
 import net.hearnsoft.tcm.R;
+import net.hearnsoft.tcm.databinding.ItemRecommendSongBinding;
+import net.hearnsoft.tcm.domain.model.song.RecommendSong;
 
 public class RecommendSongListAdapter
-        extends BaseAdapter<RecommendSongBean, RecommendSongListAdapter.SongViewHolder>{
+    extends BaseAdapter<RecommendSong, RecommendSongListAdapter.SongViewHolder> {
 
-    private OnItemClickListener<RecommendSongBean> listener;
+    private OnItemClickListener<RecommendSong> listener;
 
-    public void setOnItemClickListener(OnItemClickListener<RecommendSongBean> listener) {
+    public void setOnItemClickListener(OnItemClickListener<RecommendSong> listener) {
         this.listener = listener;
     }
 
@@ -32,9 +32,9 @@ public class RecommendSongListAdapter
     @Override
     public SongViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         ItemRecommendSongBinding binding = ItemRecommendSongBinding.inflate(
-                LayoutInflater.from(parent.getContext()),
-                parent,
-                false
+            LayoutInflater.from(parent.getContext()),
+            parent,
+            false
         );
         return new SongViewHolder(binding);
     }
@@ -52,7 +52,7 @@ public class RecommendSongListAdapter
             this.binding = binding;
         }
 
-        public void bind(RecommendSongBean song, int position) {
+        public void bind(RecommendSong song, int position) {
             binding.tvSongName.setText(song.getTitle());
             binding.tvArtistName.setText(song.getArtist());
 
@@ -61,26 +61,26 @@ public class RecommendSongListAdapter
             binding.ivSongCover.setImageDrawable(null);
 
             Glide.with(binding.ivSongCover)
-                    .load(song.getCoverUrl())
-                    .listener(new RequestListener<Drawable>() {
-                        @Override
-                        public boolean onLoadFailed(@Nullable GlideException e, Object model,
-                                                    Target<Drawable> target, boolean isFirstResource) {
-                            binding.loadingProgress.setVisibility(View.GONE);
-                            binding.ivSongCover.setImageResource(R.drawable.ic_close_24px);
-                            return true;
-                        }
+                .load(song.getCoverUrl())
+                .listener(new RequestListener<Drawable>() {
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model,
+                                                Target<Drawable> target, boolean isFirstResource) {
+                        binding.loadingProgress.setVisibility(View.GONE);
+                        binding.ivSongCover.setImageResource(R.drawable.ic_close_24px);
+                        return true;
+                    }
 
-                        @Override
-                        public boolean onResourceReady(Drawable resource, Object model,
-                                                       Target<Drawable> target, DataSource dataSource,
-                                                       boolean isFirstResource) {
-                            binding.loadingProgress.setVisibility(View.GONE);
-                            binding.ivSongCover.setImageDrawable(resource);
-                            return true;
-                        }
-                    })
-                    .into(binding.ivSongCover);
+                    @Override
+                    public boolean onResourceReady(Drawable resource, Object model,
+                                                   Target<Drawable> target, DataSource dataSource,
+                                                   boolean isFirstResource) {
+                        binding.loadingProgress.setVisibility(View.GONE);
+                        binding.ivSongCover.setImageDrawable(resource);
+                        return true;
+                    }
+                })
+                .into(binding.ivSongCover);
 
             itemView.setOnClickListener(v -> {
                 if (listener != null) {

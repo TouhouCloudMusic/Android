@@ -2,8 +2,7 @@ package net.hearnsoft.tcm.utils;
 
 import androidx.media3.common.MediaItem;
 
-import net.hearnsoft.tcm.beans.SortingRule;
-import net.hearnsoft.tcm.enums.SortingStrategy;
+import net.hearnsoft.tcm.domain.model.song.SongSortingRule;
 import net.sourceforge.pinyin4j.PinyinHelper;
 import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
 import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
@@ -35,10 +34,10 @@ public class LocalMusicSorter {
      * Sort a list of MediaItems based on the provided sorting rule
      *
      * @param items List of MediaItems to sort
-     * @param rule Sorting rule to apply
+     * @param rule  Sorting rule to apply
      * @return Sorted list of MediaItems
      */
-    public static List<MediaItem> sortMusicList(List<MediaItem> items, SortingRule rule) {
+    public static List<MediaItem> sortMusicList(List<MediaItem> items, SongSortingRule rule) {
         if (items == null || items.isEmpty()) {
             return new ArrayList<>();
         }
@@ -48,27 +47,27 @@ public class LocalMusicSorter {
         Comparator<MediaItem> comparator = null;
 
         switch (rule.getStrategy()) {
-            case NAME:
+            case Title:
                 comparator = (item1, item2) -> {
                     String title1 = item1.mediaMetadata.title != null ?
-                            item1.mediaMetadata.title.toString() : "";
+                        item1.mediaMetadata.title.toString() : "";
                     String title2 = item2.mediaMetadata.title != null ?
-                            item2.mediaMetadata.title.toString() : "";
+                        item2.mediaMetadata.title.toString() : "";
                     return compareChinese(title1, title2);
                 };
                 break;
 
-            case ARTIST_NAME:
+            case ArtistName:
                 comparator = (item1, item2) -> {
                     String artist1 = item1.mediaMetadata.artist != null ?
-                            item1.mediaMetadata.artist.toString() : "";
+                        item1.mediaMetadata.artist.toString() : "";
                     String artist2 = item2.mediaMetadata.artist != null ?
-                            item2.mediaMetadata.artist.toString() : "";
+                        item2.mediaMetadata.artist.toString() : "";
                     return compareChinese(artist1, artist2);
                 };
                 break;
 
-            case CREATION_DATE:
+            case CreatedAt:
                 comparator = (item1, item2) -> {
                     String id1 = item1.mediaId.substring(item1.mediaId.lastIndexOf("/") + 1);
                     String id2 = item2.mediaId.substring(item2.mediaId.lastIndexOf("/") + 1);
@@ -79,7 +78,7 @@ public class LocalMusicSorter {
                     }
                 };
                 break;
-            case PLAY_COUNT:
+            case PlayCount:
                 Logs.d(TAG, "Play count sorting not implemented yet");
                 return null;
             default:

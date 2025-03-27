@@ -1,5 +1,11 @@
 package net.hearnsoft.tcm.ui.fragments;
 
+import static io.vavr.API.$;
+import static io.vavr.API.Case;
+import static io.vavr.API.Match;
+import static io.vavr.Patterns.$Left;
+import static io.vavr.Patterns.$Right;
+
 import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
@@ -16,12 +22,14 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.snackbar.Snackbar;
 
 import net.hearnsoft.tcm.R;
-import net.hearnsoft.tcm.api.APICore;
-import net.hearnsoft.tcm.api.UserAPI;
+import net.hearnsoft.tcm.application.dto.AuthCreds;
+import net.hearnsoft.tcm.application.usecase.ILoginUseCase;
+import net.hearnsoft.tcm.application.usecase.UserAuthenticationType;
 import net.hearnsoft.tcm.databinding.FragmentUserLoginBinding;
-import net.hearnsoft.tcm.misc.UserLoginType;
+import net.hearnsoft.tcm.domain.model.user.UserProfile;
+import net.hearnsoft.tcm.infrastructure.adapter.http.Constants;
+import net.hearnsoft.tcm.infrastructure.adapter.http.UserAPI;
 import net.hearnsoft.tcm.ui.activity.UserLoginActivity;
-import net.hearnsoft.tcm.utils.Constants;
 import net.hearnsoft.tcm.utils.Logs;
 import net.hearnsoft.tcm.utils.SettingsPrefUtils;
 import net.hearnsoft.tcm.utils.UserLoginPortal;
@@ -31,12 +39,13 @@ public class UserLoginFragment extends Fragment {
     private static final String TAG = UserLoginFragment.class.getSimpleName();
     private FragmentUserLoginBinding binding;
     private UserLoginPortal portal;
+
     private UserAPI userAPI;
+    private ILoginUseCase loginUseCase;
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         userAPI = UserAPI.getInstance(requireContext());
         binding = FragmentUserLoginBinding.inflate(inflater, container, false);
         return binding.getRoot();
@@ -133,32 +142,46 @@ public class UserLoginFragment extends Fragment {
         }
         if (!hasError) {
             binding.userLogin.setEnabled(false);
-            userAPI.login(username, password, new APICore.SessionTokenCallback<String>() {
-                @Override
-                public void onSuccess(String data, String sessionToken) {
-                    Snackbar.make(binding.getRoot(),
-                            data + "," + getString(R.string.toast_user_login_succ),
-                            Snackbar.LENGTH_SHORT).show();
-                    SettingsPrefUtils.getInstance(requireActivity())
-                            .writeStringSettings(Constants.KEY_USER_ID, username);
-                    binding.userLogin.setEnabled(true);
-                    ((UserLoginActivity) requireActivity()).onLoginSuccess(sessionToken,
-                            UserLoginType.LOGIN);
-                }
 
-                @Override
-                public void onSuccess(String data) {
-                    //empty stub
-                }
+            AuthCreds creds = new AuthCreds(username, password);
 
-                @Override
-                public void onError(APICore.ApiError error) {
-                    Snackbar.make(binding.getRoot(), error.getMessage(), Snackbar.LENGTH_SHORT).show();
-                    Logs.e(TAG, error.getMessage());
-                    binding.userLogin.setEnabled(true);
-                }
-            });
+            loginUseCase.execSync(creds).onFailure(error -> {
+                onError(error.getMessage());
+            }).onSuccess(either ->
+                Match(either).of(
+                    Case($Right($()), value -> {
+                        onSuccess(value);
+                        return null;
+                    }),
+                    Case($Left($()), err -> {
+                        onError(err);
+                        return null;
+                    })
+                )
+            );
         }
+    }
+
+
+    private void onError(String msg) {
+        Snackbar.make(binding.getRoot(), msg, Snackbar.LENGTH_SHORT).show();
+        Logs.e(TAG, msg);
+        binding.userLogin.setEnabled(true);
+    }
+
+    public void onSuccess(UserProfile data) {
+        Snackbar.make(
+                binding.getRoot(),
+                "Ok ," + getString(R.string.toast_user_login_succ),
+                Snackbar.LENGTH_SHORT
+            )
+            .show();
+
+        SettingsPrefUtils.getInstance(requireActivity())
+            .writeStringSettings(Constants.KEY_USER_ID, data.getName());
+        binding.userLogin.setEnabled(true);
+
+        ((UserLoginActivity) requireActivity()).onLoginSuccess(UserAuthenticationType.LOGIN);
     }
 
 }

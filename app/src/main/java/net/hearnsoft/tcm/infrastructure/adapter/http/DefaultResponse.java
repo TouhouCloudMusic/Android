@@ -1,4 +1,4 @@
-package net.hearnsoft.tcm.beans;
+package net.hearnsoft.tcm.infrastructure.adapter.http;
 
 import lombok.Getter;
 import lombok.Setter;

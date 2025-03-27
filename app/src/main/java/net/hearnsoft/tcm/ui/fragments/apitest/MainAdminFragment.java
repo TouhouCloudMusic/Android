@@ -14,10 +14,10 @@ import net.hearnsoft.tcm.R;
 import net.hearnsoft.tcm.beans.ApiTestConfig;
 import net.hearnsoft.tcm.beans.ApiTestEntry;
 import net.hearnsoft.tcm.databinding.FragmentMainAdminBinding;
+import net.hearnsoft.tcm.infrastructure.adapter.http.Constants;
 import net.hearnsoft.tcm.ui.adapter.ApiTestItemAdapter;
-import net.hearnsoft.tcm.utils.ApiConfigParser;
-import net.hearnsoft.tcm.utils.Constants;
 import net.hearnsoft.tcm.ui.utils.HorizontalSpaceItemDecoration;
+import net.hearnsoft.tcm.utils.ApiConfigParser;
 import net.hearnsoft.tcm.utils.Logs;
 
 import java.io.IOException;
@@ -26,11 +26,6 @@ import java.io.InputStream;
 public class MainAdminFragment extends Fragment {
     private FragmentMainAdminBinding binding;
     private ApiTestEntry apiTestEntry;
-
-    public interface FragmentChangeListener {
-        void onFragmentChange(Fragment fragment);
-    }
-
     private FragmentChangeListener listener;
 
     public void setFragmentChangeListener(FragmentChangeListener listener) {
@@ -60,14 +55,14 @@ public class MainAdminFragment extends Fragment {
 
             ApiTestItemAdapter adapter = new ApiTestItemAdapter();
             LinearLayoutManager layoutManager = new LinearLayoutManager(
-                    requireContext(),
-                    LinearLayoutManager.VERTICAL,
-                    false
+                requireContext(),
+                LinearLayoutManager.VERTICAL,
+                false
             );
             binding.adminTestModuleList.setLayoutManager(layoutManager);
             binding.adminTestModuleList.setAdapter(adapter);
             binding.adminTestModuleList.addItemDecoration(new HorizontalSpaceItemDecoration(
-                    getResources().getDimensionPixelSize(R.dimen.card_spacing)
+                getResources().getDimensionPixelSize(R.dimen.card_spacing)
             ));
             adapter.setOnItemClickListener(this::handleApiTestItemClicked);
             adapter.setData(apiTestEntry.getApiTestConfigs());
@@ -90,6 +85,10 @@ public class MainAdminFragment extends Fragment {
         } catch (Exception e) {
             throw new RuntimeException("Invalid fragment class", e);
         }
+    }
+
+    public interface FragmentChangeListener {
+        void onFragmentChange(Fragment fragment);
     }
 
 }

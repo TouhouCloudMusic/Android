@@ -3,6 +3,8 @@ package net.hearnsoft.tcm.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import net.hearnsoft.tcm.infrastructure.adapter.http.Constants;
+
 public class SettingsPrefUtils {
 
     private static SettingsPrefUtils instance;
@@ -11,7 +13,7 @@ public class SettingsPrefUtils {
 
     private SettingsPrefUtils(Context context) {
         sharedPreferences =
-                context.getSharedPreferences(Constants.PREF_GLOBAL_NAME, Context.MODE_PRIVATE);
+            context.getSharedPreferences(Constants.PREF_GLOBAL_NAME, Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
     }
 

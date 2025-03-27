@@ -1,4 +1,4 @@
-package net.hearnsoft.tcm.api;
+package net.hearnsoft.tcm.infrastructure.adapter.http;
 
 public enum ApiMethod {
     GET("GET"),

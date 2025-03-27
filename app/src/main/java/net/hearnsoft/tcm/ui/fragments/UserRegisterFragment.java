@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.method.LinkMovementMethod;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,12 +16,12 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.snackbar.Snackbar;
 
 import net.hearnsoft.tcm.R;
-import net.hearnsoft.tcm.api.APICore;
-import net.hearnsoft.tcm.api.UserAPI;
+import net.hearnsoft.tcm.application.usecase.UserAuthenticationType;
 import net.hearnsoft.tcm.databinding.FragmentUserRegisterBinding;
-import net.hearnsoft.tcm.misc.UserLoginType;
+import net.hearnsoft.tcm.infrastructure.adapter.http.APICore;
+import net.hearnsoft.tcm.infrastructure.adapter.http.Constants;
+import net.hearnsoft.tcm.infrastructure.adapter.http.UserAPI;
 import net.hearnsoft.tcm.ui.activity.UserLoginActivity;
-import net.hearnsoft.tcm.utils.Constants;
 import net.hearnsoft.tcm.utils.Logs;
 import net.hearnsoft.tcm.utils.SettingsPrefUtils;
 import net.hearnsoft.tcm.utils.UserLoginPortal;
@@ -37,8 +36,7 @@ public class UserRegisterFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         userAPI = UserAPI.getInstance(requireContext());
         binding = FragmentUserRegisterBinding.inflate(inflater, container, false);
         return binding.getRoot();
@@ -138,14 +136,10 @@ public class UserRegisterFragment extends Fragment {
             userAPI.register(username, password, new APICore.SessionTokenCallback<String>() {
                 @Override
                 public void onSuccess(String data, String sessionToken) {
-                    Snackbar.make(binding.getRoot(),
-                            data + "," + getString(R.string.toast_user_register_succ),
-                            Snackbar.LENGTH_SHORT).show();
-                    SettingsPrefUtils.getInstance(requireActivity())
-                            .writeStringSettings(Constants.KEY_USER_ID, username);
+                    Snackbar.make(binding.getRoot(), data + "," + getString(R.string.toast_user_register_succ), Snackbar.LENGTH_SHORT).show();
+                    SettingsPrefUtils.getInstance(requireActivity()).writeStringSettings(Constants.KEY_USER_ID, username);
                     binding.userRegister.setEnabled(true);
-                    ((UserLoginActivity) requireActivity()).onLoginSuccess(sessionToken,
-                            UserLoginType.REGISTER);
+                    ((UserLoginActivity) requireActivity()).onLoginSuccess(UserAuthenticationType.REGISTER);
                 }
 
                 @Override

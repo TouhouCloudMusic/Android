@@ -71,6 +71,13 @@ dependencies {
     implementation libs.mpandroidchart
     // Lombok
     implementation libs.lombok
+
+    implementation libs.vavr
+
+    implementation libs.retrofit
+    implementation libs.converter.gson
+    implementation libs.persistentcookiejar
+
     // AndroidX Navigation
     implementation libs.androidx.navigation.fragment
     implementation libs.androidx.navigation.ui

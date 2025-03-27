@@ -12,14 +12,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import net.hearnsoft.tcm.R;
+import net.hearnsoft.tcm.application.usecase.UserAuthenticationType;
 import net.hearnsoft.tcm.databinding.ActivityUserLoginBinding;
-import net.hearnsoft.tcm.misc.UserLoginType;
+import net.hearnsoft.tcm.infrastructure.adapter.http.Constants;
 import net.hearnsoft.tcm.ui.adapter.AppViewPagerAdapter;
 import net.hearnsoft.tcm.ui.fragments.UserLoginFragment;
 import net.hearnsoft.tcm.ui.fragments.UserRegisterFragment;
 import net.hearnsoft.tcm.ui.model.AuthStateViewModel;
-import net.hearnsoft.tcm.utils.Constants;
-import net.hearnsoft.tcm.utils.SettingsPrefUtils;
 import net.hearnsoft.tcm.utils.UserLoginPortal;
 import net.hearnsoft.tcm.utils.ViewModelUtils;
 
@@ -79,12 +78,12 @@ public class UserLoginActivity extends AppCompatActivity implements UserLoginPor
         return super.onOptionsItemSelected(item);
     }
 
-    public void onLoginSuccess(String sessionToken, UserLoginType loginType) {
+    public void onLoginSuccess(UserAuthenticationType loginType) {
         // 保存 session token
-        SettingsPrefUtils.getInstance(this).writeStringSettings(Constants.KEY_USER_TOKEN, sessionToken);
+        // SettingsPrefUtils.getInstance(this).writeStringSettings(Constants.KEY_USER_TOKEN, sessionToken);
 
         // 展示Toast
-        switch(loginType) {
+        switch (loginType) {
             case REGISTER:
                 Toast.makeText(this, R.string.toast_user_register_succ, Toast.LENGTH_SHORT).show();
                 break;

@@ -1,12 +1,17 @@
 *.iml
 .gradle
-/local.properties
-.idea
 .DS_Store
 /build
 /captures
 .externalNativeBuild
 .cxx
+
+# editor
+
+.idea
+!.idea/codeStyles/
+
+
+# cfgs
 local.properties
 server.properties
-.vscode

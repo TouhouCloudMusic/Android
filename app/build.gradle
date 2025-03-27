@@ -49,6 +49,7 @@ android {
 }
 
 dependencies {
+    implementation project(':openapi-sdk')
 
     implementation libs.appcompat
     implementation libs.material

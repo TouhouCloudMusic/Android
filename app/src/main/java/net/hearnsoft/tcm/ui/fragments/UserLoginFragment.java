@@ -28,25 +28,27 @@ import net.hearnsoft.tcm.application.usecase.UserAuthenticationType;
 import net.hearnsoft.tcm.databinding.FragmentUserLoginBinding;
 import net.hearnsoft.tcm.domain.model.user.UserProfile;
 import net.hearnsoft.tcm.infrastructure.adapter.http.Constants;
-import net.hearnsoft.tcm.infrastructure.adapter.http.UserAPI;
 import net.hearnsoft.tcm.ui.activity.UserLoginActivity;
 import net.hearnsoft.tcm.utils.Logs;
 import net.hearnsoft.tcm.utils.SettingsPrefUtils;
 import net.hearnsoft.tcm.utils.UserLoginPortal;
 
 public class UserLoginFragment extends Fragment {
-
     private static final String TAG = UserLoginFragment.class.getSimpleName();
     private FragmentUserLoginBinding binding;
     private UserLoginPortal portal;
-
-    private UserAPI userAPI;
     private ILoginUseCase loginUseCase;
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        userAPI = UserAPI.getInstance(requireContext());
+    public View onCreateView(
+        @NonNull
+        LayoutInflater inflater,
+        @Nullable
+        ViewGroup container,
+        @Nullable
+        Bundle savedInstanceState
+    ) {
         binding = FragmentUserLoginBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }

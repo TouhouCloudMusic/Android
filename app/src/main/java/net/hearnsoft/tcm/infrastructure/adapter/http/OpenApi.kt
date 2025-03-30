@@ -60,7 +60,7 @@ class UserApi(basePath: String) {
     val login: ILoginUseCase = LoginUseCase(api)
 }
 
-class LoginUseCase(private val api: UserOpenApi) : ILoginUseCase {
+private class LoginUseCase(private val api: UserOpenApi) : ILoginUseCase {
     override suspend fun exec(creds: AuthCreds): UserProfile {
         val ret = api.signIn(AuthCredential(creds.username, creds.password)).data
 

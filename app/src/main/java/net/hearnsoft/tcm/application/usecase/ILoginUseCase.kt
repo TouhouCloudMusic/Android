@@ -9,9 +9,9 @@ import java.util.concurrent.CompletableFuture
 
 
 interface ILoginUseCase {
-    suspend fun exec(creds: AuthCreds): Result<UserProfile>;
+    suspend fun exec(creds: AuthCreds): UserProfile;
 
-    fun execSync(creds: AuthCreds): CompletableFuture<Result<UserProfile>> {
+    fun execSync(creds: AuthCreds): CompletableFuture<UserProfile> {
         val future = CoroutineScope(Dispatchers.IO).future {
             exec(creds)
         };

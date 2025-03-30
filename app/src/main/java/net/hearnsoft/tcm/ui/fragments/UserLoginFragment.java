@@ -1,11 +1,5 @@
 package net.hearnsoft.tcm.ui.fragments;
 
-import static io.vavr.API.$;
-import static io.vavr.API.Case;
-import static io.vavr.API.Match;
-import static io.vavr.Patterns.$Left;
-import static io.vavr.Patterns.$Right;
-
 import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
@@ -26,12 +20,15 @@ import net.hearnsoft.tcm.application.dto.AuthCreds;
 import net.hearnsoft.tcm.application.usecase.ILoginUseCase;
 import net.hearnsoft.tcm.application.usecase.UserAuthenticationType;
 import net.hearnsoft.tcm.databinding.FragmentUserLoginBinding;
-import net.hearnsoft.tcm.domain.model.user.UserProfile;
 import net.hearnsoft.tcm.infrastructure.adapter.http.Constants;
 import net.hearnsoft.tcm.ui.activity.UserLoginActivity;
 import net.hearnsoft.tcm.utils.Logs;
 import net.hearnsoft.tcm.utils.SettingsPrefUtils;
 import net.hearnsoft.tcm.utils.UserLoginPortal;
+
+import org.openapitools.client.models.UserProfile;
+
+import io.vavr.concurrent.Future;
 
 public class UserLoginFragment extends Fragment {
     private static final String TAG = UserLoginFragment.class.getSimpleName();
@@ -147,20 +144,9 @@ public class UserLoginFragment extends Fragment {
 
             AuthCreds creds = new AuthCreds(username, password);
 
-            loginUseCase.execSync(creds).onFailure(error -> {
+            Future.fromCompletableFuture(loginUseCase.execSync(creds)).onFailure(error -> {
                 onError(error.getMessage());
-            }).onSuccess(either ->
-                Match(either).of(
-                    Case($Right($()), value -> {
-                        onSuccess(value);
-                        return null;
-                    }),
-                    Case($Left($()), err -> {
-                        onError(err);
-                        return null;
-                    })
-                )
-            );
+            }).onSuccess(this::onSuccess);
         }
     }
 

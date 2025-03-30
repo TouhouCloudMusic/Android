@@ -60,14 +60,11 @@ class UserApi(basePath: String) {
     val login: ILoginUseCase = LoginUseCase(api)
 }
 
-class LoginUseCase(val api: UserOpenApi) : ILoginUseCase {
-    override suspend fun exec(creds: AuthCreds): Result<UserProfile> {
-        try {
-            val ret = api.signIn(AuthCredential(creds.username, creds.password)).data
-            return Result.success(ret)
-        } catch (e: Exception) {
-            return Result.failure(e)
-        }
+class LoginUseCase(private val api: UserOpenApi) : ILoginUseCase {
+    override suspend fun exec(creds: AuthCreds): UserProfile {
+        val ret = api.signIn(AuthCredential(creds.username, creds.password)).data
+
+        return ret
     }
 }
 

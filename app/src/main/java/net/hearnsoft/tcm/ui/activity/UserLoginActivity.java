@@ -12,8 +12,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import net.hearnsoft.tcm.R;
-import net.hearnsoft.tcm.application.usecase.UserAuthenticationType;
 import net.hearnsoft.tcm.databinding.ActivityUserLoginBinding;
+import net.hearnsoft.tcm.domain.model.user.UserAuthenticationType;
 import net.hearnsoft.tcm.infrastructure.adapter.http.Constants;
 import net.hearnsoft.tcm.ui.adapter.AppViewPagerAdapter;
 import net.hearnsoft.tcm.ui.fragments.UserLoginFragment;
@@ -99,7 +99,10 @@ public class UserLoginActivity extends AppCompatActivity implements UserLoginPor
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
 
         // 重置ViewModel处理状态
-        AuthStateViewModel authStateViewModel = ViewModelUtils.getViewModel(this, AuthStateViewModel.class);
+        AuthStateViewModel authStateViewModel = ViewModelUtils.getViewModel(
+            this,
+            AuthStateViewModel.class
+        );
         authStateViewModel.finishHandling401();
 
         // 关闭登录活动

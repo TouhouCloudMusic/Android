@@ -1,15 +1,17 @@
 package net.hearnsoft.tcm.infrastructure.adapter.http
 
 
-import net.hearnsoft.tcm.application.dto.AuthCreds
-import net.hearnsoft.tcm.application.usecase.ILoginUseCase
+import net.hearnsoft.tcm.application.service.SyncUserService
+import net.hearnsoft.tcm.application.service.UserService
 import net.hearnsoft.tcm.domain.repository.ArtistRepository
 import net.hearnsoft.tcm.domain.repository.ReleaseRepository
 import net.hearnsoft.tcm.domain.repository.UserRepository
 import org.openapitools.client.models.ArtistCorrection
 import org.openapitools.client.models.AuthCredential
+import org.openapitools.client.models.Message
 import org.openapitools.client.models.ReleaseCorrection
 import org.openapitools.client.models.UserProfile
+import java.io.File
 import org.openapitools.client.apis.ArtistApi as ArtistOpenApi
 import org.openapitools.client.apis.ReleaseApi as ReleaseOpenApi
 
@@ -54,24 +56,31 @@ class TagApi {
 
 }
 
-class UserApi(basePath: String) : UserRepository {
+class UserApi(basePath: String) : UserRepository, UserService, SyncUserService {
     private val api = org.openapitools.client.apis.UserApi(basePath)
-
-    val login: ILoginUseCase = LoginUseCase(api)
 
     override suspend fun getProfile(username: String): UserProfile {
         val res = api.profileWithName(username)
 
         return res.data
     }
-}
 
-private class LoginUseCase(private val api: org.openapitools.client.apis.UserApi) : ILoginUseCase {
-    override suspend fun exec(creds: AuthCreds): UserProfile {
-        val ret = api.signIn(AuthCredential(creds.username, creds.password)).data
+    override suspend fun signIn(authCreds: AuthCredential): UserProfile {
+        return api.signIn(authCreds).data
+    }
 
-        return ret
+    override suspend fun signUp(authCreds: AuthCredential): UserProfile {
+        return api.signUp(authCreds).data
+    }
+
+    override suspend fun signOut(): Message {
+        return api.signOut()
+    }
+
+    override suspend fun uploadAvatar(data: File): Message {
+        return api.uploadAvatar(data)
     }
 }
+
 
 

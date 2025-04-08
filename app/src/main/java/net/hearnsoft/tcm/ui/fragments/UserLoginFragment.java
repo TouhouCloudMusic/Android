@@ -18,10 +18,9 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.snackbar.Snackbar;
 
 import net.hearnsoft.tcm.R;
-import net.hearnsoft.tcm.application.dto.AuthCreds;
-import net.hearnsoft.tcm.application.usecase.ILoginUseCase;
-import net.hearnsoft.tcm.application.usecase.UserAuthenticationType;
+import net.hearnsoft.tcm.application.service.SyncUserService;
 import net.hearnsoft.tcm.databinding.FragmentUserLoginBinding;
+import net.hearnsoft.tcm.domain.model.user.UserAuthenticationType;
 import net.hearnsoft.tcm.infrastructure.adapter.http.Constants;
 import net.hearnsoft.tcm.infrastructure.adapter.http.UserApi;
 import net.hearnsoft.tcm.ui.activity.UserLoginActivity;
@@ -29,6 +28,7 @@ import net.hearnsoft.tcm.utils.Logs;
 import net.hearnsoft.tcm.utils.SettingsPrefUtils;
 import net.hearnsoft.tcm.utils.UserLoginPortal;
 
+import org.openapitools.client.models.AuthCredential;
 import org.openapitools.client.models.UserProfile;
 
 import io.vavr.concurrent.Future;
@@ -37,7 +37,7 @@ public class UserLoginFragment extends Fragment {
     private static final String TAG = UserLoginFragment.class.getSimpleName();
     private FragmentUserLoginBinding binding;
     private UserLoginPortal portal;
-    private ILoginUseCase loginUseCase;
+    private SyncUserService userService;
 
     @Nullable
     @Override
@@ -47,7 +47,7 @@ public class UserLoginFragment extends Fragment {
         @Nullable Bundle savedInstanceState
     ) {
         // TODO: 依赖注入
-        loginUseCase = new UserApi(BASE_URL).getLogin();
+        userService = new UserApi(BASE_URL);
         binding = FragmentUserLoginBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
@@ -144,9 +144,9 @@ public class UserLoginFragment extends Fragment {
         if (!hasError) {
             binding.userLogin.setEnabled(false);
 
-            AuthCreds creds = new AuthCreds(username, password);
+            AuthCredential creds = new AuthCredential(username, password);
 
-            Future.fromCompletableFuture(loginUseCase.execSync(creds)).onFailure(error -> {
+            Future.fromCompletableFuture(userService.signInSync(creds)).onFailure(error -> {
                 onError(error.getMessage());
             }).onSuccess(this::onSuccess);
         }

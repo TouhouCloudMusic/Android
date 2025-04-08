@@ -153,25 +153,36 @@ public class UserLoginFragment extends Fragment {
     }
 
     private void onError(String msg) {
-        Snackbar.make(binding.getRoot(), msg, Snackbar.LENGTH_SHORT).show();
-        Logs.e(TAG, msg);
-        binding.userLogin.setEnabled(true);
+        // 确保在UI线程中执行
+        if (isAdded() && !isRemoving()) {
+            requireActivity().runOnUiThread(() -> {
+                Snackbar.make(binding.getRoot(), msg, Snackbar.LENGTH_SHORT).show();
+                Logs.e(TAG, msg);
+                binding.userLogin.setEnabled(true);
+            });
+        }
     }
 
     public void onSuccess(UserProfile data) {
-        Snackbar.make(
-            binding.getRoot(),
-            "Ok ," + getString(R.string.toast_user_login_succ),
-            Snackbar.LENGTH_SHORT
-        ).show();
-
+        if (data == null) {
+            return;
+        }
         SettingsPrefUtils.getInstance(requireActivity()).writeStringSettings(
             Constants.KEY_USER_ID,
             data.getName()
         );
-        binding.userLogin.setEnabled(true);
-
-        ((UserLoginActivity) requireActivity()).onLoginSuccess(UserAuthenticationType.LOGIN);
+        if (isAdded() && !isRemoving()) {
+            // 确保在UI线程中执行
+            requireActivity().runOnUiThread(() -> {
+                Snackbar.make(
+                    binding.getRoot(),
+                    "Ok ," + getString(R.string.toast_user_login_succ),
+                    Snackbar.LENGTH_SHORT
+                ).show();
+                binding.userLogin.setEnabled(true);
+                ((UserLoginActivity) requireActivity()).onLoginSuccess(UserAuthenticationType.LOGIN);
+            });
+        }
     }
 
 }

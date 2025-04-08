@@ -27,6 +27,7 @@ import net.hearnsoft.tcm.utils.Logs;
 import java.util.ArrayList;
 import java.util.List;
 
+@UnstableApi
 public class MusicPlaybackService extends MediaLibraryService {
     private MediaLibrarySession mediaLibrarySession;
     private ExoPlayer player;
@@ -65,14 +66,16 @@ public class MusicPlaybackService extends MediaLibraryService {
         player.setRepeatMode(Player.REPEAT_MODE_ALL);
     }
 
-    @OptIn(markerClass = UnstableApi.class)
+    @UnstableApi
     private void initializeSession() {
         // 创建PendingIntent用于通知点击动作
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent sessionActivity = PendingIntent.getActivity(
-                this,
-                0,
-                new Intent(this, MainActivity.class),
-                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT
+            this,
+            0,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT
         );
 
         // 创建媒体库会话

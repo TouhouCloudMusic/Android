@@ -20,7 +20,7 @@ import net.hearnsoft.tcm.application.usecase.UserAuthenticationType;
 import net.hearnsoft.tcm.databinding.FragmentUserRegisterBinding;
 import net.hearnsoft.tcm.infrastructure.adapter.http.APICore;
 import net.hearnsoft.tcm.infrastructure.adapter.http.Constants;
-import net.hearnsoft.tcm.infrastructure.adapter.http.UserAPI;
+import net.hearnsoft.tcm.infrastructure.adapter.http.UserAPIOld;
 import net.hearnsoft.tcm.ui.activity.UserLoginActivity;
 import net.hearnsoft.tcm.utils.Logs;
 import net.hearnsoft.tcm.utils.SettingsPrefUtils;
@@ -32,12 +32,16 @@ public class UserRegisterFragment extends Fragment {
     private static final String TAG = UserRegisterFragment.class.getSimpleName();
     private FragmentUserRegisterBinding binding;
     private UserLoginPortal portal;
-    private UserAPI userAPI;
+    private UserAPIOld userAPI;
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        userAPI = UserAPI.getInstance(requireContext());
+    public View onCreateView(
+        @NonNull LayoutInflater inflater,
+        @Nullable ViewGroup container,
+        @Nullable Bundle savedInstanceState
+    ) {
+        userAPI = UserAPIOld.getInstance(requireContext());
         binding = FragmentUserRegisterBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
@@ -133,27 +137,37 @@ public class UserRegisterFragment extends Fragment {
         }
         if (!hasError) {
             binding.userRegister.setEnabled(false);
-            userAPI.register(username, password, new APICore.SessionTokenCallback<String>() {
-                @Override
-                public void onSuccess(String data, String sessionToken) {
-                    Snackbar.make(binding.getRoot(), data + "," + getString(R.string.toast_user_register_succ), Snackbar.LENGTH_SHORT).show();
-                    SettingsPrefUtils.getInstance(requireActivity()).writeStringSettings(Constants.KEY_USER_ID, username);
-                    binding.userRegister.setEnabled(true);
-                    ((UserLoginActivity) requireActivity()).onLoginSuccess(UserAuthenticationType.REGISTER);
-                }
+            userAPI.register(
+                username, password, new APICore.SessionTokenCallback<String>() {
+                    @Override
+                    public void onSuccess(String data, String sessionToken) {
+                        Snackbar.make(
+                            binding.getRoot(),
+                            data + "," + getString(R.string.toast_user_register_succ),
+                            Snackbar.LENGTH_SHORT
+                        ).show();
+                        SettingsPrefUtils.getInstance(requireActivity()).writeStringSettings(Constants.KEY_USER_ID,
+                            username
+                        );
+                        binding.userRegister.setEnabled(true);
+                        ((UserLoginActivity) requireActivity()).onLoginSuccess(
+                            UserAuthenticationType.REGISTER);
+                    }
 
-                @Override
-                public void onSuccess(String data) {
-                    //empty stub
-                }
+                    @Override
+                    public void onSuccess(String data) {
+                        //empty stub
+                    }
 
-                @Override
-                public void onError(APICore.ApiError error) {
-                    Snackbar.make(binding.getRoot(), error.getMessage(), Snackbar.LENGTH_SHORT).show();
-                    Logs.e(TAG, error.getMessage());
-                    binding.userRegister.setEnabled(true);
+                    @Override
+                    public void onError(APICore.ApiError error) {
+                        Snackbar.make(binding.getRoot(), error.getMessage(), Snackbar.LENGTH_SHORT)
+                            .show();
+                        Logs.e(TAG, error.getMessage());
+                        binding.userRegister.setEnabled(true);
+                    }
                 }
-            });
+            );
         }
     }
 

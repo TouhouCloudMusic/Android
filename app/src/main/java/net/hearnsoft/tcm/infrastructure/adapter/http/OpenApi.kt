@@ -11,7 +11,6 @@ import org.openapitools.client.models.ReleaseCorrection
 import org.openapitools.client.models.UserProfile
 import org.openapitools.client.apis.ArtistApi as ArtistOpenApi
 import org.openapitools.client.apis.ReleaseApi as ReleaseOpenApi
-import org.openapitools.client.apis.UserApi as UserOpenApi
 
 
 class OpenApiAdapter(basePath: String) {
@@ -55,19 +54,17 @@ class TagApi {
 }
 
 class UserApi(basePath: String) {
-    private val api = UserOpenApi(basePath)
+    private val api = org.openapitools.client.apis.UserApi(basePath)
 
     val login: ILoginUseCase = LoginUseCase(api)
 }
 
-private class LoginUseCase(private val api: UserOpenApi) : ILoginUseCase {
+private class LoginUseCase(private val api: org.openapitools.client.apis.UserApi) : ILoginUseCase {
     override suspend fun exec(creds: AuthCreds): UserProfile {
         val ret = api.signIn(AuthCredential(creds.username, creds.password)).data
 
         return ret
     }
 }
-
-
 
 

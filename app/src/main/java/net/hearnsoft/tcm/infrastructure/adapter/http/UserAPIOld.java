@@ -7,17 +7,18 @@ import android.text.TextUtils;
 
 import com.google.gson.JsonObject;
 
-import net.hearnsoft.tcm.domain.model.user.UserProfile;
 import net.hearnsoft.tcm.utils.Logs;
 import net.hearnsoft.tcm.utils.SettingsPrefUtils;
 
-public class UserAPI {
+import org.openapitools.client.models.UserProfile;
+
+public class UserAPIOld {
     private static final String TAG = "UserAPI";
-    private static volatile UserAPI instance;
+    private static volatile UserAPIOld instance;
     private final APICore apiCore;
     private final SettingsPrefUtils preferences;
 
-    private UserAPI(Context context) {
+    private UserAPIOld(Context context) {
         String baseApiUrl = Constants.API_HOST;
         this.apiCore = new APICore(context, baseApiUrl);
         this.preferences = SettingsPrefUtils.getInstance(context);
@@ -28,11 +29,11 @@ public class UserAPI {
         }
     }
 
-    public static UserAPI getInstance(Context context) {
+    public static UserAPIOld getInstance(Context context) {
         if (instance == null) {
-            synchronized (UserAPI.class) {
+            synchronized (UserAPIOld.class) {
                 if (instance == null) {
-                    instance = new UserAPI(context);
+                    instance = new UserAPIOld(context);
                 }
             }
         }
@@ -45,62 +46,87 @@ public class UserAPI {
         requestData.addProperty("password", password);
         Logs.d(TAG, "login json:" + requestData);
 
-        apiCore.callAPI(Constants.API_LOGIN, ApiMethod.POST, requestData, String.class, new APICore.SessionTokenCallback<String>() {
-            @Override
-            public void onSuccess(String data, String sessionToken) {
-                preferences.writeStringSettings(Constants.KEY_USER_TOKEN, sessionToken);
-                apiCore.setSessionToken(sessionToken);
-//                callback.onSuccess(data, sessionToken);
-            }
+        apiCore.callAPI(
+            Constants.API_LOGIN,
+            ApiMethod.POST,
+            requestData,
+            String.class,
+            new APICore.SessionTokenCallback<String>() {
+                @Override
+                public void onSuccess(String data, String sessionToken) {
+                    preferences.writeStringSettings(Constants.KEY_USER_TOKEN, sessionToken);
+                    apiCore.setSessionToken(sessionToken);
+                    //                callback.onSuccess(data, sessionToken);
+                }
 
-            @Override
-            public void onSuccess(String data) {
+                @Override
+                public void onSuccess(String data) {
 
-            }
+                }
 
-            @Override
-            public void onError(APICore.ApiError error) {
-//                callback.onError(error);
-            }
-        }, false); // 登录请求不需要包含 Cookie
+                @Override
+                public void onError(APICore.ApiError error) {
+                    //                callback.onError(error);
+                }
+            },
+            false
+        ); // 登录请求不需要包含 Cookie
     }
 
-    public void register(String username, String password, APICore.SessionTokenCallback<String> callback) {
+    public void register(
+        String username,
+        String password,
+        APICore.SessionTokenCallback<String> callback
+    ) {
         JsonObject requestData = new JsonObject();
         requestData.addProperty("username", username);
         requestData.addProperty("password", password);
         Logs.d(TAG, "register json:" + requestData);
 
-        apiCore.callAPI(Constants.API_REGISTER, ApiMethod.POST, requestData, String.class, new APICore.SessionTokenCallback<String>() {
-            @Override
-            public void onSuccess(String data, String sessionToken) {
-                preferences.writeStringSettings(Constants.KEY_USER_TOKEN, sessionToken);
-                apiCore.setSessionToken(sessionToken);
-                callback.onSuccess(data, sessionToken);
-            }
+        apiCore.callAPI(
+            Constants.API_REGISTER,
+            ApiMethod.POST,
+            requestData,
+            String.class,
+            new APICore.SessionTokenCallback<String>() {
+                @Override
+                public void onSuccess(String data, String sessionToken) {
+                    preferences.writeStringSettings(Constants.KEY_USER_TOKEN, sessionToken);
+                    apiCore.setSessionToken(sessionToken);
+                    callback.onSuccess(data, sessionToken);
+                }
 
-            @Override
-            public void onSuccess(String data) {
-                // 注册方法不需要该回调
-            }
+                @Override
+                public void onSuccess(String data) {
+                    // 注册方法不需要该回调
+                }
 
-            @Override
-            public void onError(APICore.ApiError error) {
-                callback.onError(error);
-            }
-        }, false);// 注册请求不需要包含 Cookie
+                @Override
+                public void onError(APICore.ApiError error) {
+                    callback.onError(error);
+                }
+            },
+            false
+        );// 注册请求不需要包含 Cookie
     }
 
     public void logout(String token, APICore.APICallback<String> callback) {
         // 首先检查token是否为空
         if (token == null || TextUtils.isEmpty(token)) {
-            callback.onError(new APICore.ApiError("Unauthorized", "No session token available",
-                ErrorCode.Unauthorized));
+            callback.onError(new APICore.ApiError(
+                "Unauthorized",
+                "No session token available",
+                ErrorCode.Unauthorized
+            ));
             return;
         }
 
         apiCore.setSessionToken(token);
-        apiCore.callAPI(Constants.API_LOGOUT, ApiMethod.GET, null, String.class,
+        apiCore.callAPI(
+            Constants.API_LOGOUT,
+            ApiMethod.GET,
+            null,
+            String.class,
             new APICore.APICallback<String>() {
                 @Override
                 public void onSuccess(String data) {
@@ -114,7 +140,9 @@ public class UserAPI {
                 public void onError(APICore.ApiError error) {
                     callback.onError(error);
                 }
-            }, true);
+            },
+            true
+        );
     }
 
     /**
@@ -126,15 +154,19 @@ public class UserAPI {
     public void getUserProfile(String token, APICore.APICallback<UserProfile> callback) {
         String username = preferences.readStringSettings(Constants.KEY_USER_ID);
         if (token == null || TextUtils.isEmpty(token)) {
-            callback.onError(new APICore.ApiError("Unauthorized",
+            callback.onError(new APICore.ApiError(
+                "Unauthorized",
                 "No session token available",
-                ErrorCode.Unauthorized));
+                ErrorCode.Unauthorized
+            ));
             return;
         }
         if (username == null || TextUtils.isEmpty(username)) {
-            callback.onError(new APICore.ApiError("Bad Request",
+            callback.onError(new APICore.ApiError(
+                "Bad Request",
                 "Username is required",
-                ErrorCode.UnexpectedError));
+                ErrorCode.UnexpectedError
+            ));
             return;
         }
 
@@ -148,27 +180,39 @@ public class UserAPI {
      * @param username 用户名
      * @param callback 回调
      */
-    public void getUserProfile(String token, String username, APICore.APICallback<UserProfile> callback) {
+    public void getUserProfile(
+        String token,
+        String username,
+        APICore.APICallback<UserProfile> callback
+    ) {
         // 首先检查token是否为空
         if (token == null || TextUtils.isEmpty(token)) {
-            callback.onError(new APICore.ApiError("Unauthorized",
+            callback.onError(new APICore.ApiError(
+                "Unauthorized",
                 "No session token available",
-                ErrorCode.Unauthorized));
+                ErrorCode.Unauthorized
+            ));
             return;
         }
         // 检查用户名是否为空
         if (username == null || TextUtils.isEmpty(username)) {
-            callback.onError(new APICore.ApiError("Bad Request",
+            callback.onError(new APICore.ApiError(
+                "Bad Request",
                 "Username is required",
-                ErrorCode.UnexpectedError));
+                ErrorCode.UnexpectedError
+            ));
             return;
         }
 
         String endpoint = Constants.API_USER_PROFILE + "/" + username;
 
         apiCore.setSessionToken(token);
-        apiCore.callAPI(endpoint, ApiMethod.GET, null,
-            UserProfile.class, new APICore.APICallback<UserProfile>() {
+        apiCore.callAPI(
+            endpoint,
+            ApiMethod.GET,
+            null,
+            UserProfile.class,
+            new APICore.APICallback<UserProfile>() {
                 @Override
                 public void onSuccess(UserProfile data) {
                     callback.onSuccess(data);
@@ -182,17 +226,26 @@ public class UserAPI {
                     }
                     callback.onError(error);
                 }
-            });
+            }
+        );
     }
 
     public void getUserRoleList(APICore.APICallback<String[]> callback) {
         apiCore.callAPI(Constants.API_USER_ROLES, ApiMethod.GET, null, String[].class, callback);
     }
 
-    public void uploadAvatar(String token, Uri imageUri, ContentResolver resolver, APICore.APICallback<String> callback) {
+    public void uploadAvatar(
+        String token,
+        Uri imageUri,
+        ContentResolver resolver,
+        APICore.APICallback<String> callback
+    ) {
         if (TextUtils.isEmpty(token)) {
-            callback.onError(new APICore.ApiError("Unauthorized", "No session token available",
-                ErrorCode.Unauthorized));
+            callback.onError(new APICore.ApiError(
+                "Unauthorized",
+                "No session token available",
+                ErrorCode.Unauthorized
+            ));
             return;
         }
         apiCore.setSessionToken(token);

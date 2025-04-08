@@ -1,5 +1,7 @@
 package net.hearnsoft.tcm.ui.fragments;
 
+import static net.hearnsoft.tcm.infrastructure.adapter.http.ApiEndpoints.BASE_URL;
+
 import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
@@ -21,6 +23,7 @@ import net.hearnsoft.tcm.application.usecase.ILoginUseCase;
 import net.hearnsoft.tcm.application.usecase.UserAuthenticationType;
 import net.hearnsoft.tcm.databinding.FragmentUserLoginBinding;
 import net.hearnsoft.tcm.infrastructure.adapter.http.Constants;
+import net.hearnsoft.tcm.infrastructure.adapter.http.UserApi;
 import net.hearnsoft.tcm.ui.activity.UserLoginActivity;
 import net.hearnsoft.tcm.utils.Logs;
 import net.hearnsoft.tcm.utils.SettingsPrefUtils;
@@ -39,13 +42,12 @@ public class UserLoginFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(
-        @NonNull
-        LayoutInflater inflater,
-        @Nullable
-        ViewGroup container,
-        @Nullable
-        Bundle savedInstanceState
+        @NonNull LayoutInflater inflater,
+        @Nullable ViewGroup container,
+        @Nullable Bundle savedInstanceState
     ) {
+        // TODO: 依赖注入
+        loginUseCase = new UserApi(BASE_URL).getLogin();
         binding = FragmentUserLoginBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
@@ -150,7 +152,6 @@ public class UserLoginFragment extends Fragment {
         }
     }
 
-
     private void onError(String msg) {
         Snackbar.make(binding.getRoot(), msg, Snackbar.LENGTH_SHORT).show();
         Logs.e(TAG, msg);
@@ -159,14 +160,15 @@ public class UserLoginFragment extends Fragment {
 
     public void onSuccess(UserProfile data) {
         Snackbar.make(
-                binding.getRoot(),
-                "Ok ," + getString(R.string.toast_user_login_succ),
-                Snackbar.LENGTH_SHORT
-            )
-            .show();
+            binding.getRoot(),
+            "Ok ," + getString(R.string.toast_user_login_succ),
+            Snackbar.LENGTH_SHORT
+        ).show();
 
-        SettingsPrefUtils.getInstance(requireActivity())
-            .writeStringSettings(Constants.KEY_USER_ID, data.getName());
+        SettingsPrefUtils.getInstance(requireActivity()).writeStringSettings(
+            Constants.KEY_USER_ID,
+            data.getName()
+        );
         binding.userLogin.setEnabled(true);
 
         ((UserLoginActivity) requireActivity()).onLoginSuccess(UserAuthenticationType.LOGIN);

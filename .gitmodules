@@ -1,0 +1,3 @@
+[submodule "openapi-sdk"]
+	path = openapi-sdk
+	url = https://github.com/TouhouCloudMusic/openapi-sdk-java

@@ -5,6 +5,7 @@ import net.hearnsoft.tcm.application.dto.AuthCreds
 import net.hearnsoft.tcm.application.usecase.ILoginUseCase
 import net.hearnsoft.tcm.domain.repository.ArtistRepository
 import net.hearnsoft.tcm.domain.repository.ReleaseRepository
+import net.hearnsoft.tcm.domain.repository.UserRepository
 import org.openapitools.client.models.ArtistCorrection
 import org.openapitools.client.models.AuthCredential
 import org.openapitools.client.models.ReleaseCorrection
@@ -53,10 +54,16 @@ class TagApi {
 
 }
 
-class UserApi(basePath: String) {
+class UserApi(basePath: String) : UserRepository {
     private val api = org.openapitools.client.apis.UserApi(basePath)
 
     val login: ILoginUseCase = LoginUseCase(api)
+
+    override suspend fun getProfile(username: String): UserProfile {
+        val res = api.profileWithName(username)
+
+        return res.data
+    }
 }
 
 private class LoginUseCase(private val api: org.openapitools.client.apis.UserApi) : ILoginUseCase {

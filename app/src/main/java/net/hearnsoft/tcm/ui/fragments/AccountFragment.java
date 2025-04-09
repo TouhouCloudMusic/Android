@@ -25,13 +25,19 @@ import net.hearnsoft.tcm.infrastructure.adapter.http.ErrorCode;
 import net.hearnsoft.tcm.infrastructure.adapter.http.UserAPIOld;
 import net.hearnsoft.tcm.ui.activity.UserLoginActivity;
 import net.hearnsoft.tcm.ui.activity.UserProfileActivity;
+import net.hearnsoft.tcm.ui.model.UserViewModel;
 import net.hearnsoft.tcm.ui.widgets.UserCardView;
 import net.hearnsoft.tcm.utils.Logs;
+import net.hearnsoft.tcm.utils.OffsetDateTimeFormater;
 import net.hearnsoft.tcm.utils.SettingsPrefUtils;
+import net.hearnsoft.tcm.utils.ViewModelUtils;
 
 import org.openapitools.client.models.UserProfile;
 
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.util.Date;
 import java.util.Locale;
 
 public class AccountFragment extends Fragment {
@@ -39,35 +45,13 @@ public class AccountFragment extends Fragment {
     private static final String TAG = AccountFragment.class.getSimpleName();
     private FragmentAccountBinding binding;
     private UserCardView userCard;
-    private BroadcastReceiver refreshReceiver;
+    private UserViewModel userViewModel;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        refreshReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (isAdded()) {
-                    refreshUserProfile();
-                }
-            }
-        };
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (refreshReceiver != null) {
-            LocalBroadcastManager.getInstance(requireContext()).registerReceiver(
-                refreshReceiver,
-                new IntentFilter(Constants.ACTION_REFRESH_USER_PROFILE)
-            );
-        }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
+        // Get ViewModel instance
+        userViewModel = ViewModelUtils.getViewModel(requireActivity(), UserViewModel.class);
     }
 
     @Nullable
@@ -82,15 +66,16 @@ public class AccountFragment extends Fragment {
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(refreshReceiver);
-    }
-
-    @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         initUserCard();
+
+        // Set up observers
+        userViewModel.getUserProfile().observe(getViewLifecycleOwner(), this::updateUserProfile);
+        userViewModel.getError().observe(getViewLifecycleOwner(), this::handleError);
+
+        // Initial profile check
+        refreshUserProfile();
     }
 
     private void initUserCard() {
@@ -110,63 +95,60 @@ public class AccountFragment extends Fragment {
 
         userCard.setLayoutParams(params);
         binding.getRoot().addView(userCard, 0);
+    }
 
-        // 测试信息设置，非实际用户 Yuyuko1024 add code start
-        // 上线时需移除该测试代码为实际代码
-        if (isAdded()) {
-            refreshUserProfile();
-        }
-        // Yuyuko1024 add code end
+    @Override
+    public void onResume() {
+        super.onResume();
+        refreshUserProfile();
     }
 
     private void refreshUserProfile() {
-        Logs.d(TAG, "refreshUserProfile: ");
-        String userToken = SettingsPrefUtils.getInstance(requireContext()).readStringSettings(
-            Constants.KEY_USER_TOKEN);
-        if (TextUtils.isEmpty(userToken)) {
+        Logs.d(TAG, "refreshUserProfile");
+        String username = SettingsPrefUtils.getInstance(requireContext()).readStringSettings(
+            Constants.KEY_USER_ID);
+
+        if (TextUtils.isEmpty(username)) {
             setUserCardForLoggedOutState();
         } else {
-            UserAPIOld.getInstance(requireContext()).getUserProfile(
-                userToken, new APICore.APICallback<UserProfile>() {
-                    @Override
-                    public void onSuccess(UserProfile data) {
-                        SimpleDateFormat dateFormat = new SimpleDateFormat(
-                            getString(R.string.date_format_str),
-                            Locale.CHINA
-                        );
-                        String lastLoginDate = getString(
-                            R.string.usercard_last_login_desc,
-                            dateFormat.format(data.getLastLogin())
-                        );
-                        setUserCardInfo(data.getName(), lastLoginDate, null);
-                        userCard.setOnUserCardClickListener(v -> {
-                            // empty click
-                        });
-                        userCard.setUserCardEditClickListener(v -> openUserProfile());
-                        userCard.setUserAvatarFromUrl(getAvatarUrl(data.getAvatarUrl()));
-                        userCard.setUserCardBackgroundFromUrl(getAvatarUrl(data.getAvatarUrl()));
-                        Toast.makeText(
-                            requireContext(),
-                            R.string.toast_refresh_profile_succ,
-                            Toast.LENGTH_SHORT
-                        ).show();
-                    }
+            userViewModel.getProfileByUsername(username);
+        }
+    }
 
-                    @Override
-                    public void onError(APICore.ApiError error) {
-                        Logs.e(TAG, "refreshUserProfile error: " + error.getMessage());
-                        if (error.getError_code() == ErrorCode.RiskControlError) {
-                            Toast.makeText(
-                                requireContext(),
-                                R.string.toast_api_reach_risk_control + error.getMessage(),
-                                Toast.LENGTH_SHORT
-                            ).show();
-                        } else {
-                            setUserCardForLoggedOutState();
-                        }
-                    }
-                }
-            );
+    private void updateUserProfile(UserProfile data) {
+        if (data == null || !isAdded()) {
+            setUserCardForLoggedOutState();
+            return;
+        }
+
+        String lastLoginDate = getString(
+            R.string.usercard_last_login_desc,
+            OffsetDateTimeFormater.format(data.getLastLogin(), getString(R.string.date_format_str))
+        );
+        setUserCardInfo(data.getName(), lastLoginDate, null);
+        userCard.setOnUserCardClickListener(v -> {
+            // empty click
+        });
+        userCard.setUserCardEditClickListener(v -> openUserProfile());
+        userCard.setUserAvatarFromUrl(getAvatarUrl(data.getAvatarUrl()));
+        userCard.setUserCardBackgroundFromUrl(getAvatarUrl(data.getAvatarUrl()));
+        Toast.makeText(
+            requireContext(),
+            R.string.toast_refresh_profile_succ,
+            Toast.LENGTH_SHORT
+        ).show();
+    }
+
+    private void handleError(String errorMessage) {
+        Logs.e(TAG, "refreshUserProfile error: " + errorMessage);
+        if (errorMessage != null && errorMessage.contains("RiskControlError")) {
+            Toast.makeText(
+                requireContext(),
+                getString(R.string.toast_api_reach_risk_control) + errorMessage,
+                Toast.LENGTH_SHORT
+            ).show();
+        } else {
+            setUserCardForLoggedOutState();
         }
     }
 
@@ -178,13 +160,14 @@ public class AccountFragment extends Fragment {
     }
 
     private void setUserCardForLoggedOutState() {
-        if (isAdded()) {
-            setUserCardInfo(
-                getString(R.string.usercard_default_name),
-                getString(R.string.usercard_default_desc),
-                null
-            );
-        }
+        if (!isAdded()) return;
+
+        setUserCardInfo(
+            getString(R.string.usercard_default_name),
+            getString(R.string.usercard_default_desc),
+            null
+        );
+
         userCard.setOnUserCardClickListener(v -> {
             Intent loginPage = new Intent(getContext(), UserLoginActivity.class);
             getContext().startActivity(loginPage);
@@ -199,7 +182,7 @@ public class AccountFragment extends Fragment {
             userCard.setUserName(TextUtils.isEmpty(userName) ? getString(R.string.usercard_default_name) : userName);
             userCard.setUserDescription(TextUtils.isEmpty(userDesc) ? getString(R.string.usercard_default_desc) : userDesc);
             if (TextUtils.isEmpty(userAvatarUrl)) {
-                userCard.setUserAvatarFromRes(R.drawable.test_avatar);
+                userCard.setUserAvatarFromRes(R.drawable.default_avatar);
             } else {
                 userCard.setUserAvatarFromUrl(userAvatarUrl);
             }

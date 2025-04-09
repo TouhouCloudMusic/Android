@@ -4,6 +4,8 @@ package net.hearnsoft.tcm.application.service
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.future
+import net.hearnsoft.tcm.domain.repository.UserRepository
+import net.hearnsoft.tcm.utils.Logs
 import org.openapitools.client.models.AuthCredential
 import org.openapitools.client.models.Message
 import org.openapitools.client.models.UserProfile
@@ -15,6 +17,7 @@ interface UserService {
     suspend fun signUp(authCreds: AuthCredential): UserProfile;
     suspend fun signOut(): Message;
     suspend fun uploadAvatar(data: File): Message;
+    suspend fun getProfile(username: String): UserProfile;
 }
 
 interface SyncUserService : UserService {
@@ -42,6 +45,12 @@ interface SyncUserService : UserService {
     fun uploadAvatarSync(data: File): CompletableFuture<Message> {
         return scope.future {
             uploadAvatar(data)
+        }
+    }
+
+    fun getProfileByUsernameSync(username: String): CompletableFuture<UserProfile> {
+        return scope.future {
+            getProfile(username)
         }
     }
 }

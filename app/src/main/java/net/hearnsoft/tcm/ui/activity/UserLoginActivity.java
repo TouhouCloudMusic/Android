@@ -19,6 +19,8 @@ import net.hearnsoft.tcm.ui.adapter.AppViewPagerAdapter;
 import net.hearnsoft.tcm.ui.fragments.UserLoginFragment;
 import net.hearnsoft.tcm.ui.fragments.UserRegisterFragment;
 import net.hearnsoft.tcm.ui.model.AuthStateViewModel;
+import net.hearnsoft.tcm.ui.model.UserViewModel;
+import net.hearnsoft.tcm.utils.SettingsPrefUtils;
 import net.hearnsoft.tcm.utils.UserLoginPortal;
 import net.hearnsoft.tcm.utils.ViewModelUtils;
 
@@ -30,6 +32,7 @@ public class UserLoginActivity extends AppCompatActivity implements UserLoginPor
 
     private ActivityUserLoginBinding binding;
     private AppViewPagerAdapter adapter;
+    private UserViewModel userViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +47,7 @@ public class UserLoginActivity extends AppCompatActivity implements UserLoginPor
             actionBar.setHomeButtonEnabled(true);
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
+        userViewModel = ViewModelUtils.getViewModel(this, UserViewModel.class);
         loginActivity = this;
     }
 
@@ -79,9 +83,6 @@ public class UserLoginActivity extends AppCompatActivity implements UserLoginPor
     }
 
     public void onLoginSuccess(UserAuthenticationType loginType) {
-        // 保存 session token
-        // SettingsPrefUtils.getInstance(this).writeStringSettings(Constants.KEY_USER_TOKEN, sessionToken);
-
         // 展示Toast
         switch (loginType) {
             case REGISTER:
@@ -94,9 +95,11 @@ public class UserLoginActivity extends AppCompatActivity implements UserLoginPor
                 break;
         }
 
-        // 发送广播通知 AccountFragment 刷新
-        Intent intent = new Intent(Constants.ACTION_REFRESH_USER_PROFILE);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        // Get the ViewModel to refresh data in observers
+        String username = SettingsPrefUtils.getInstance(this).readStringSettings(Constants.KEY_USER_ID);
+        if (!TextUtils.isEmpty(username)) {
+            userViewModel.getProfileByUsername(username);
+        }
 
         // 重置ViewModel处理状态
         AuthStateViewModel authStateViewModel = ViewModelUtils.getViewModel(

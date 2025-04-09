@@ -24,9 +24,11 @@ import net.hearnsoft.tcm.domain.model.user.UserAuthenticationType;
 import net.hearnsoft.tcm.infrastructure.adapter.http.Constants;
 import net.hearnsoft.tcm.infrastructure.adapter.http.UserApi;
 import net.hearnsoft.tcm.ui.activity.UserLoginActivity;
+import net.hearnsoft.tcm.ui.model.UserViewModel;
 import net.hearnsoft.tcm.utils.Logs;
 import net.hearnsoft.tcm.utils.SettingsPrefUtils;
 import net.hearnsoft.tcm.utils.UserLoginPortal;
+import net.hearnsoft.tcm.utils.ViewModelUtils;
 
 import org.openapitools.client.models.AuthCredential;
 import org.openapitools.client.models.UserProfile;
@@ -37,7 +39,7 @@ public class UserLoginFragment extends Fragment {
     private static final String TAG = UserLoginFragment.class.getSimpleName();
     private FragmentUserLoginBinding binding;
     private UserLoginPortal portal;
-    private SyncUserService userService;
+    private UserViewModel userViewModel;
 
     @Nullable
     @Override
@@ -46,8 +48,7 @@ public class UserLoginFragment extends Fragment {
         @Nullable ViewGroup container,
         @Nullable Bundle savedInstanceState
     ) {
-        // TODO: 依赖注入
-        userService = new UserApi(BASE_URL);
+        userViewModel = ViewModelUtils.getViewModel(requireActivity(), UserViewModel.class);
         binding = FragmentUserLoginBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
@@ -144,11 +145,29 @@ public class UserLoginFragment extends Fragment {
         if (!hasError) {
             binding.userLogin.setEnabled(false);
 
-            AuthCredential creds = new AuthCredential(username, password);
+            // 提前清除旧的观察者以避免重复观察
+            userViewModel.getUserProfile().removeObservers(getViewLifecycleOwner());
+            userViewModel.getError().removeObservers(getViewLifecycleOwner());
 
-            Future.fromCompletableFuture(userService.signInSync(creds)).onFailure(error -> {
-                onError(error.getMessage());
-            }).onSuccess(this::onSuccess);
+            // 设置新的观察者
+            userViewModel.getUserProfile().observe(getViewLifecycleOwner(), userProfile -> {
+                if (userProfile != null) {
+                    onSuccess(userProfile);
+                    // 登录成功后移除观察者
+                    userViewModel.getUserProfile().removeObservers(getViewLifecycleOwner());
+                }
+            });
+
+            userViewModel.getError().observe(getViewLifecycleOwner(), error -> {
+                if (error != null) {
+                    onError(error);
+                    // 错误处理后移除观察者
+                    userViewModel.getError().removeObservers(getViewLifecycleOwner());
+                }
+            });
+
+            // 执行登录操作
+            userViewModel.login(username, password);
         }
     }
 

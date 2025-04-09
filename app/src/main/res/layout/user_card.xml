@@ -33,7 +33,7 @@
                 android:layout_marginEnd="@dimen/account_cardview_avatar_margin_end"
                 android:layout_marginTop="@dimen/account_cardview_avatar_margin_top"
                 android:layout_marginBottom="@dimen/account_cardview_avatar_margin_bottom"
-                android:src="@drawable/ic_account_circle"
+                android:src="@drawable/default_avatar"
                 android:scaleType="fitCenter"
                 android:id="@+id/user_avatar"
                 app:shapeAppearance="@style/UserAvatarCircle"

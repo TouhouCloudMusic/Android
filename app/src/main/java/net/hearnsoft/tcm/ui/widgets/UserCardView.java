@@ -55,7 +55,7 @@ public class UserCardView extends LinearLayout {
         // 初始化默认的信息
         setUserName("");
         setUserDescription("");
-        setUserAvatarFromRes(R.drawable.ic_account_circle);
+        setUserAvatarFromRes(R.drawable.default_avatar);
         setUserCardBackgroundFromRes(R.drawable.test_res2);
     }
 
@@ -106,7 +106,7 @@ public class UserCardView extends LinearLayout {
      */
     public void setUserAvatarFromRes(int avatarResId) {
         if (Objects.isNull(avatarResId)) {
-            userAvatar.setImageResource(R.drawable.ic_account_circle);
+            userAvatar.setImageResource(R.drawable.default_avatar);
             Logs.e(TAG, "avatarRes is null!");
             return;
         }
@@ -119,13 +119,13 @@ public class UserCardView extends LinearLayout {
      */
     public void setUserAvatarFromUrl(String avatarResUrl) {
         if (TextUtils.isEmpty(avatarResUrl)) {
-            userAvatar.setImageResource(R.drawable.ic_account_circle);
+            userAvatar.setImageResource(R.drawable.default_avatar);
             Logs.e(TAG, "avatarResUrl is empty!");
             return;
         }
         Glide.with(this)
                 .load(avatarResUrl)
-                .placeholder(R.drawable.ic_account_circle)
+                .placeholder(R.drawable.default_avatar)
                 .into(userAvatar);
     }
 

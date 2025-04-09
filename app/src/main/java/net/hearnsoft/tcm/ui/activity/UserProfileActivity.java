@@ -22,6 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -36,9 +37,12 @@ import net.hearnsoft.tcm.databinding.ActivityUserProfileBinding;
 import net.hearnsoft.tcm.infrastructure.adapter.http.APICore;
 import net.hearnsoft.tcm.infrastructure.adapter.http.Constants;
 import net.hearnsoft.tcm.infrastructure.adapter.http.UserAPIOld;
+import net.hearnsoft.tcm.ui.model.UserViewModel;
 import net.hearnsoft.tcm.ui.widgets.ProfileItem;
 import net.hearnsoft.tcm.utils.Logs;
+import net.hearnsoft.tcm.utils.OffsetDateTimeFormater;
 import net.hearnsoft.tcm.utils.SettingsPrefUtils;
+import net.hearnsoft.tcm.utils.ViewModelUtils;
 
 import org.openapitools.client.models.UserProfile;
 
@@ -53,12 +57,11 @@ public class UserProfileActivity extends AppCompatActivity {
     private static final String tempAvatarImageName = "avatar.jpg";
     private final String TAG = this.getClass().getSimpleName();
     private ActivityUserProfileBinding binding;
-    private UserAPIOld userAPI;
+    private UserViewModel userViewModel;
     private UserProfileAdapter adapter;
     private ActivityResultLauncher<PickVisualMediaRequest> pickAvatar;
 
     private String[] userRoles;
-    private String userToken;
     private boolean isEditMode = false;
     private boolean isProfileUpdated = false; // 用于跟踪资料是否更新
 
@@ -68,7 +71,8 @@ public class UserProfileActivity extends AppCompatActivity {
         binding = ActivityUserProfileBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        userAPI = UserAPIOld.getInstance(this);
+        // 初始化UserViewModel
+        userViewModel = ViewModelUtils.getViewModel(this, UserViewModel.class);
 
         setSupportActionBar(binding.topAppbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -78,9 +82,6 @@ public class UserProfileActivity extends AppCompatActivity {
         binding.recyclerView.setAdapter(adapter);
 
         loadUserRolesList();
-
-        userToken = SettingsPrefUtils.getInstance(this)
-            .readStringSettings(Constants.KEY_USER_TOKEN);
 
         pickAvatar = registerForActivityResult(
             new ActivityResultContracts.PickVisualMedia(), uri -> {
@@ -109,105 +110,109 @@ public class UserProfileActivity extends AppCompatActivity {
                 }
             }
         );
-        loadUserProfile(userToken);
+        loadUserProfile();
     }
 
-    private void loadUserProfile(String userToken) {
+    private void loadUserProfile() {
         if (adapter != null && !adapter.items.isEmpty()) {
             adapter.items.clear();
         }
-        userAPI.getUserProfile(
-            userToken, new APICore.APICallback<UserProfile>() {
-                @Override
-                public void onSuccess(UserProfile data) {
-                    List<ProfileItem> items = new ArrayList<>();
-                    items.add(new ProfileItem(
-                        ProfileItem.TYPE_AVATAR,
-                        getString(R.string.profile_title_avatar),
-                        getAvatarUrl(data.getAvatarUrl()),
-                        true,
-                        item -> {
-                            // 处理头像点击事件，例如打开图片选择器
-                            openImagePicker();
-                        }
-                    ));
-                    items.add(new ProfileItem(
-                        ProfileItem.TYPE_INFO,
-                        getString(R.string.profile_title_username),
-                        data.getName(),
-                        true,
-                        item -> {
-                            // 处理名字点击事件，例如打开编辑对话框
-                            openEditNameDialog(item.getContent());
-                        }
-                    ));
-                    SimpleDateFormat dateFormat = new SimpleDateFormat(
-                        getString(R.string.date_format_str),
-                        Locale.CHINA
-                    );
-                    items.add(new ProfileItem(
-                        ProfileItem.TYPE_INFO,
-                        getString(R.string.profile_title_last_login),
-                        dateFormat.format(data.getLastLogin())
-                    ));
-                    items.add(new ProfileItem(
-                        ProfileItem.TYPE_INFO,
-                        getString(R.string.profile_title_user_permission),
-                        getUserRoleString(data.getRoles()
-                            .stream()
-                            .mapToInt(Integer::intValue)
-                            .toArray())
-                    ));
-
-                    // 管理员功能
-                    if (isAdminUser(data.getRoles()
+        // Set up observers
+        userViewModel.getUserProfile().observe(this, data -> {
+            if (data != null) {
+                List<ProfileItem> items = new ArrayList<>();
+                items.add(new ProfileItem(
+                    ProfileItem.TYPE_AVATAR,
+                    getString(R.string.profile_title_avatar),
+                    getAvatarUrl(data.getAvatarUrl()),
+                    true,
+                    item -> openImagePicker()
+                ));
+                items.add(new ProfileItem(
+                    ProfileItem.TYPE_INFO,
+                    getString(R.string.profile_title_username),
+                    data.getName(),
+                    true,
+                    item -> openEditNameDialog(item.getContent())
+                ));
+                items.add(new ProfileItem(
+                    ProfileItem.TYPE_INFO,
+                    getString(R.string.profile_title_last_login),
+                    OffsetDateTimeFormater.format(data.getLastLogin(), getString(R.string.date_format_str))
+                ));
+                items.add(new ProfileItem(
+                    ProfileItem.TYPE_INFO,
+                    getString(R.string.profile_title_user_permission),
+                    getUserRoleString(data.getRoles()
                         .stream()
                         .mapToInt(Integer::intValue)
-                        .toArray())) {
-                        items.add(new ProfileItem(
-                            ProfileItem.TYPE_PREFERENCE_ITEM,
-                            getString(R.string.profile_title_admin_mode),
-                            null,
-                            true,
-                            item -> {
-                                Toast.makeText(
-                                    UserProfileActivity.this,
-                                    R.string.admin_mode_notice,
-                                    Toast.LENGTH_SHORT
-                                ).show();
-                                Intent intent = new Intent(
-                                    UserProfileActivity.this,
-                                    AdminModeActivity.class
-                                );
-                                intent.putExtra("user_token", userToken);
-                                startActivity(intent);
-                            }
-                        ));
-                    }
-                    items.add(new ProfileItem(
-                        ProfileItem.TYPE_BUTTON,
-                        getString(R.string.profile_title_logout),
-                        "",
-                        true,
-                        item -> logout()
-                    ));
-                    adapter.setItems(items);
-                }
+                        .toArray())
+                ));
 
-                @Override
-                public void onError(APICore.ApiError error) {
-                    Logs.e(TAG, "failed to load profile, msg: " + error.getMessage());
-                    new MaterialAlertDialogBuilder(UserProfileActivity.this).setTitle(R.string.profile_dialog_err_title)
-                        .setMessage(R.string.profile_dialog_err_msg)
-                        .setPositiveButton(android.R.string.ok, (dialog, which) -> finish())
-                        .show();
-                }
+                // 管理员功能
+                // TODO: 使用新方式实现，临时废弃
+                /*if (isAdminUser(data.getRoles()
+                    .stream()
+                    .mapToInt(Integer::intValue)
+                    .toArray())) {
+                    items.add(new ProfileItem(
+                        ProfileItem.TYPE_PREFERENCE_ITEM,
+                        getString(R.string.profile_title_admin_mode),
+                        null,
+                        true,
+                        item -> {
+                            Toast.makeText(
+                                UserProfileActivity.this,
+                                R.string.admin_mode_notice,
+                                Toast.LENGTH_SHORT
+                            ).show();
+                            Intent intent = new Intent(
+                                UserProfileActivity.this,
+                                AdminModeActivity.class
+                            );
+                            intent.putExtra("user_token", userToken);
+                            startActivity(intent);
+                        }
+                    ));
+                }*/
+                items.add(new ProfileItem(
+                    ProfileItem.TYPE_BUTTON,
+                    getString(R.string.profile_title_logout),
+                    "",
+                    true,
+                    item -> logout()
+                ));
+                adapter.setItems(items);
             }
-        );
+        });
+
+        userViewModel.getError().observe(this, error -> {
+            if (error != null) {
+                Logs.e(TAG, "failed to load profile, msg: " + error);
+                new MaterialAlertDialogBuilder(UserProfileActivity.this)
+                    .setTitle(R.string.profile_dialog_err_title)
+                    .setMessage(R.string.profile_dialog_err_msg)
+                    .setPositiveButton(android.R.string.ok, (dialog, which) -> finish())
+                    .show();
+            }
+        });
+
+        // Trigger profile fetch
+        String username = SettingsPrefUtils.getInstance(this).readStringSettings(Constants.KEY_USER_ID);
+        if (!TextUtils.isEmpty(username)) {
+            userViewModel.getProfileByUsername(username);
+        }
     }
 
     private void loadUserRolesList() {
-        userAPI.getUserRoleList(new APICore.APICallback<String[]>() {
+        // TODO: 实现defaultApiAdapter
+        // 临时使用Mock数据
+        userRoles = new String[]{
+            "Admin",
+            "Moderator",
+            "User"
+        };
+        /*userAPI.getUserRoleList(new APICore.APICallback<String[]>() {
             @Override
             public void onSuccess(String[] data) {
                 Logs.d(TAG, "loadUserRolesList: " + Arrays.toString(data));
@@ -219,7 +224,7 @@ public class UserProfileActivity extends AppCompatActivity {
                 Logs.e(TAG, "loadUserRolesListErr: " + error.getMessage());
                 userRoles = new String[]{};
             }
-        });
+        });*/
     }
 
     private boolean isAdminUser(int[] rolesList) {
@@ -266,7 +271,7 @@ public class UserProfileActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (resultCode == RESULT_OK && requestCode == UCrop.REQUEST_CROP) {
-            uploadAvatar(userToken, UCrop.getOutput(data));
+            uploadAvatar(UCrop.getOutput(data));
         } else if (resultCode == UCrop.RESULT_ERROR) {
             Toast.makeText(
                 UserProfileActivity.this,
@@ -277,39 +282,55 @@ public class UserProfileActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void uploadAvatar(String userToken, Uri uri) {
-        if (uri != null && !TextUtils.isEmpty(userToken)) {
+    private void uploadAvatar(Uri uri) {
+        if (uri != null) {
             Logs.d(TAG, "Selected URI: " + uri);
-            userAPI.uploadAvatar(
-                userToken, uri, getContentResolver(), new APICore.APICallback<String>() {
-                    @Override
-                    public void onSuccess(String data) {
-                        runOnUiThread(() -> Toast.makeText(
+
+            try {
+                userViewModel.uploadAvatar(uri, getContentResolver());
+
+                userViewModel.getMessage().observe(this, message -> {
+                    if (message != null) {
+                        Toast.makeText(
                             UserProfileActivity.this,
                             R.string.toast_profile_upload_avatar_succ,
                             Toast.LENGTH_SHORT
-                        ).show());
-                        loadUserProfile(userToken);
-                        isProfileUpdated = true; // 标记资料已更新
-                    }
+                        ).show();
 
-                    @Override
-                    public void onError(APICore.ApiError error) {
-                        Logs.e(TAG, error.getMessage());
-                        runOnUiThread(() -> Toast.makeText(
+                        // Refresh profile
+                        String username = SettingsPrefUtils.getInstance(this)
+                            .readStringSettings(Constants.KEY_USER_ID);
+                        if (!TextUtils.isEmpty(username)) {
+                            userViewModel.getProfileByUsername(username);
+                        }
+
+                        // Remove observer to prevent multiple notifications
+                        //userViewModel.getMessage().removeObserver(this);
+                    }
+                });
+
+                userViewModel.getError().observe(this, error -> {
+                    if (error != null) {
+                        Logs.e(TAG, error);
+                        Toast.makeText(
                             UserProfileActivity.this,
-                            getString(R.string.toast_profile_upload_avatar_err) + "\n" + error.getMessage(),
+                            getString(R.string.toast_profile_upload_avatar_err) + "\n" + error,
                             Toast.LENGTH_SHORT
-                        ).show());
-                    }
-                }
-            );
-        }
-    }
+                        ).show();
 
-    private void sendRefreshBroadcast() {
-        Intent intent = new Intent(Constants.ACTION_REFRESH_USER_PROFILE);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+                        // Remove observer to prevent multiple notifications
+                        //userViewModel.getError().removeObserver((Observer<? super String>) this);
+                    }
+                });
+            } catch (Exception e) {
+                Logs.e(TAG, "Error creating file from Uri: " + e.getMessage());
+                Toast.makeText(
+                    UserProfileActivity.this,
+                    R.string.toast_profile_upload_avatar_err,
+                    Toast.LENGTH_SHORT
+                ).show();
+            }
+        }
     }
 
     private String getAvatarUrl(String fileName) {
@@ -320,55 +341,53 @@ public class UserProfileActivity extends AppCompatActivity {
     }
 
     private void logout() {
-        String token = SettingsPrefUtils.getInstance(this)
-            .readStringSettings(Constants.KEY_USER_TOKEN);
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
         builder.setTitle(R.string.profile_title_logout);
         builder.setMessage(R.string.profile_title_logout_content);
-        builder.setPositiveButton(
-            android.R.string.ok, (dialog, which) -> {
-                userAPI.logout(
-                    token, new APICore.APICallback<String>() {
-                        @Override
-                        public void onSuccess(String data) {
-                            Toast.makeText(
-                                UserProfileActivity.this,
-                                R.string.toast_profile_logout_succ,
-                                Toast.LENGTH_SHORT
-                            ).show();
-                            // 发送广播通知 AccountFragment 刷新
-                            Intent intent = new Intent(Constants.ACTION_REFRESH_USER_PROFILE);
-                            LocalBroadcastManager.getInstance(UserProfileActivity.this)
-                                .sendBroadcast(intent);
-                            dialog.dismiss();
-                            finish();
-                        }
+        builder.setPositiveButton(android.R.string.ok, (dialog, which) -> {
+            // Set up observers for logout
+            userViewModel.getMessage().observe(this, message -> {
+                if (message != null) {
+                    Toast.makeText(
+                        UserProfileActivity.this,
+                        R.string.toast_profile_logout_succ,
+                        Toast.LENGTH_SHORT
+                    ).show();
 
-                        @Override
-                        public void onError(APICore.ApiError error) {
-                            Logs.e(TAG, "failed to logout, msg: " + error.getMessage());
-                            Toast.makeText(
-                                UserProfileActivity.this,
-                                R.string.toast_profile_logout_err,
-                                Toast.LENGTH_SHORT
-                            ).show();
-                            dialog.dismiss();
-                        }
-                    }
-                );
-            }
-        );
+                    // Clear stored credentials
+                    SettingsPrefUtils.getInstance(this).writeStringSettings(Constants.KEY_USER_TOKEN, "");
+                    SettingsPrefUtils.getInstance(this).writeStringSettings(Constants.KEY_USER_ID, "");
+
+                    dialog.dismiss();
+                    finish();
+
+                    // Remove observer to prevent multiple notifications
+                    //userViewModel.getMessage().removeObserver(this);
+                }
+            });
+
+            userViewModel.getError().observe(this, error -> {
+                if (error != null) {
+                    Logs.e(TAG, "failed to logout, msg: " + error);
+                    Toast.makeText(
+                        UserProfileActivity.this,
+                        R.string.toast_profile_logout_err,
+                        Toast.LENGTH_SHORT
+                    ).show();
+                    dialog.dismiss();
+
+                    // Remove observer to prevent multiple notifications
+                    //userViewModel.getError().removeObserver(this);
+                }
+            });
+
+            // Execute logout
+            userViewModel.logout();
+        });
+
         builder.setNegativeButton(android.R.string.cancel, null);
         AlertDialog dialog = builder.create();
         dialog.show();
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (isProfileUpdated) {
-            sendRefreshBroadcast();
-        }
-        super.onBackPressed();
     }
 
     @Override
@@ -380,9 +399,6 @@ public class UserProfileActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            if (isProfileUpdated) {
-                sendRefreshBroadcast();
-            }
             finish();
             return true;
         } else if (item.getItemId() == R.id.menu_profile_edit) {
@@ -460,7 +476,7 @@ public class UserProfileActivity extends AppCompatActivity {
                 AvatarViewHolder avatarHolder = (AvatarViewHolder) holder;
                 Glide.with(avatarHolder.itemView.getContext())
                     .load(item.getContent())
-                    .placeholder(R.drawable.test_avatar)
+                    .placeholder(R.drawable.default_avatar)
                     .into(avatarHolder.avatarImageView);
                 setItemClickListener(avatarHolder.itemView, item, isEditMode);
                 // 根据编辑模式更新 UI

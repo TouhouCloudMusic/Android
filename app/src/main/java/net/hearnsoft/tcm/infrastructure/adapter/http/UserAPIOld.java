@@ -9,8 +9,7 @@ import com.google.gson.JsonObject;
 
 import net.hearnsoft.tcm.utils.Logs;
 import net.hearnsoft.tcm.utils.SettingsPrefUtils;
-
-import org.openapitools.client.models.UserProfile;
+import net.hearnsoft.thcdb_sdk.model.UserProfile;
 
 public class UserAPIOld {
     private static final String TAG = "UserAPI";

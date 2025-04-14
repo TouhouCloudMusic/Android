@@ -1,46 +1,33 @@
 package net.hearnsoft.tcm.ui.model;
 
-import static net.hearnsoft.tcm.infrastructure.adapter.http.ApiEndpoints.BASE_URL;
-
-import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.ContentResolver;
-import android.database.Cursor;
 import android.net.Uri;
-import android.provider.OpenableColumns;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import net.hearnsoft.tcm.application.service.SyncUserService;
-import net.hearnsoft.tcm.domain.repository.UserRepository;
-import net.hearnsoft.tcm.infrastructure.adapter.http.APICore;
-import net.hearnsoft.tcm.infrastructure.adapter.http.ErrorCode;
-import net.hearnsoft.tcm.infrastructure.adapter.http.UserApi;
-
-import org.openapitools.client.models.AuthCredential;
-import org.openapitools.client.models.Message;
-import org.openapitools.client.models.UserProfile;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
+import net.hearnsoft.tcm.infrastructure.adapter.http.Constants;
+import net.hearnsoft.tcm.infrastructure.adapter.http.ThcdbApiAdapter;
+import net.hearnsoft.tcm.infrastructure.adapter.http.ThcdbApiAdapter.ThcdbApiException;
+import net.hearnsoft.thcdb_sdk.model.UserProfile;
 
 import io.vavr.concurrent.Future;
 
 public class UserViewModel extends AndroidViewModel {
     private static final String TAG = UserViewModel.class.getSimpleName();
 
-    private final SyncUserService userService;
+    private final ThcdbApiAdapter apiAdapter;
     private final MutableLiveData<UserProfile> userProfileLiveData = new MutableLiveData<>();
     private final MutableLiveData<String> errorLiveData = new MutableLiveData<>();
-    private final MutableLiveData<Message> messageLiveData = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> successLiveData = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> loadingLiveData = new MutableLiveData<>(false);
 
     public UserViewModel(@NonNull Application application) {
         super(application);
-        userService = new UserApi(BASE_URL);
+        apiAdapter = new ThcdbApiAdapter(application, Constants.API_HOST);
     }
 
     public LiveData<UserProfile> getUserProfile() {
@@ -51,45 +38,101 @@ public class UserViewModel extends AndroidViewModel {
         return errorLiveData;
     }
 
-    public LiveData<Message> getMessage() {
-        return messageLiveData;
+    public LiveData<Boolean> getSuccess() {
+        return successLiveData;
+    }
+
+    public LiveData<Boolean> isLoading() {
+        return loadingLiveData;
+    }
+
+    public boolean isLoggedIn() {
+        return apiAdapter.isLoggedIn();
     }
 
     public void login(String username, String password) {
-        AuthCredential creds = new AuthCredential(username, password);
-        Future.fromCompletableFuture(userService.signInSync(creds))
-            .onSuccess(userProfileLiveData::postValue)
+        loadingLiveData.postValue(true);
+
+        Future.fromCompletableFuture(apiAdapter.getUser().signIn(username, password))
+            .onSuccess(profile -> {
+                userProfileLiveData.postValue(profile);
+                successLiveData.postValue(true);
+                loadingLiveData.postValue(false);
+            })
             .onFailure(error -> {
-                errorLiveData.postValue(error.getMessage());
+                handleError(error);
+                successLiveData.postValue(false);
+                loadingLiveData.postValue(false);
             });
     }
 
     public void register(String username, String password) {
-        AuthCredential creds = new AuthCredential(username, password);
-        Future.fromCompletableFuture(userService.signUpSync(creds))
-            .onSuccess(userProfileLiveData::postValue)
+        loadingLiveData.postValue(true);
+
+        Future.fromCompletableFuture(apiAdapter.getUser().signUp(username, password))
+            .onSuccess(profile -> {
+                userProfileLiveData.postValue(profile);
+                successLiveData.postValue(true);
+                loadingLiveData.postValue(false);
+            })
             .onFailure(error -> {
-                errorLiveData.postValue(error.getMessage());
+                handleError(error);
+                successLiveData.postValue(false);
+                loadingLiveData.postValue(false);
             });
     }
 
     public void logout() {
-        Future.fromCompletableFuture(userService.signOutSync())
-            .onSuccess(message -> {
-                messageLiveData.postValue(message);
-                userProfileLiveData.postValue(null); // 清除当前用户信息
+        loadingLiveData.postValue(true);
+
+        Future.fromCompletableFuture(apiAdapter.getUser().signOut())
+            .onSuccess(success -> {
+                if (success) {
+                    userProfileLiveData.postValue(null); // Clear current user info
+                    successLiveData.postValue(true);
+                } else {
+                    errorLiveData.postValue("Logout failed");
+                    successLiveData.postValue(false);
+                }
+                loadingLiveData.postValue(false);
             })
             .onFailure(error -> {
-                errorLiveData.postValue(error.getMessage());
+                handleError(error);
+                successLiveData.postValue(false);
+                loadingLiveData.postValue(false);
             });
     }
 
     public void getProfileByUsername(String username) {
-        // 利用 UserApi 中提供的 getProfile 方法
-        Future.fromCompletableFuture(userService.getProfileByUsernameSync(username))
-            .onSuccess(userProfileLiveData::postValue)
+        loadingLiveData.postValue(true);
+
+        Future.fromCompletableFuture(apiAdapter.getUser().profileWithName(username))
+            .onSuccess(profile -> {
+                userProfileLiveData.postValue(profile);
+                loadingLiveData.postValue(false);
+            })
             .onFailure(error -> {
-                errorLiveData.postValue(error.getMessage());
+                handleError(error);
+                loadingLiveData.postValue(false);
+            });
+    }
+
+    public void getCurrentUserProfile() {
+        if (!apiAdapter.isLoggedIn()) {
+            errorLiveData.postValue("Not logged in");
+            return;
+        }
+
+        loadingLiveData.postValue(true);
+
+        Future.fromCompletableFuture(apiAdapter.getUser().profile())
+            .onSuccess(profile -> {
+                userProfileLiveData.postValue(profile);
+                loadingLiveData.postValue(false);
+            })
+            .onFailure(error -> {
+                handleError(error);
+                loadingLiveData.postValue(false);
             });
     }
 
@@ -99,68 +142,41 @@ public class UserViewModel extends AndroidViewModel {
             return;
         }
 
-        File tempFile = null;
+        loadingLiveData.postValue(true);
 
-        try {
-            // Get file name from Uri
-            String fileName = getFileNameFromUri(avatarUri, resolver);
-
-            // Create a temporary file to store the content
-            tempFile = File.createTempFile("avatar_", fileName, getApplication().getCacheDir());
-
-            // Copy content from Uri to the file
-            ContentResolver contentResolver = getApplication().getContentResolver();
-            try (InputStream inputStream = contentResolver.openInputStream(avatarUri);
-                 FileOutputStream outputStream = new FileOutputStream(tempFile)) {
-
-                if (inputStream == null) {
-                    errorLiveData.postValue("Cannot read from the selected file");
-                    return;
+        Future.fromCompletableFuture(apiAdapter.getUser().uploadAvatar(avatarUri, resolver))
+            .onSuccess(success -> {
+                if (success) {
+                    successLiveData.postValue(true);
+                    // After successful upload, refresh user profile to get the updated avatar
+                    getCurrentUserProfile();
+                } else {
+                    errorLiveData.postValue("Avatar upload failed");
+                    successLiveData.postValue(false);
                 }
-
-                byte[] buffer = new byte[4 * 1024]; // 4k buffer
-                int read;
-                while ((read = inputStream.read(buffer)) != -1) {
-                    outputStream.write(buffer, 0, read);
-                }
-                outputStream.flush();
-
-                Future.fromCompletableFuture(userService.uploadAvatarSync(tempFile))
-                    .onSuccess(messageLiveData::postValue)
-                    .onFailure(error -> {
-                        errorLiveData.postValue(error.getMessage());
-                    });
-            }
-        } catch (java.io.IOException e) {
-            errorLiveData.postValue("Error processing file: " + e.getMessage());
-        } finally {
-            try {
-                if (tempFile != null) {
-                    tempFile.delete();
-                }
-            } catch (Exception e) {
-                errorLiveData.postValue("Error deleting temporary file: " + e.getMessage());
-            }
-        }
+                loadingLiveData.postValue(false);
+            })
+            .onFailure(error -> {
+                handleError(error);
+                successLiveData.postValue(false);
+                loadingLiveData.postValue(false);
+            });
     }
 
-    @SuppressLint("Range")
-    private String getFileNameFromUri(Uri uri, ContentResolver contentResolver) {
-        String result = null;
-        if (uri.getScheme().equals("content")) {
-            try (Cursor cursor = contentResolver.query(uri, null, null, null, null)) {
-                if (cursor != null && cursor.moveToFirst()) {
-                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
-                }
+    private void handleError(Throwable error) {
+        if (error instanceof ThcdbApiException) {
+            ThcdbApiException apiError = (ThcdbApiException) error;
+            Integer errorCode = apiError.getErrorCode();
+
+            if (errorCode != null && errorCode == 401) {
+                // Handle unauthorized error specially - e.g., clear local session
+                apiAdapter.clearSession();
+                errorLiveData.postValue("Session expired. Please login again.");
+            } else {
+                errorLiveData.postValue(apiError.getMessage());
             }
+        } else {
+            errorLiveData.postValue(error.getMessage());
         }
-        if (result == null) {
-            result = uri.getPath();
-            int cut = result.lastIndexOf('/');
-            if (cut != -1) {
-                result = result.substring(cut + 1);
-            }
-        }
-        return result;
     }
 }

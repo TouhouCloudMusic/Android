@@ -1,9 +1,6 @@
 package net.hearnsoft.tcm.ui.fragments;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -15,14 +12,10 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import net.hearnsoft.tcm.R;
 import net.hearnsoft.tcm.databinding.FragmentAccountBinding;
-import net.hearnsoft.tcm.infrastructure.adapter.http.APICore;
 import net.hearnsoft.tcm.infrastructure.adapter.http.Constants;
-import net.hearnsoft.tcm.infrastructure.adapter.http.ErrorCode;
-import net.hearnsoft.tcm.infrastructure.adapter.http.UserAPIOld;
 import net.hearnsoft.tcm.ui.activity.UserLoginActivity;
 import net.hearnsoft.tcm.ui.activity.UserProfileActivity;
 import net.hearnsoft.tcm.ui.model.UserViewModel;
@@ -32,13 +25,7 @@ import net.hearnsoft.tcm.utils.OffsetDateTimeFormater;
 import net.hearnsoft.tcm.utils.SettingsPrefUtils;
 import net.hearnsoft.tcm.utils.ViewModelUtils;
 
-import org.openapitools.client.models.UserProfile;
-
-import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.util.Date;
-import java.util.Locale;
+import net.hearnsoft.thcdb_sdk.model.UserProfile;
 
 public class AccountFragment extends Fragment {
 

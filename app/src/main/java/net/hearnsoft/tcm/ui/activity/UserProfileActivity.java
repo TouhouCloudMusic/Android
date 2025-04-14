@@ -2,7 +2,6 @@ package net.hearnsoft.tcm.ui.activity;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -22,8 +21,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.Observer;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -34,9 +31,7 @@ import com.yalantis.ucrop.UCrop;
 
 import net.hearnsoft.tcm.R;
 import net.hearnsoft.tcm.databinding.ActivityUserProfileBinding;
-import net.hearnsoft.tcm.infrastructure.adapter.http.APICore;
 import net.hearnsoft.tcm.infrastructure.adapter.http.Constants;
-import net.hearnsoft.tcm.infrastructure.adapter.http.UserAPIOld;
 import net.hearnsoft.tcm.ui.model.UserViewModel;
 import net.hearnsoft.tcm.ui.widgets.ProfileItem;
 import net.hearnsoft.tcm.utils.Logs;
@@ -44,13 +39,9 @@ import net.hearnsoft.tcm.utils.OffsetDateTimeFormater;
 import net.hearnsoft.tcm.utils.SettingsPrefUtils;
 import net.hearnsoft.tcm.utils.ViewModelUtils;
 
-import org.openapitools.client.models.UserProfile;
-
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 
 public class UserProfileActivity extends AppCompatActivity {
 
@@ -189,11 +180,17 @@ public class UserProfileActivity extends AppCompatActivity {
         userViewModel.getError().observe(this, error -> {
             if (error != null) {
                 Logs.e(TAG, "failed to load profile, msg: " + error);
-                new MaterialAlertDialogBuilder(UserProfileActivity.this)
-                    .setTitle(R.string.profile_dialog_err_title)
-                    .setMessage(R.string.profile_dialog_err_msg)
-                    .setPositiveButton(android.R.string.ok, (dialog, which) -> finish())
-                    .show();
+                runOnUiThread(() -> {
+                    new MaterialAlertDialogBuilder(UserProfileActivity.this)
+                        .setTitle(R.string.profile_dialog_err_title)
+                        .setMessage(getString(R.string.profile_dialog_err_msg)
+                            +"\n"+error)
+                        .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                            dialog.dismiss();
+                            finish();
+                        })
+                        .show();
+                });
             }
         });
 
@@ -289,8 +286,8 @@ public class UserProfileActivity extends AppCompatActivity {
             try {
                 userViewModel.uploadAvatar(uri, getContentResolver());
 
-                userViewModel.getMessage().observe(this, message -> {
-                    if (message != null) {
+                userViewModel.getSuccess().observe(this, success -> {
+                    if (success != null && success) {
                         Toast.makeText(
                             UserProfileActivity.this,
                             R.string.toast_profile_upload_avatar_succ,
@@ -303,9 +300,6 @@ public class UserProfileActivity extends AppCompatActivity {
                         if (!TextUtils.isEmpty(username)) {
                             userViewModel.getProfileByUsername(username);
                         }
-
-                        // Remove observer to prevent multiple notifications
-                        //userViewModel.getMessage().removeObserver(this);
                     }
                 });
 
@@ -346,8 +340,8 @@ public class UserProfileActivity extends AppCompatActivity {
         builder.setMessage(R.string.profile_title_logout_content);
         builder.setPositiveButton(android.R.string.ok, (dialog, which) -> {
             // Set up observers for logout
-            userViewModel.getMessage().observe(this, message -> {
-                if (message != null) {
+            userViewModel.getSuccess().observe(this, success -> {
+                if (success != null && success) {
                     Toast.makeText(
                         UserProfileActivity.this,
                         R.string.toast_profile_logout_succ,
@@ -360,9 +354,6 @@ public class UserProfileActivity extends AppCompatActivity {
 
                     dialog.dismiss();
                     finish();
-
-                    // Remove observer to prevent multiple notifications
-                    //userViewModel.getMessage().removeObserver(this);
                 }
             });
 

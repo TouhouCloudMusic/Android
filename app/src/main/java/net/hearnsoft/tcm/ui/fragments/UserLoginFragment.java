@@ -1,7 +1,5 @@
 package net.hearnsoft.tcm.ui.fragments;
 
-import static net.hearnsoft.tcm.infrastructure.adapter.http.ApiEndpoints.BASE_URL;
-
 import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
@@ -18,11 +16,9 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.snackbar.Snackbar;
 
 import net.hearnsoft.tcm.R;
-import net.hearnsoft.tcm.application.service.SyncUserService;
 import net.hearnsoft.tcm.databinding.FragmentUserLoginBinding;
 import net.hearnsoft.tcm.domain.model.user.UserAuthenticationType;
 import net.hearnsoft.tcm.infrastructure.adapter.http.Constants;
-import net.hearnsoft.tcm.infrastructure.adapter.http.UserApi;
 import net.hearnsoft.tcm.ui.activity.UserLoginActivity;
 import net.hearnsoft.tcm.ui.model.UserViewModel;
 import net.hearnsoft.tcm.utils.Logs;
@@ -30,10 +26,7 @@ import net.hearnsoft.tcm.utils.SettingsPrefUtils;
 import net.hearnsoft.tcm.utils.UserLoginPortal;
 import net.hearnsoft.tcm.utils.ViewModelUtils;
 
-import org.openapitools.client.models.AuthCredential;
-import org.openapitools.client.models.UserProfile;
-
-import io.vavr.concurrent.Future;
+import net.hearnsoft.thcdb_sdk.model.UserProfile;
 
 public class UserLoginFragment extends Fragment {
     private static final String TAG = UserLoginFragment.class.getSimpleName();

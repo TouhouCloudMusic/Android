@@ -49,7 +49,7 @@ android {
 }
 
 dependencies {
-    implementation project(':openapi-sdk')
+    implementation project(':thcdb-sdk')
 
     implementation libs.appcompat
     implementation libs.material

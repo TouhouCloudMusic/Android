@@ -50,6 +50,7 @@ android {
 
 dependencies {
     implementation project(':thcdb-sdk')
+    implementation fileTree(include: ['*.jar','*.aar'], dir: 'libs')
 
     implementation libs.appcompat
     implementation libs.material
@@ -67,7 +68,7 @@ dependencies {
     // Gson
     implementation libs.gson
     // uCrop
-    implementation libs.ucrop
+    // implementation libs.ucrop
     // MPAndroidChart
     implementation libs.mpandroidchart
     // Lombok

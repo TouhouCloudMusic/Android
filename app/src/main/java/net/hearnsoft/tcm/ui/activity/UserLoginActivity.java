@@ -6,9 +6,13 @@ import android.text.TextUtils;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import net.hearnsoft.tcm.R;
@@ -32,13 +36,19 @@ public class UserLoginActivity extends AppCompatActivity implements UserLoginPor
 
     private ActivityUserLoginBinding binding;
     private AppViewPagerAdapter adapter;
-    private UserViewModel userViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
         binding = ActivityUserLoginBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), (v, insets) -> {
+            Insets statusBar = insets.getInsets(WindowInsetsCompat.Type.statusBars());
+            v.setPadding(0, statusBar.top, 0, 0);
+            return insets;
+        });
+
         adapter = new AppViewPagerAdapter(this);
         initUserLoginPage();
         setSupportActionBar(binding.topAppbar);
@@ -47,7 +57,7 @@ public class UserLoginActivity extends AppCompatActivity implements UserLoginPor
             actionBar.setHomeButtonEnabled(true);
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
-        userViewModel = ViewModelUtils.getViewModel(this, UserViewModel.class);
+
         loginActivity = this;
     }
 

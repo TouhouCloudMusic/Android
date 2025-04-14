@@ -50,7 +50,6 @@
     <string name="menu_settings">Settings</string>
     <string name="toast_user_register_succ">Register successful!</string>
     <string name="toast_user_login_succ">Login successful!</string>
-    <string name="toast_refresh_profile_succ">Profile refresh successful!</string>
     <string name="usercard_default_name">Click to login</string>
     <string name="usercard_default_desc">login to continue</string>
     <string name="usercard_last_login_desc">Last login: <xliff:g id="date">%s</xliff:g></string>

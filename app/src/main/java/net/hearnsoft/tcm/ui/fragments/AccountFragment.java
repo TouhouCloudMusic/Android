@@ -120,11 +120,6 @@ public class AccountFragment extends Fragment {
         userCard.setUserCardEditClickListener(v -> openUserProfile());
         userCard.setUserAvatarFromUrl(getAvatarUrl(data.getAvatarUrl()));
         userCard.setUserCardBackgroundFromUrl(getAvatarUrl(data.getAvatarUrl()));
-        Toast.makeText(
-            requireContext(),
-            R.string.toast_refresh_profile_succ,
-            Toast.LENGTH_SHORT
-        ).show();
     }
 
     private void handleError(String errorMessage) {

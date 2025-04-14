@@ -52,7 +52,6 @@
     <string name="menu_settings">设置</string>
     <string name="toast_user_register_succ">注册成功！</string>
     <string name="toast_user_login_succ">登录成功！</string>
-    <string name="toast_refresh_profile_succ">刷新用户信息成功！</string>
     <string name="usercard_default_name">点击登录</string>
     <string name="usercard_default_desc">登录以继续使用</string>
     <string name="usercard_last_login_desc">上次登录: <xliff:g id="date">%s</xliff:g></string>

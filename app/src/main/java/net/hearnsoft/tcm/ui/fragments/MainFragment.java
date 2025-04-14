@@ -26,6 +26,8 @@ import net.hearnsoft.tcm.databinding.FragmentMainBinding;
 import net.hearnsoft.tcm.ui.activity.MainActivity;
 import net.hearnsoft.tcm.ui.interfaces.OnNowPlayingClickListener;
 import net.hearnsoft.tcm.ui.model.PlaybackViewModel;
+import net.hearnsoft.tcm.ui.model.UserViewModel;
+import net.hearnsoft.tcm.utils.ViewModelUtils;
 
 @UnstableApi
 public class MainFragment extends Fragment {
@@ -35,6 +37,7 @@ public class MainFragment extends Fragment {
     private FragmentMainBinding binding;
     private OnNowPlayingClickListener listener;
     private PlaybackViewModel viewModel;
+    private UserViewModel userViewModel;
     private NavController navController;
     private int currentNavSelected = DEFAULT_NAV_ITEM;
 
@@ -109,7 +112,14 @@ public class MainFragment extends Fragment {
         });
 
         // 获取ViewModel
-        viewModel = new ViewModelProvider(requireActivity()).get(PlaybackViewModel.class);
+        viewModel = ViewModelUtils.getViewModel(requireActivity(), PlaybackViewModel.class);
+        userViewModel = ViewModelUtils.getViewModel(requireActivity(), UserViewModel.class);
+        if (userViewModel.isLoggedIn()) {
+            // 已登录时获取用户信息
+            userViewModel.getCurrentUserProfile();
+        }
+
+        // 设置ViewModel观察者
         observeViewModel();
 
         // 启动进度更新

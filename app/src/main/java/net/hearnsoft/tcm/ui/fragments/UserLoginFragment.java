@@ -179,10 +179,6 @@ public class UserLoginFragment extends Fragment {
         if (data == null) {
             return;
         }
-        SettingsPrefUtils.getInstance(requireActivity()).writeStringSettings(
-            Constants.KEY_USER_ID,
-            data.getName()
-        );
         if (isAdded() && !isRemoving()) {
             // 确保在UI线程中执行
             requireActivity().runOnUiThread(() -> {

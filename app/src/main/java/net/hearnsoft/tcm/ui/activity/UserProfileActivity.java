@@ -54,7 +54,6 @@ public class UserProfileActivity extends AppCompatActivity {
 
     private String[] userRoles;
     private boolean isEditMode = false;
-    private boolean isProfileUpdated = false; // 用于跟踪资料是否更新
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -193,12 +192,6 @@ public class UserProfileActivity extends AppCompatActivity {
                 });
             }
         });
-
-        // Trigger profile fetch
-        String username = SettingsPrefUtils.getInstance(this).readStringSettings(Constants.KEY_USER_ID);
-        if (!TextUtils.isEmpty(username)) {
-            userViewModel.getProfileByUsername(username);
-        }
     }
 
     private void loadUserRolesList() {
@@ -293,13 +286,6 @@ public class UserProfileActivity extends AppCompatActivity {
                             R.string.toast_profile_upload_avatar_succ,
                             Toast.LENGTH_SHORT
                         ).show();
-
-                        // Refresh profile
-                        String username = SettingsPrefUtils.getInstance(this)
-                            .readStringSettings(Constants.KEY_USER_ID);
-                        if (!TextUtils.isEmpty(username)) {
-                            userViewModel.getProfileByUsername(username);
-                        }
                     }
                 });
 
@@ -311,9 +297,6 @@ public class UserProfileActivity extends AppCompatActivity {
                             getString(R.string.toast_profile_upload_avatar_err) + "\n" + error,
                             Toast.LENGTH_SHORT
                         ).show();
-
-                        // Remove observer to prevent multiple notifications
-                        //userViewModel.getError().removeObserver((Observer<? super String>) this);
                     }
                 });
             } catch (Exception e) {
@@ -348,10 +331,6 @@ public class UserProfileActivity extends AppCompatActivity {
                         Toast.LENGTH_SHORT
                     ).show();
 
-                    // Clear stored credentials
-                    SettingsPrefUtils.getInstance(this).writeStringSettings(Constants.KEY_USER_TOKEN, "");
-                    SettingsPrefUtils.getInstance(this).writeStringSettings(Constants.KEY_USER_ID, "");
-
                     dialog.dismiss();
                     finish();
                 }
@@ -366,9 +345,6 @@ public class UserProfileActivity extends AppCompatActivity {
                         Toast.LENGTH_SHORT
                     ).show();
                     dialog.dismiss();
-
-                    // Remove observer to prevent multiple notifications
-                    //userViewModel.getError().removeObserver(this);
                 }
             });
 

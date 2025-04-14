@@ -95,12 +95,6 @@ public class UserLoginActivity extends AppCompatActivity implements UserLoginPor
                 break;
         }
 
-        // Get the ViewModel to refresh data in observers
-        String username = SettingsPrefUtils.getInstance(this).readStringSettings(Constants.KEY_USER_ID);
-        if (!TextUtils.isEmpty(username)) {
-            userViewModel.getProfileByUsername(username);
-        }
-
         // 重置ViewModel处理状态
         AuthStateViewModel authStateViewModel = ViewModelUtils.getViewModel(
             this,

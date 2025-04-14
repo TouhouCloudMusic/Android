@@ -57,12 +57,22 @@ public class AccountFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         initUserCard();
 
-        // Set up observers
+        // Set up observers for the shared LiveData
         userViewModel.getUserProfile().observe(getViewLifecycleOwner(), this::updateUserProfile);
         userViewModel.getError().observe(getViewLifecycleOwner(), this::handleError);
 
-        // Initial profile check
-        refreshUserProfile();
+        // Check if we need to refresh the profile
+        if (userViewModel.getUserProfile().getValue() == null && userViewModel.isLoggedIn()) {
+            userViewModel.getCurrentUserProfile();
+        } else {
+            // Use cached profile if available
+            UserProfile cachedProfile = userViewModel.getUserProfile().getValue();
+            if (cachedProfile != null) {
+                updateUserProfile(cachedProfile);
+            } else {
+                setUserCardForLoggedOutState();
+            }
+        }
     }
 
     private void initUserCard() {
@@ -87,18 +97,9 @@ public class AccountFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        refreshUserProfile();
-    }
-
-    private void refreshUserProfile() {
-        Logs.d(TAG, "refreshUserProfile");
-        String username = SettingsPrefUtils.getInstance(requireContext()).readStringSettings(
-            Constants.KEY_USER_ID);
-
-        if (TextUtils.isEmpty(username)) {
-            setUserCardForLoggedOutState();
-        } else {
-            userViewModel.getProfileByUsername(username);
+        // Only refresh if necessary (e.g., after logout)
+        if (userViewModel.getUserProfile().getValue() == null && userViewModel.isLoggedIn()) {
+            userViewModel.getCurrentUserProfile();
         }
     }
 

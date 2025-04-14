@@ -18,11 +18,9 @@ public class DefaultApiAdapter extends BaseApiAdapter {
     // 默认的后台线程执行器
     private static final Executor executor = Executors.newCachedThreadPool();
     private final DefaultApi api;
-    private final ApiClient client;
 
     protected DefaultApiAdapter(ApiClient apiClient, Context context) {
         super(apiClient, context);
-        this.client = apiClient;
         this.api = apiClient.createService(DefaultApi.class);
     }
 

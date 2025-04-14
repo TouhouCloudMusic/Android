@@ -17,22 +17,27 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.util.UnstableApi;
-import androidx.viewpager2.widget.ViewPager2;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.navigation.ui.NavigationUI;
 
 import net.hearnsoft.tcm.R;
 import net.hearnsoft.tcm.databinding.FragmentMainBinding;
 import net.hearnsoft.tcm.ui.activity.MainActivity;
-import net.hearnsoft.tcm.ui.adapter.AppViewPagerAdapter;
 import net.hearnsoft.tcm.ui.interfaces.OnNowPlayingClickListener;
 import net.hearnsoft.tcm.ui.model.PlaybackViewModel;
 
 @UnstableApi
 public class MainFragment extends Fragment {
+    private static final String KEY_SELECTED_NAV_ITEM = "nav_selected";
+    private static final int DEFAULT_NAV_ITEM = R.id.fragment_explore;
+
     private FragmentMainBinding binding;
-    private AppViewPagerAdapter adapter;
     private OnNowPlayingClickListener listener;
     private PlaybackViewModel viewModel;
-    private int currentPagerPosition = 0;
+    private NavController navController;
+    private int currentNavSelected = DEFAULT_NAV_ITEM;
+
     private final Handler progressHandler = new Handler(Looper.getMainLooper());
     private final Runnable progressRunnable = new Runnable() {
         @Override
@@ -45,17 +50,15 @@ public class MainFragment extends Fragment {
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        // 保存ViewPager2的状态
-        if (binding != null) {
-            outState.putInt("viewpager_position", binding.mainView.getCurrentItem());
-        }
+        // Save the current navigation state
+        outState.putInt(KEY_SELECTED_NAV_ITEM, currentNavSelected);
     }
 
     @Override
     public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
         if (savedInstanceState != null) {
-            currentPagerPosition = savedInstanceState.getInt("viewpager_position", 0);
+            currentNavSelected = savedInstanceState.getInt(KEY_SELECTED_NAV_ITEM, DEFAULT_NAV_ITEM);
         }
     }
 
@@ -76,7 +79,6 @@ public class MainFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FragmentMainBinding.inflate(inflater, container, false);
-        adapter = AppViewPagerAdapter.create(this);
         return binding.getRoot();
     }
 
@@ -90,7 +92,6 @@ public class MainFragment extends Fragment {
         });
         ViewCompat.requestApplyInsets(binding.getRoot());
 
-        initPager();
         initNavBar();
 
         // Initially hide now playing bar
@@ -115,47 +116,21 @@ public class MainFragment extends Fragment {
         startProgressTracking();
     }
 
-    private void initPager() {
-        binding.mainView.setAdapter(adapter);
-        // 添加Fragments
-        if (adapter.getItemCount() == 0) {
-            adapter.addFragment(new ExploreFragment());
-            adapter.addFragment(new RadioFragment());
-            adapter.addFragment(new LibraryFragment());
-            adapter.addFragment(new MusicFragment());
-            adapter.addFragment(new AccountFragment());
-        }
-        // ViewPager2属性设置
-        // 设置当前页面以及是否启用丝滑滚动
-        binding.mainView.setCurrentItem(currentPagerPosition,true);
-        // 设置是否启用用户切换手势
-        binding.mainView.setUserInputEnabled(false);
-        // 设置onPageChangeCallback
-        binding.mainView.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
-            @Override
-            public void onPageSelected(int position) {
-                binding.navBar.getMenu().getItem(position).setChecked(true);
-            }
-        });
-    }
+
 
     private void initNavBar() {
-        binding.navBar.setOnItemSelectedListener(menuItem -> {
-            int position = 0;
-            if (menuItem.getItemId() == R.id.nav_explore) {
-                position = 0;
-            } else if (menuItem.getItemId() == R.id.nav_music_library) {
-                position = 1;
-            } else if (menuItem.getItemId() == R.id.nav_statistics) {
-                position = 2;
-            } else if (menuItem.getItemId() == R.id.nav_music) {
-                position = 3;
-            } else if (menuItem.getItemId() == R.id.nav_account) {
-                position = 4;
-            }
-            binding.mainView.setCurrentItem(position, true);
-            return true;
+        navController = Navigation.findNavController(requireActivity(), R.id.app_main_view);
+        NavigationUI.setupWithNavController(binding.navBar, navController);
+
+        // Set listener to track selection changes
+        binding.navBar.setOnItemSelectedListener(item -> {
+            currentNavSelected = item.getItemId();
+            // Let NavigationUI handle the navigation
+            return NavigationUI.onNavDestinationSelected(item, navController);
         });
+
+        navController.navigate(currentNavSelected);
+        binding.navBar.setSelectedItemId(currentNavSelected);
     }
 
     private void observeViewModel() {
@@ -219,7 +194,7 @@ public class MainFragment extends Fragment {
 
     @Override
     public void onResume() {
-        super.onResume();
+        navController.navigate(currentNavSelected);
         // 确保控制器已连接
         if (viewModel != null) {
             viewModel.ensureControllerConnected();
@@ -232,11 +207,13 @@ public class MainFragment extends Fragment {
             }
         }
         startProgressTracking();
+        super.onResume();
     }
 
     @Override
     public void onPause() {
         // Always stop tracking when the fragment pauses
+        currentNavSelected = binding.navBar.getSelectedItemId();
         stopProgressTracking();
         super.onPause();
     }

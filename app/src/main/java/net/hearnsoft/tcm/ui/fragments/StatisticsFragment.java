@@ -9,17 +9,17 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import net.hearnsoft.tcm.databinding.FragmentRadioBinding;
+import net.hearnsoft.tcm.databinding.FragmentStatisticsBinding;
 
-public class RadioFragment extends Fragment {
+public class StatisticsFragment extends Fragment {
 
-    private FragmentRadioBinding binding;
+    private FragmentStatisticsBinding binding;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        binding = FragmentRadioBinding.inflate(inflater, container, false);
+        binding = FragmentStatisticsBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
 

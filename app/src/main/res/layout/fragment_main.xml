@@ -55,14 +55,18 @@
         </com.google.android.material.appbar.MaterialToolbar>
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/main_view"
+    <fragment
+        android:id="@+id/app_main_view"
+        android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        app:defaultNavHost="false"
+        app:navGraph="@navigation/fragment_main_pages"
         app:layout_constraintTop_toBottomOf="@+id/appBar"
         app:layout_constraintBottom_toTopOf="@+id/nav_bar"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="FragmentTagUsage" />
 
     <net.hearnsoft.tcm.ui.widgets.NowPlayingBar
         android:id="@+id/nowPlayingBar"

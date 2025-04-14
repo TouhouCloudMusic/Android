@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_main_pages"
+    app:startDestination="@id/fragment_explore">
+
+    <fragment
+        android:id="@+id/fragment_explore"
+        android:name="net.hearnsoft.tcm.ui.fragments.ExploreFragment"
+        android:label="ExplorerFragment"
+        tools:layout="@layout/fragment_explore"/>
+    <fragment
+        android:id="@+id/fragment_library"
+        android:name="net.hearnsoft.tcm.ui.fragments.LibraryFragment"
+        android:label="LibraryFragment"
+        tools:layout="@layout/fragment_library" />
+    <fragment
+        android:id="@+id/fragment_statistics"
+        android:name="net.hearnsoft.tcm.ui.fragments.StatisticsFragment"
+        android:label="StatisticsFragment"
+        tools:layout="@layout/fragment_statistics" />
+    <fragment
+        android:id="@+id/fragment_music"
+        android:name="net.hearnsoft.tcm.ui.fragments.MusicFragment"
+        android:label="MusicFragment"
+        tools:layout="@layout/fragment_music" />
+    <fragment
+        android:id="@+id/fragment_account"
+        android:name="net.hearnsoft.tcm.ui.fragments.AccountFragment"
+        android:label="AccountFragment"
+        tools:layout="@layout/fragment_account" />
+</navigation>

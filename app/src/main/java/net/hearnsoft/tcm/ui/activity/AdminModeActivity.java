@@ -15,12 +15,9 @@ import net.hearnsoft.tcm.ui.fragments.apitest.MainAdminFragment;
 public class AdminModeActivity extends AppCompatActivity {
     private ActivityAdminModeBinding binding;
 
-    private String userToken;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        userToken = getIntent().getStringExtra("user_token");
         binding = ActivityAdminModeBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -33,9 +30,6 @@ public class AdminModeActivity extends AppCompatActivity {
                     .commit();
             fragment.setFragmentChangeListener(this::replaceFragment);
         }
-
-
-        Toast.makeText(this, userToken, Toast.LENGTH_SHORT).show();
     }
 
     private void replaceFragment(Fragment newFragment) {

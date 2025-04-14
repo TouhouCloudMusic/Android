@@ -38,6 +38,7 @@ import net.hearnsoft.tcm.utils.Logs;
 import net.hearnsoft.tcm.utils.OffsetDateTimeFormater;
 import net.hearnsoft.tcm.utils.SettingsPrefUtils;
 import net.hearnsoft.tcm.utils.ViewModelUtils;
+import net.hearnsoft.thcdb_sdk.model.UserProfile;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -108,73 +109,7 @@ public class UserProfileActivity extends AppCompatActivity {
             adapter.items.clear();
         }
         // Set up observers
-        userViewModel.getUserProfile().observe(this, data -> {
-            if (data != null) {
-                List<ProfileItem> items = new ArrayList<>();
-                items.add(new ProfileItem(
-                    ProfileItem.TYPE_AVATAR,
-                    getString(R.string.profile_title_avatar),
-                    getAvatarUrl(data.getAvatarUrl()),
-                    true,
-                    item -> openImagePicker()
-                ));
-                items.add(new ProfileItem(
-                    ProfileItem.TYPE_INFO,
-                    getString(R.string.profile_title_username),
-                    data.getName(),
-                    true,
-                    item -> openEditNameDialog(item.getContent())
-                ));
-                items.add(new ProfileItem(
-                    ProfileItem.TYPE_INFO,
-                    getString(R.string.profile_title_last_login),
-                    OffsetDateTimeFormater.format(data.getLastLogin(), getString(R.string.date_format_str))
-                ));
-                items.add(new ProfileItem(
-                    ProfileItem.TYPE_INFO,
-                    getString(R.string.profile_title_user_permission),
-                    getUserRoleString(data.getRoles()
-                        .stream()
-                        .mapToInt(Integer::intValue)
-                        .toArray())
-                ));
-
-                // 管理员功能
-                // TODO: 使用新方式实现，临时废弃
-                /*if (isAdminUser(data.getRoles()
-                    .stream()
-                    .mapToInt(Integer::intValue)
-                    .toArray())) {
-                    items.add(new ProfileItem(
-                        ProfileItem.TYPE_PREFERENCE_ITEM,
-                        getString(R.string.profile_title_admin_mode),
-                        null,
-                        true,
-                        item -> {
-                            Toast.makeText(
-                                UserProfileActivity.this,
-                                R.string.admin_mode_notice,
-                                Toast.LENGTH_SHORT
-                            ).show();
-                            Intent intent = new Intent(
-                                UserProfileActivity.this,
-                                AdminModeActivity.class
-                            );
-                            intent.putExtra("user_token", userToken);
-                            startActivity(intent);
-                        }
-                    ));
-                }*/
-                items.add(new ProfileItem(
-                    ProfileItem.TYPE_BUTTON,
-                    getString(R.string.profile_title_logout),
-                    "",
-                    true,
-                    item -> logout()
-                ));
-                adapter.setItems(items);
-            }
-        });
+        userViewModel.getUserProfile().observe(this, this::setupUserProfileList);
 
         userViewModel.getError().observe(this, error -> {
             if (error != null) {
@@ -192,6 +127,84 @@ public class UserProfileActivity extends AppCompatActivity {
                 });
             }
         });
+    }
+
+    private void setupUserProfileList(UserProfile data) {
+        if (data != null) {
+            List<ProfileItem> items = new ArrayList<>();
+            items.add(new ProfileItem(
+                ProfileItem.TYPE_AVATAR,
+                getString(R.string.profile_title_avatar),
+                getAvatarUrl(data.getAvatarUrl()),
+                true,
+                item -> openImagePicker()
+            ));
+            items.add(new ProfileItem(
+                ProfileItem.TYPE_INFO,
+                getString(R.string.profile_title_username),
+                data.getName(),
+                true,
+                item -> openEditNameDialog(item.getContent())
+            ));
+            items.add(new ProfileItem(
+                ProfileItem.TYPE_INFO,
+                getString(R.string.profile_title_last_login),
+                OffsetDateTimeFormater.format(data.getLastLogin(), getString(R.string.date_format_str))
+            ));
+            items.add(new ProfileItem(
+                ProfileItem.TYPE_INFO,
+                getString(R.string.profile_title_user_permission),
+                getUserRoleString(data.getRoles()
+                    .stream()
+                    .mapToInt(Integer::intValue)
+                    .toArray())
+            ));
+
+            // 管理员功能
+            // TODO: 使用新方式实现
+            if (isAdminUser(data.getRoles()
+                .stream()
+                .mapToInt(Integer::intValue)
+                .toArray())) {
+                items.add(new ProfileItem(
+                    ProfileItem.TYPE_PREFERENCE_ITEM,
+                    getString(R.string.profile_title_admin_mode),
+                    null,
+                    true,
+                    item -> {
+                        Toast.makeText(
+                            UserProfileActivity.this,
+                            R.string.admin_mode_notice,
+                            Toast.LENGTH_SHORT
+                        ).show();
+                        Intent intent = new Intent(
+                            UserProfileActivity.this,
+                            AdminModeActivity.class
+                        );
+                        startActivity(intent);
+                    }
+                ));
+            }
+            items.add(new ProfileItem(
+                ProfileItem.TYPE_BUTTON,
+                getString(R.string.profile_title_logout),
+                "",
+                true,
+                item -> logout()
+            ));
+            adapter.setItems(items);
+        } else {
+            runOnUiThread(() -> {
+                new MaterialAlertDialogBuilder(UserProfileActivity.this)
+                    .setTitle(R.string.profile_dialog_err_title)
+                    .setMessage(getString(R.string.profile_dialog_err_msg))
+                    .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                        dialog.dismiss();
+                        finish();
+                    })
+                    .show();
+            });
+        }
     }
 
     private void loadUserRolesList() {

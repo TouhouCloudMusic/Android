@@ -194,7 +194,10 @@ public class MainFragment extends Fragment {
 
     @Override
     public void onResume() {
-        navController.navigate(currentNavSelected);
+        // 只在当前选中项变更时才重新导航
+        if (binding.navBar.getSelectedItemId() != currentNavSelected) {
+            navController.navigate(currentNavSelected);
+        }
         // 确保控制器已连接
         if (viewModel != null) {
             viewModel.ensureControllerConnected();

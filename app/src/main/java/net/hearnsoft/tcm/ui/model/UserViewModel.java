@@ -12,6 +12,7 @@ import androidx.lifecycle.MutableLiveData;
 import net.hearnsoft.tcm.infrastructure.adapter.http.Constants;
 import net.hearnsoft.tcm.infrastructure.adapter.http.ThcdbApiAdapter;
 import net.hearnsoft.tcm.infrastructure.adapter.http.ThcdbApiAdapter.ThcdbApiException;
+import net.hearnsoft.thcdb_sdk.model.AuthCredential;
 import net.hearnsoft.thcdb_sdk.model.DataVecString;
 import net.hearnsoft.thcdb_sdk.model.UserProfile;
 
@@ -74,10 +75,42 @@ public class UserViewModel extends AndroidViewModel {
             });
     }
 
+    public void login(AuthCredential auth) {
+        loadingLiveData.postValue(true);
+
+        Future.fromCompletableFuture(apiAdapter.getUser().signIn(auth))
+            .onSuccess(profile -> {
+                userProfileLiveData.postValue(profile);
+                successLiveData.postValue(true);
+                loadingLiveData.postValue(false);
+            })
+            .onFailure(error -> {
+                handleError(error);
+                successLiveData.postValue(false);
+                loadingLiveData.postValue(false);
+            });
+    }
+
     public void register(String username, String password) {
         loadingLiveData.postValue(true);
 
         Future.fromCompletableFuture(apiAdapter.getUser().signUp(username, password))
+            .onSuccess(profile -> {
+                userProfileLiveData.postValue(profile);
+                successLiveData.postValue(true);
+                loadingLiveData.postValue(false);
+            })
+            .onFailure(error -> {
+                handleError(error);
+                successLiveData.postValue(false);
+                loadingLiveData.postValue(false);
+            });
+    }
+
+    public void register(AuthCredential auth) {
+        loadingLiveData.postValue(true);
+
+        Future.fromCompletableFuture(apiAdapter.getUser().signUp(auth))
             .onSuccess(profile -> {
                 userProfileLiveData.postValue(profile);
                 successLiveData.postValue(true);

@@ -173,6 +173,46 @@ public class ThcdbApiAdapter {
         }
 
         /**
+         * 用户登录
+         * @param auth {@code AuthCredential} 认证信息
+         * @return 包含用户信息的CompletableFuture
+         */
+        public CompletableFuture<UserProfile> signIn(AuthCredential auth) {
+            return CompletableFuture.supplyAsync(() -> {
+                try {
+                    Response<DataUserProfile> response = api.signIn(auth).execute();
+                    if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                        return response.body().getData();
+                    } else {
+                        throw createApiException(response);
+                    }
+                } catch (IOException e) {
+                    throw new ThcdbApiException(e);
+                }
+            }, executor);
+        }
+
+        /**
+         * 用户注册
+         * @param auth {@code AuthCredential} 认证信息
+         * @return 包含用户信息的CompletableFuture
+         */
+        public CompletableFuture<UserProfile> signUp(AuthCredential auth) {
+            return CompletableFuture.supplyAsync(() -> {
+                try {
+                    Response<DataUserProfile> response = api.signUp(auth).execute();
+                    if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                        return response.body().getData();
+                    } else {
+                        throw createApiException(response);
+                    }
+                } catch (IOException e) {
+                    throw new ThcdbApiException(e);
+                }
+            }, executor);
+        }
+
+        /**
          * 用户登出
          * @return 包含操作结果的CompletableFuture
          */

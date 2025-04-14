@@ -22,9 +22,12 @@ import net.hearnsoft.tcm.infrastructure.adapter.http.APICore;
 import net.hearnsoft.tcm.infrastructure.adapter.http.Constants;
 import net.hearnsoft.tcm.infrastructure.adapter.http.UserAPIOld;
 import net.hearnsoft.tcm.ui.activity.UserLoginActivity;
+import net.hearnsoft.tcm.ui.model.UserViewModel;
 import net.hearnsoft.tcm.utils.Logs;
 import net.hearnsoft.tcm.utils.SettingsPrefUtils;
 import net.hearnsoft.tcm.utils.UserLoginPortal;
+import net.hearnsoft.tcm.utils.ViewModelUtils;
+import net.hearnsoft.thcdb_sdk.model.AuthCredential;
 
 
 public class UserRegisterFragment extends Fragment {
@@ -32,7 +35,7 @@ public class UserRegisterFragment extends Fragment {
     private static final String TAG = UserRegisterFragment.class.getSimpleName();
     private FragmentUserRegisterBinding binding;
     private UserLoginPortal portal;
-    private UserAPIOld userAPI;
+    private UserViewModel userViewModel;
 
     @Nullable
     @Override
@@ -41,7 +44,7 @@ public class UserRegisterFragment extends Fragment {
         @Nullable ViewGroup container,
         @Nullable Bundle savedInstanceState
     ) {
-        userAPI = UserAPIOld.getInstance(requireContext());
+        userViewModel = ViewModelUtils.getViewModel(requireActivity(), UserViewModel.class);
         binding = FragmentUserRegisterBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
@@ -137,37 +140,57 @@ public class UserRegisterFragment extends Fragment {
         }
         if (!hasError) {
             binding.userRegister.setEnabled(false);
-            userAPI.register(
-                username, password, new APICore.SessionTokenCallback<String>() {
-                    @Override
-                    public void onSuccess(String data, String sessionToken) {
-                        Snackbar.make(
-                            binding.getRoot(),
-                            data + "," + getString(R.string.toast_user_register_succ),
-                            Snackbar.LENGTH_SHORT
-                        ).show();
-                        SettingsPrefUtils.getInstance(requireActivity()).writeStringSettings(Constants.KEY_USER_ID,
-                            username
-                        );
-                        binding.userRegister.setEnabled(true);
-                        ((UserLoginActivity) requireActivity()).onLoginSuccess(
-                            UserAuthenticationType.REGISTER);
-                    }
 
-                    @Override
-                    public void onSuccess(String data) {
-                        //empty stub
-                    }
+            // 提前清除旧的观察者以避免重复观察
+            userViewModel.getSuccess().removeObservers(getViewLifecycleOwner());
+            userViewModel.getError().removeObservers(getViewLifecycleOwner());
 
-                    @Override
-                    public void onError(APICore.ApiError error) {
-                        Snackbar.make(binding.getRoot(), error.getMessage(), Snackbar.LENGTH_SHORT)
-                            .show();
-                        Logs.e(TAG, error.getMessage());
-                        binding.userRegister.setEnabled(true);
-                    }
+            // 设置新的观察者
+            userViewModel.getSuccess().observe(getViewLifecycleOwner(), success -> {
+                if (success != null && success) {
+                    onSuccess();
+                    // 登录成功后移除观察者
+                    userViewModel.getUserProfile().removeObservers(getViewLifecycleOwner());
                 }
-            );
+            });
+
+            userViewModel.getError().observe(getViewLifecycleOwner(), error -> {
+                if (error != null) {
+                    onError(error);
+                    // 错误处理后移除观察者
+                    userViewModel.getError().removeObservers(getViewLifecycleOwner());
+                }
+            });
+
+            // 注册操作
+            AuthCredential auth = new AuthCredential(username, password);
+            userViewModel.register(auth);
+        }
+    }
+
+    private void onError(String msg) {
+        // 确保在UI线程中执行
+        if (isAdded() && !isRemoving()) {
+            requireActivity().runOnUiThread(() -> {
+                Snackbar.make(binding.getRoot(), msg, Snackbar.LENGTH_SHORT).show();
+                Logs.e(TAG, msg);
+                binding.userRegister.setEnabled(true);
+            });
+        }
+    }
+
+    public void onSuccess() {
+        if (isAdded() && !isRemoving()) {
+            // 确保在UI线程中执行
+            requireActivity().runOnUiThread(() -> {
+                Snackbar.make(
+                    binding.getRoot(),
+                    "Ok ," + getString(R.string.toast_user_register_succ),
+                    Snackbar.LENGTH_SHORT
+                ).show();
+                binding.userRegister.setEnabled(true);
+                ((UserLoginActivity) requireActivity()).onLoginSuccess(UserAuthenticationType.REGISTER);
+            });
         }
     }
 

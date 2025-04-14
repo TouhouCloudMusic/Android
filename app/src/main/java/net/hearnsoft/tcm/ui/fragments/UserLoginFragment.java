@@ -18,14 +18,13 @@ import com.google.android.material.snackbar.Snackbar;
 import net.hearnsoft.tcm.R;
 import net.hearnsoft.tcm.databinding.FragmentUserLoginBinding;
 import net.hearnsoft.tcm.domain.model.user.UserAuthenticationType;
-import net.hearnsoft.tcm.infrastructure.adapter.http.Constants;
 import net.hearnsoft.tcm.ui.activity.UserLoginActivity;
 import net.hearnsoft.tcm.ui.model.UserViewModel;
 import net.hearnsoft.tcm.utils.Logs;
-import net.hearnsoft.tcm.utils.SettingsPrefUtils;
 import net.hearnsoft.tcm.utils.UserLoginPortal;
 import net.hearnsoft.tcm.utils.ViewModelUtils;
 
+import net.hearnsoft.thcdb_sdk.model.AuthCredential;
 import net.hearnsoft.thcdb_sdk.model.UserProfile;
 
 public class UserLoginFragment extends Fragment {
@@ -139,13 +138,13 @@ public class UserLoginFragment extends Fragment {
             binding.userLogin.setEnabled(false);
 
             // 提前清除旧的观察者以避免重复观察
-            userViewModel.getUserProfile().removeObservers(getViewLifecycleOwner());
+            userViewModel.getSuccess().removeObservers(getViewLifecycleOwner());
             userViewModel.getError().removeObservers(getViewLifecycleOwner());
 
             // 设置新的观察者
-            userViewModel.getUserProfile().observe(getViewLifecycleOwner(), userProfile -> {
-                if (userProfile != null) {
-                    onSuccess(userProfile);
+            userViewModel.getSuccess().observe(getViewLifecycleOwner(), success -> {
+                if (success != null && success) {
+                    onSuccess();
                     // 登录成功后移除观察者
                     userViewModel.getUserProfile().removeObservers(getViewLifecycleOwner());
                 }
@@ -160,7 +159,8 @@ public class UserLoginFragment extends Fragment {
             });
 
             // 执行登录操作
-            userViewModel.login(username, password);
+            AuthCredential auth = new AuthCredential(username, password);
+            userViewModel.login(auth);
         }
     }
 
@@ -175,10 +175,7 @@ public class UserLoginFragment extends Fragment {
         }
     }
 
-    public void onSuccess(UserProfile data) {
-        if (data == null) {
-            return;
-        }
+    public void onSuccess() {
         if (isAdded() && !isRemoving()) {
             // 确保在UI线程中执行
             requireActivity().runOnUiThread(() -> {

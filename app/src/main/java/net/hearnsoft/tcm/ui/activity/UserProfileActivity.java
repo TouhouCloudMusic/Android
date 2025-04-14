@@ -51,6 +51,7 @@ public class UserProfileActivity extends AppCompatActivity {
     private UserViewModel userViewModel;
     private UserProfileAdapter adapter;
     private ActivityResultLauncher<PickVisualMediaRequest> pickAvatar;
+    private AlertDialog errorDialog;
 
     private List<String> userRoles;
     private boolean isEditMode = false;
@@ -113,16 +114,19 @@ public class UserProfileActivity extends AppCompatActivity {
         userViewModel.getError().observe(this, error -> {
             if (error != null) {
                 Logs.e(TAG, "failed to load profile, msg: " + error);
+                errorDialog = new MaterialAlertDialogBuilder(UserProfileActivity.this)
+                    .setTitle(R.string.profile_dialog_err_title)
+                    .setMessage(getString(R.string.profile_dialog_err_msg)
+                        +"\n"+error)
+                    .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                        dialog.dismiss();
+                        finish();
+                    })
+                    .create();
                 runOnUiThread(() -> {
-                    new MaterialAlertDialogBuilder(UserProfileActivity.this)
-                        .setTitle(R.string.profile_dialog_err_title)
-                        .setMessage(getString(R.string.profile_dialog_err_msg)
-                            +"\n"+error)
-                        .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                            dialog.dismiss();
-                            finish();
-                        })
-                        .show();
+                    if (errorDialog != null && !errorDialog.isShowing()) {
+                        errorDialog.show();
+                    }
                 });
             }
         });
@@ -193,16 +197,21 @@ public class UserProfileActivity extends AppCompatActivity {
             ));
             adapter.setItems(items);
         } else {
-            runOnUiThread(() -> {
-                new MaterialAlertDialogBuilder(UserProfileActivity.this)
+            // 只在登录时才显示错误对话框
+            if (userViewModel.isLoggedIn()) {
+                errorDialog = new MaterialAlertDialogBuilder(UserProfileActivity.this)
                     .setTitle(R.string.profile_dialog_err_title)
                     .setMessage(getString(R.string.profile_dialog_err_msg))
                     .setPositiveButton(android.R.string.ok, (dialog, which) -> {
                         dialog.dismiss();
                         finish();
-                    })
-                    .show();
-            });
+                    }).create();
+                runOnUiThread(() -> {
+                    if (errorDialog != null && !errorDialog.isShowing()) {
+                        errorDialog.show();
+                    }
+                });
+            }
         }
     }
 
@@ -331,7 +340,9 @@ public class UserProfileActivity extends AppCompatActivity {
                         Toast.LENGTH_SHORT
                     ).show();
 
-                    dialog.dismiss();
+                    if (dialog != null) {
+                        dialog.dismiss();
+                    }
                     finish();
                 }
             });
@@ -344,7 +355,9 @@ public class UserProfileActivity extends AppCompatActivity {
                         R.string.toast_profile_logout_err,
                         Toast.LENGTH_SHORT
                     ).show();
-                    dialog.dismiss();
+                    if (dialog != null) {
+                        dialog.dismiss();
+                    }
                 }
             });
 
@@ -352,9 +365,12 @@ public class UserProfileActivity extends AppCompatActivity {
             userViewModel.logout();
         });
 
-        builder.setNegativeButton(android.R.string.cancel, null);
+        builder.setNegativeButton(android.R.string.cancel, (dialog, which) ->
+            dialog.dismiss());
         AlertDialog dialog = builder.create();
-        dialog.show();
+        if (!dialog.isShowing()) {
+            dialog.show();
+        }
     }
 
     @Override

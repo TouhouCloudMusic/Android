@@ -36,7 +36,6 @@ import net.hearnsoft.tcm.ui.model.UserViewModel;
 import net.hearnsoft.tcm.ui.widgets.ProfileItem;
 import net.hearnsoft.tcm.utils.Logs;
 import net.hearnsoft.tcm.utils.OffsetDateTimeFormater;
-import net.hearnsoft.tcm.utils.SettingsPrefUtils;
 import net.hearnsoft.tcm.utils.ViewModelUtils;
 import net.hearnsoft.thcdb_sdk.model.UserProfile;
 
@@ -53,7 +52,7 @@ public class UserProfileActivity extends AppCompatActivity {
     private UserProfileAdapter adapter;
     private ActivityResultLauncher<PickVisualMediaRequest> pickAvatar;
 
-    private String[] userRoles;
+    private List<String> userRoles;
     private boolean isEditMode = false;
 
     @Override
@@ -208,26 +207,14 @@ public class UserProfileActivity extends AppCompatActivity {
     }
 
     private void loadUserRolesList() {
-        // TODO: 实现defaultApiAdapter
-        // 临时使用Mock数据
-        userRoles = new String[]{
-            "Admin",
-            "Moderator",
-            "User"
-        };
-        /*userAPI.getUserRoleList(new APICore.APICallback<String[]>() {
-            @Override
-            public void onSuccess(String[] data) {
-                Logs.d(TAG, "loadUserRolesList: " + Arrays.toString(data));
-                userRoles = data;
-            }
-
-            @Override
-            public void onError(APICore.ApiError error) {
-                Logs.e(TAG, "loadUserRolesListErr: " + error.getMessage());
-                userRoles = new String[]{};
-            }
-        });*/
+        if (userViewModel.getUserRoleList() != null) {
+            userRoles = userViewModel.getUserRoleList().getValue();
+            return;
+        }
+        userViewModel.getUserRoles();
+        userViewModel.getUserRoleList().observe(this, roles -> {
+            userRoles = roles;
+        });
     }
 
     private boolean isAdminUser(int[] rolesList) {
@@ -248,9 +235,9 @@ public class UserProfileActivity extends AppCompatActivity {
             return "";
         }
         for (int role : rolesList) {
-            if (role < userRoles.length) {
+            if (role < userRoles.size()) {
                 // 用户权限索引从1开始
-                sb.append(userRoles[role - 1]).append(",");
+                sb.append(userRoles.get(role - 1)).append(",");
             }
         }
         return sb.length() > 0 ? sb.substring(0, sb.length() - 1) : "";

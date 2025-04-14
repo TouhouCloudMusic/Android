@@ -12,7 +12,10 @@ import androidx.lifecycle.MutableLiveData;
 import net.hearnsoft.tcm.infrastructure.adapter.http.Constants;
 import net.hearnsoft.tcm.infrastructure.adapter.http.ThcdbApiAdapter;
 import net.hearnsoft.tcm.infrastructure.adapter.http.ThcdbApiAdapter.ThcdbApiException;
+import net.hearnsoft.thcdb_sdk.model.DataVecString;
 import net.hearnsoft.thcdb_sdk.model.UserProfile;
+
+import java.util.List;
 
 import io.vavr.concurrent.Future;
 
@@ -23,6 +26,7 @@ public class UserViewModel extends AndroidViewModel {
     private final MutableLiveData<UserProfile> userProfileLiveData = new MutableLiveData<>();
     private final MutableLiveData<String> errorLiveData = new MutableLiveData<>();
     private final MutableLiveData<Boolean> successLiveData = new MutableLiveData<>();
+    private final MutableLiveData<List<String>> userRoleListLiveData = new MutableLiveData<>();
     private final MutableLiveData<Boolean> loadingLiveData = new MutableLiveData<>(false);
 
     public UserViewModel(@NonNull Application application) {
@@ -44,6 +48,10 @@ public class UserViewModel extends AndroidViewModel {
 
     public LiveData<Boolean> isLoading() {
         return loadingLiveData;
+    }
+
+    public LiveData<List<String>> getUserRoleList() {
+        return userRoleListLiveData;
     }
 
     public boolean isLoggedIn() {
@@ -104,6 +112,10 @@ public class UserViewModel extends AndroidViewModel {
     }
 
     public void getProfileByUsername(String username) {
+        if (userProfileLiveData.getValue() == null) {
+            getUserRoles();
+        }
+
         loadingLiveData.postValue(true);
 
         Future.fromCompletableFuture(apiAdapter.getUser().profileWithName(username))
@@ -122,6 +134,9 @@ public class UserViewModel extends AndroidViewModel {
             errorLiveData.postValue("Not logged in");
             return;
         }
+        if (userProfileLiveData.getValue() == null) {
+            getUserRoles();
+        }
 
         loadingLiveData.postValue(true);
 
@@ -131,6 +146,25 @@ public class UserViewModel extends AndroidViewModel {
                 loadingLiveData.postValue(false);
             })
             .onFailure(error -> {
+                handleError(error);
+                loadingLiveData.postValue(false);
+            });
+    }
+
+    public void getUserRoles() {
+        loadingLiveData.postValue(true);
+
+        Future.fromCompletableFuture(apiAdapter.getDefaultApi().userRoles())
+            .onSuccess(roles -> {
+                List<String> rolesList = roles.getData();
+                if (rolesList == null) {
+                    handleError(new ThcdbApiException("Roles list is null"));
+                    loadingLiveData.postValue(false);
+                    return;
+                }
+                userRoleListLiveData.postValue(rolesList);
+                loadingLiveData.postValue(false);
+            }).onFailure(error -> {
                 handleError(error);
                 loadingLiveData.postValue(false);
             });

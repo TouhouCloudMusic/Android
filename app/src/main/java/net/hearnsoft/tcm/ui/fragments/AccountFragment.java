@@ -124,15 +124,7 @@ public class AccountFragment extends Fragment {
 
     private void handleError(String errorMessage) {
         Logs.e(TAG, "refreshUserProfile error: " + errorMessage);
-        if (errorMessage != null && errorMessage.contains("RiskControlError")) {
-            Toast.makeText(
-                requireContext(),
-                getString(R.string.toast_api_reach_risk_control) + errorMessage,
-                Toast.LENGTH_SHORT
-            ).show();
-        } else {
-            setUserCardForLoggedOutState();
-        }
+        setUserCardForLoggedOutState();
     }
 
     private String getAvatarUrl(String fileName) {

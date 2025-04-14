@@ -63,7 +63,6 @@
     <string name="toast_profile_upload_avatar_err">Failed to upload avatar, reason:</string>
     <string name="toast_profile_logout_succ">Logout successful</string>
     <string name="toast_profile_logout_err">Logout error</string>
-    <string name="toast_api_reach_risk_control">Reach risk control! \n</string>
     <string name="music_tab_music_title">Music</string>
     <string name="music_tab_artists_title">Artists</string>
     <string name="music_tab_album_title">Album</string>

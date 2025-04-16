@@ -11,6 +11,7 @@ import com.bumptech.glide.Glide;
 
 import net.hearnsoft.tcm.R;
 import net.hearnsoft.tcm.databinding.ItemMusicItemListBinding;
+import net.hearnsoft.tcm.ui.interfaces.OnMusicItemClickListener;
 
 public class MusicItemAdapter extends BaseAdapter<MediaItem, MusicItemAdapter.MusicItemHolder> {
 

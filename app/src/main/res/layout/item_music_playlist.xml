@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/itemMusicPlaylistContainer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingVertical="8dp"
+    android:paddingHorizontal="4dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="@drawable/rp_recyclerview_item"
+    android:background="@drawable/bg_playlist_item_background"
+    tools:background="@drawable/bg_playlist_current_item">
+
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/itemMusicPlaylistTitle"
+        style="@style/TextAppearance.Material3.TitleSmall"
+        android:layout_marginHorizontal="6dp"
+        android:layout_marginVertical="2dp"
+        android:textAlignment="textStart"
+        android:ellipsize="end"
+        android:hyphenationFrequency="normal"
+        android:maxLines="1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/itemMusicPlaylistSubtitle"
+        app:layout_constraintEnd_toStartOf="@id/itemMusicPlaylistRemove"
+        tools:text="Lunatic DriVe"/>
+
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/itemMusicPlaylistSubtitle"
+        style="@style/TextAppearance.Material3.BodySmall"
+        android:layout_marginHorizontal="6dp"
+        android:layout_marginVertical="2dp"
+        android:textAlignment="textStart"
+        android:ellipsize="end"
+        android:hyphenationFrequency="normal"
+        android:maxLines="1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/itemMusicPlaylistTitle"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/itemMusicPlaylistRemove"
+        tools:text="Elle - Fullmoon Timbre"/>
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/itemMusicPlaylistRemove"
+        android:layout_marginHorizontal="6dp"
+        android:src="@drawable/ic_remove_24px"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Remove"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

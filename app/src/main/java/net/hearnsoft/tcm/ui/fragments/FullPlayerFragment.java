@@ -35,6 +35,7 @@ import net.hearnsoft.tcm.ui.fragments.fullplayer.FullPlayerInfoFragment;
 import net.hearnsoft.tcm.ui.fragments.fullplayer.FullPlayerMusicFragment;
 import net.hearnsoft.tcm.ui.fragments.fullplayer.FullPlayerLyricsFragment;
 import net.hearnsoft.tcm.ui.model.PlaybackViewModel;
+import net.hearnsoft.tcm.ui.widgets.CurrentPlaylistBottomSheetDialog;
 import net.hearnsoft.tcm.utils.Logs;
 
 import java.util.Locale;
@@ -54,6 +55,7 @@ public class FullPlayerFragment extends Fragment {
     private FloatingActionButton playPauseButton;
     private MaterialButton prevButton;
     private MaterialButton nextButton;
+    private MaterialButton playlistButton;
     private Slider timelineSlider;
     private TextView currentTimeTextView;
     private TextView durationTextView;
@@ -187,6 +189,7 @@ public class FullPlayerFragment extends Fragment {
         playPauseButton = binding.fullPlayerControlsAction.fullPlayerControlsPlayPause;
         prevButton = binding.fullPlayerControlsAction.fullPlayerControlsPrevious;
         nextButton = binding.fullPlayerControlsAction.fullPlayerControlsNext;
+        playlistButton = binding.fullPlayerControlsAction.fullPlayerControlsPlaylist;
 
         // 设置播放/暂停按钮点击事件
         playPauseButton.setOnClickListener(v -> {
@@ -201,6 +204,13 @@ public class FullPlayerFragment extends Fragment {
         // 设置下一曲按钮点击事件
         nextButton.setOnClickListener(v -> {
             viewModel.playNext();
+        });
+
+        // 设置播放列表按钮点击事件
+        playlistButton.setOnClickListener(v -> {
+            // 创建并显示BottomSheetDialog
+            CurrentPlaylistBottomSheetDialog dialog = new CurrentPlaylistBottomSheetDialog();
+            dialog.show(getParentFragmentManager(), "playlist_dialog");
         });
     }
 

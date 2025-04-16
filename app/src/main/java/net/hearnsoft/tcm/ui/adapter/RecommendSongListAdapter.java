@@ -18,6 +18,7 @@ import com.bumptech.glide.request.target.Target;
 import net.hearnsoft.tcm.R;
 import net.hearnsoft.tcm.databinding.ItemRecommendSongBinding;
 import net.hearnsoft.tcm.domain.model.song.RecommendSong;
+import net.hearnsoft.tcm.ui.interfaces.OnItemClickListener;
 
 public class RecommendSongListAdapter
     extends BaseAdapter<RecommendSong, RecommendSongListAdapter.SongViewHolder> {

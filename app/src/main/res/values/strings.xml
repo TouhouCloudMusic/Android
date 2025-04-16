@@ -6,6 +6,10 @@
     <string name="nav_library_title">Library</string>
     <string name="nav_account_title">Account</string>
 
+    <string name="dialog_current_playlist_title">Playlist</string>
+    <string name="dialog_current_playlist_clear_text">Clear</string>
+    <string name="dialog_current_playlist_chip_shuffle">Shuffle Playlist</string>
+
     <string name="unknown">Unknown</string>
     <string name="sort_by_unknown">Unknown</string>
 
@@ -78,4 +82,7 @@
     <string name="sort_by_title">Title</string>
     <string name="sort_by_play_count">Play count</string>
     <string name="button_locate_to_current">Locate to current</string>
+
+    <string name="dialog_playlist_clear_title">Clear current playlist?</string>
+    <string name="dialog_playlist_clear_msg">Are you sure to clear all songs in current playlist?</string>
 </resources>

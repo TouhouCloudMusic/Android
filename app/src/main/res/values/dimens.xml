@@ -20,4 +20,7 @@
     <dimen name="account_cardview_view_margin">@dimen/account_cardview_margin</dimen>
 
     <dimen name="card_spacing">2dp</dimen>
+
+    <dimen name="min_playlist_height">240dp</dimen>
+    <dimen name="playlist_item_height">56dp</dimen>
 </resources>

@@ -1,4 +1,4 @@
-package net.hearnsoft.tcm.ui.adapter;
+package net.hearnsoft.tcm.ui.interfaces;
 
 import androidx.media3.common.MediaItem;
 

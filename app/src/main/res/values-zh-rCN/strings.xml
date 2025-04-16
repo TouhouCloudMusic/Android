@@ -7,6 +7,10 @@
     <string name="nav_library_title">音乐库</string>
     <string name="nav_account_title">个人</string>
 
+    <string name="dialog_current_playlist_title">播放队列</string>
+    <string name="dialog_current_playlist_clear_text">清空</string>
+    <string name="dialog_current_playlist_chip_shuffle">打乱播放列表</string>
+
     <string name="unknown">未知</string>
     <string name="sort_by_unknown">未知</string>
 
@@ -80,4 +84,6 @@
     <string name="sort_by_title">标题</string>
     <string name="sort_by_play_count">播放次数</string>
     <string name="button_locate_to_current">定位到当前</string>
+    <string name="dialog_playlist_clear_title">清空当前播放列表</string>
+    <string name="dialog_playlist_clear_msg">你将要清空当前播放列表，确定吗？</string>
 </resources>

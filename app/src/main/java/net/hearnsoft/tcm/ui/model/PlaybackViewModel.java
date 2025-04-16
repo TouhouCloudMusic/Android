@@ -17,13 +17,16 @@ import net.hearnsoft.tcm.domain.model.song.SongSortingStrategy;
 import net.hearnsoft.tcm.utils.LocalMusicScanner;
 import net.hearnsoft.tcm.utils.MusicPlayerController;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 @UnstableApi
 public class PlaybackViewModel extends AndroidViewModel {
     private MusicPlayerController playerController;
     private final MutableLiveData<MediaItem> currentMediaItem = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isPlaying = new MutableLiveData<>(false);
+    // 设备媒体库播放列表，默认为不要改动
     private final MutableLiveData<List<MediaItem>> playlist = new MutableLiveData<>();
     private final MutableLiveData<Long> currentPosition = new MutableLiveData<>(0L);
     private final MutableLiveData<Long> duration = new MutableLiveData<>(0L);
@@ -31,6 +34,9 @@ public class PlaybackViewModel extends AndroidViewModel {
     private final MutableLiveData<Boolean> isSorting = new MutableLiveData<>(false);
     private final MutableLiveData<SongSortingRule> currentSortRule = new MutableLiveData<>(new SongSortingRule(SongSortingStrategy.Title, false));
     private final MutableLiveData<Integer> currentIndex = new MutableLiveData<>(0);
+    //当前PlayerController的播放列表，通常是由UI控件增删监控这个列表
+    private final MutableLiveData<List<MediaItem>> currentPlaylist = new MutableLiveData<>();
+    private final MutableLiveData<Integer> repeatMode = new MutableLiveData<>(0);
 
     // 标记控制器是否已连接
     private boolean isControllerActive = false;
@@ -79,6 +85,11 @@ public class PlaybackViewModel extends AndroidViewModel {
                     updatePlaylist();
                 }
             }
+
+            @Override
+            public void onRepeatModeChanged(int repeatMode) {
+                PlaybackViewModel.this.repeatMode.postValue(repeatMode);
+            }
         });
 
         // 初始化状态
@@ -89,6 +100,11 @@ public class PlaybackViewModel extends AndroidViewModel {
             }
             isPlaying.postValue(playerController.getMediaController().isPlaying());
             duration.postValue(playerController.getMediaController().getDuration());
+
+            // 初始化播放模式
+            repeatMode.postValue(playerController.getMediaController().getRepeatMode());
+
+            // 初始化当前播放列表
             updatePlaylist();
         }
     }
@@ -173,12 +189,119 @@ public class PlaybackViewModel extends AndroidViewModel {
         }
     }
 
+    public void clearCurrentPlaylist() {
+        ensureControllerConnected();
+        if (playerController.getMediaController() != null) {
+            // 清空当前播放列表
+            playerController.getMediaController().clearMediaItems();
+            // 更新LiveData
+            currentPlaylist.postValue(new ArrayList<>());
+            // 重置当前索引
+            currentIndex.postValue(0);
+        }
+    }
+
+    public void setRepeatMode(int repeatMode) {
+        ensureControllerConnected();
+        if (playerController.getMediaController() != null) {
+            playerController.getMediaController().setRepeatMode(repeatMode);
+            this.repeatMode.postValue(repeatMode);
+        }
+    }
+
+    /**
+     * 打乱当前播放列表并开始播放
+     * 当前正在播放的歌曲会被放在打乱后的列表的开头
+     * @return 返回打乱后的列表
+     */
+    public void shuffleCurrentPlaylist() {
+        List<MediaItem> currentItems = currentPlaylist.getValue();
+        if (currentItems == null || currentItems.isEmpty()) {
+            return;
+        }
+
+        // 获取当前播放的媒体项
+        Integer currentIdx = currentIndex.getValue();
+        MediaItem currentItem = null;
+        if (currentIdx != null && currentIdx < currentItems.size()) {
+            currentItem = currentItems.get(currentIdx);
+        }
+
+        // 创建列表副本进行打乱
+        List<MediaItem> shuffledList = new ArrayList<>(currentItems);
+
+        // 如果有当前播放的项，将其从要打乱的列表中移除
+        if (currentItem != null) {
+            shuffledList.remove(currentItem);
+        }
+
+        // 打乱列表
+        java.util.Collections.shuffle(shuffledList);
+
+        // 如果有当前播放的项，将其放在列表开头
+        if (currentItem != null) {
+            shuffledList.add(0, currentItem);
+        }
+
+        // 保存打乱后的列表
+        currentPlaylist.postValue(shuffledList);
+
+        // 将打乱后的列表设置回播放器，随机一首开始播放
+        Random random = new Random();
+        int startIndex = random.nextInt(shuffledList.size());
+        playMusic(shuffledList, startIndex);
+        currentIndex.postValue(startIndex);
+    }
+
+    public void skipToQueueItem(int position) {
+        ensureControllerConnected();
+        if (playerController.getMediaController() != null) {
+            List<MediaItem> items = currentPlaylist.getValue();
+            if (items != null && position >= 0 && position < items.size()) {
+                playerController.getMediaController().seekToDefaultPosition(position);
+                // 更新当前索引
+                currentIndex.postValue(position);
+            }
+        }
+    }
+
+    public void removeFromCurrentPlaylistByPosition(int position) {
+        ensureControllerConnected();
+        if (playerController.getMediaController() != null) {
+            List<MediaItem> items = currentPlaylist.getValue();
+            if (items != null && position >= 0 && position < items.size()) {
+                // 获取当前索引
+                int currentIdx = currentIndex.getValue() != null ? currentIndex.getValue() : 0;
+
+                // 从播放器控制器中移除该项
+                playerController.getMediaController().removeMediaItem(position);
+
+                // 更新本地列表
+                List<MediaItem> newList = new ArrayList<>(items);
+                newList.remove(position);
+                currentPlaylist.postValue(newList);
+
+                // 调整当前播放索引
+                if (position < currentIdx) {
+                    // 如果删除的是当前播放项之前的项，索引需要减1
+                    currentIndex.postValue(currentIdx - 1);
+                } else if (position == currentIdx && position >= newList.size()) {
+                    // 如果删除的是当前播放的最后一项，索引需要调整到列表的末尾
+                    currentIndex.postValue(Math.max(0, newList.size() - 1));
+                }
+                // 其他情况索引不变
+            }
+        }
+    }
+
     public void playMusic(List<MediaItem> playlist, int startIndex) {
         ensureControllerConnected();
         if (playerController.getMediaController() != null) {
             playerController.playMusic(playlist, startIndex);
             this.playlist.postValue(playlist);
             this.currentIndex.postValue(startIndex);
+            // 将当前设备媒体列表同步给当前播放列表
+            this.currentPlaylist.postValue(new ArrayList<>(playlist));
         }
     }
 
@@ -266,6 +389,17 @@ public class PlaybackViewModel extends AndroidViewModel {
     public LiveData<Integer> getCurrentIndex() {
         return currentIndex;
     }
+
+    // 获取当前播放列表的LiveData
+    public LiveData<List<MediaItem>> getCurrentPlaylist() {
+        return currentPlaylist;
+    }
+
+    // 获取重复模式
+    public LiveData<Integer> getRepeatMode() {
+        return repeatMode;
+    }
+
 
     @Override
     protected void onCleared() {

@@ -24,7 +24,7 @@ import net.hearnsoft.tcm.databinding.FragmentMusicListBinding;
 import net.hearnsoft.tcm.domain.model.song.SongSortingRule;
 import net.hearnsoft.tcm.domain.model.song.SongSortingStrategy;
 import net.hearnsoft.tcm.ui.adapter.MusicItemAdapter;
-import net.hearnsoft.tcm.ui.adapter.OnMusicItemClickListener;
+import net.hearnsoft.tcm.ui.interfaces.OnMusicItemClickListener;
 import net.hearnsoft.tcm.ui.model.PlaybackViewModel;
 import net.hearnsoft.tcm.ui.utils.LinearTopSmoothScroller;
 import net.hearnsoft.tcm.utils.Logs;
@@ -40,6 +40,7 @@ public class MusicListFragment extends Fragment implements OnMusicItemClickListe
     private MusicItemAdapter adapter;
     private List<MediaItem> musicList = new ArrayList<>();
     private PlaybackViewModel viewModel;
+    private LinearTopSmoothScroller scroller;
 
     private ActivityResultLauncher<String> requestPermissionLauncher =
         registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
@@ -70,6 +71,8 @@ public class MusicListFragment extends Fragment implements OnMusicItemClickListe
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         adapter = new MusicItemAdapter(this);
         binding.recyclerView.setAdapter(adapter);
+        // 创建LinearTopSmoothScroller
+        scroller = new LinearTopSmoothScroller(requireContext(), true);
 
         //设置排序chips
         setSortingChips();
@@ -81,7 +84,6 @@ public class MusicListFragment extends Fragment implements OnMusicItemClickListe
 
         binding.musicLocationButton.setOnClickListener(v -> {
             if (!musicList.isEmpty()) {
-                LinearTopSmoothScroller scroller = new LinearTopSmoothScroller(requireContext(), true);
                 binding.recyclerView.post(() -> {
                     int currentIndex = viewModel.getCurrentIndex().getValue() != null
                             ? viewModel.getCurrentIndex().getValue() : 0;

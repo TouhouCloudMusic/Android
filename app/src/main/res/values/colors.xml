@@ -11,4 +11,5 @@
     <color name="netrual_color">#EEEEEE</color>
     <color name="error">#FFC1666B</color>
     <color name="title_color">#6750A4</color>
+    <color name="ripple_color_translucent">#33808080</color>  <!-- 33表示20%的不透明度 -->
 </resources>

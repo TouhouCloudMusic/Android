@@ -167,6 +167,10 @@ public class UserProfileActivity extends AppCompatActivity {
             items.add(new ProfileItem(
                 ProfileItem.TYPE_INFO,
                 getString(R.string.profile_title_user_permission),
+                getUserRoleString(data.getRoles())));
+            /*items.add(new ProfileItem(
+                ProfileItem.TYPE_INFO,
+                getString(R.string.profile_title_user_permission),
                 getUserRoleString(data.getRoles()
                     .stream()
                     .mapToInt(Integer::intValue)
@@ -197,7 +201,7 @@ public class UserProfileActivity extends AppCompatActivity {
                         startActivity(intent);
                     }
                 ));
-            }
+            }*/
             items.add(new ProfileItem(
                 ProfileItem.TYPE_BUTTON,
                 getString(R.string.profile_title_logout),
@@ -248,7 +252,18 @@ public class UserProfileActivity extends AppCompatActivity {
         return false;
     }
 
-    private String getUserRoleString(int[] rolesList) {
+    private String getUserRoleString(List<String> rolesList) {
+        StringBuilder sb = new StringBuilder();
+        if (rolesList == null || rolesList.isEmpty() || userRoles == null) {
+            return "";
+        }
+        for (String role : rolesList) {
+            sb.append(role).append(",");
+        }
+        return sb.length() > 0 ? sb.substring(0, sb.length() - 1) : "";
+    }
+
+    /*private String getUserRoleString(int[] rolesList) {
         StringBuilder sb = new StringBuilder();
         if (rolesList == null || rolesList.length == 0 || userRoles == null) {
             return "";
@@ -260,7 +275,7 @@ public class UserProfileActivity extends AppCompatActivity {
             }
         }
         return sb.length() > 0 ? sb.substring(0, sb.length() - 1) : "";
-    }
+    }*/
 
     private void openImagePicker() {
         // TODO: 待实现

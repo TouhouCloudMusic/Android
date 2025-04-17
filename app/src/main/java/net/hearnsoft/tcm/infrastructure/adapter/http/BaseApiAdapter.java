@@ -52,7 +52,7 @@ public abstract class BaseApiAdapter {
             String formattedErrorMsg = String.format("HTTP错误(%d): %s",
                 response.code(),
                 response.message());
-            return new ThcdbApiAdapter.ThcdbApiException(formattedErrorMsg);
+            return new ThcdbApiAdapter.ThcdbApiException("req url: " + response.raw().request().url()+ ","+formattedErrorMsg);
         }
 
         // 尝试从响应体中获取错误信息

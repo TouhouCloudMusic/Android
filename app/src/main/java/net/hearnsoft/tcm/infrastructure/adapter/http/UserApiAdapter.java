@@ -271,6 +271,67 @@ public class UserApiAdapter extends BaseApiAdapter {
     }
 
     /**
+     * 上传用户背景横幅图
+     * @param bannerUri 头像文件的URI
+     * @param contentResolver 用于访问URI内容的ContentResolver
+     * @return 包含操作结果的CompletableFuture
+     */
+    public CompletableFuture<Boolean> uploadProfileBanner(Uri bannerUri, ContentResolver contentResolver) {
+        return CompletableFuture.supplyAsync(() -> {
+            if (bannerUri == null) {
+                throw new ThcdbApiAdapter.ThcdbApiException("Image URI is null");
+            }
+
+            try {
+                // 获取文件名
+                String fileName = getFileNameFromUri(bannerUri, contentResolver);
+
+                // 创建请求体，直接从URI读取数据
+                RequestBody requestBody = new RequestBody() {
+                    @Override
+                    public MediaType contentType() {
+                        String mimeType = contentResolver.getType(bannerUri);
+                        if (mimeType == null) {
+                            mimeType = "image/*";
+                        }
+                        return MediaType.parse(mimeType);
+                    }
+
+                    @Override
+                    public void writeTo(okio.BufferedSink bufferedSink) throws IOException {
+                        try (InputStream inputStream = contentResolver.openInputStream(bannerUri)) {
+                            if (inputStream != null) {
+                                byte[] buffer = new byte[4096];
+                                int read;
+                                while ((read = inputStream.read(buffer)) != -1) {
+                                    bufferedSink.write(buffer, 0, read);
+                                }
+                            }
+                        }
+                    }
+                };
+
+                // 创建MultipartBody.Part用于上传
+                MultipartBody.Part body = MultipartBody.Part.createFormData("data", fileName, requestBody);
+
+                // 执行上传
+                Response<BaseResponse<Void>> response = api.uploadProfileBanner(body).execute();
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    return true;
+                } else {
+                    ThcdbApiAdapter.ThcdbApiException exception = createApiException(response);
+                    handleApiError(exception);
+                    throw exception;
+                }
+            } catch (IOException e) {
+                ThcdbApiAdapter.ThcdbApiException exception = new ThcdbApiAdapter.ThcdbApiException(e);
+                handleApiError(exception);
+                throw exception;
+            }
+        }, executor);
+    }
+
+    /**
      * 从URI获取文件名
      * @param uri 文件URI
      * @param contentResolver ContentResolver实例

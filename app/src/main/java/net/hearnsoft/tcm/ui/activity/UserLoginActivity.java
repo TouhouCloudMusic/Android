@@ -28,7 +28,7 @@ import net.hearnsoft.tcm.utils.SettingsPrefUtils;
 import net.hearnsoft.tcm.utils.UserLoginPortal;
 import net.hearnsoft.tcm.utils.ViewModelUtils;
 
-public class UserLoginActivity extends AppCompatActivity implements UserLoginPortal {
+public class UserLoginActivity extends BaseActivity implements UserLoginPortal {
 
     private static final String TAG = UserLoginActivity.class.getSimpleName();
 
@@ -40,7 +40,6 @@ public class UserLoginActivity extends AppCompatActivity implements UserLoginPor
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         binding = ActivityUserLoginBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), (v, insets) -> {

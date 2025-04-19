@@ -96,6 +96,9 @@ dependencies {
     implementation libs.lyricviewx
     // Pinyin4J
     implementation libs.pinyin4j
+    // OpenImage
+    implementation libs.openimagefulllib
+
     testImplementation libs.junit
     // Lombok annotation processor
     annotationProcessor libs.lombok

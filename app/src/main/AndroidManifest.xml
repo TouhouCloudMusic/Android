@@ -35,6 +35,10 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".ui.activity.UserHomePageActivity"
+            android:exported="true"
+            android:label="@string/user_homepage_title"/>
+
         <activity android:name=".ui.activity.UserProfileActivity"
             android:exported="false"
             android:label="@string/profile_title"/>

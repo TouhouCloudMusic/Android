@@ -33,6 +33,8 @@
     <string name="login_btn_register">Register</string>
     <string name="login_btn_back_login">Back to login</string>
 
+    <string name="user_homepage_title">User Homepage</string>
+
     <string name="profile_title">Your profile</string>
     <string name="profile_title_avatar">Avatar</string>
     <string name="profile_title_avatar_content">Click to set avatar</string>

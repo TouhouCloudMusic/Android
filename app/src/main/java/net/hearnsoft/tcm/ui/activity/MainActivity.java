@@ -15,7 +15,7 @@ import net.hearnsoft.tcm.databinding.ActivityMainBinding;
 import net.hearnsoft.tcm.ui.interfaces.OnNowPlayingClickListener;
 import net.hearnsoft.tcm.utils.Logs;
 
-public class MainActivity extends AppCompatActivity implements OnNowPlayingClickListener {
+public class MainActivity extends BaseActivity implements OnNowPlayingClickListener {
     private static final String TAG = MainActivity.class.getSimpleName();
     private ActivityMainBinding binding;
 
@@ -30,7 +30,6 @@ public class MainActivity extends AppCompatActivity implements OnNowPlayingClick
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 

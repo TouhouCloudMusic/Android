@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment;
 import net.hearnsoft.tcm.R;
 import net.hearnsoft.tcm.databinding.FragmentAccountBinding;
 import net.hearnsoft.tcm.infrastructure.adapter.http.Constants;
+import net.hearnsoft.tcm.ui.activity.UserHomePageActivity;
 import net.hearnsoft.tcm.ui.activity.UserLoginActivity;
 import net.hearnsoft.tcm.ui.activity.UserProfileActivity;
 import net.hearnsoft.tcm.ui.model.UserViewModel;
@@ -115,7 +116,8 @@ public class AccountFragment extends Fragment {
         );
         setUserCardInfo(data.getName(), lastLoginDate, null);
         userCard.setOnUserCardClickListener(v -> {
-            // empty click
+            Intent userHomePage = new Intent(getContext(), UserHomePageActivity.class);
+            startActivity(userHomePage);
         });
         userCard.setUserCardEditClickListener(v -> openUserProfile());
         userCard.setUserAvatarFromUrl(getAvatarUrl(data.getAvatarUrl()));

@@ -12,7 +12,7 @@ import net.hearnsoft.tcm.R;
 import net.hearnsoft.tcm.databinding.ActivityAdminModeBinding;
 import net.hearnsoft.tcm.ui.fragments.apitest.MainAdminFragment;
 
-public class AdminModeActivity extends AppCompatActivity {
+public class AdminModeActivity extends BaseActivity {
     private ActivityAdminModeBinding binding;
 
     @Override

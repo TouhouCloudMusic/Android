@@ -47,7 +47,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserProfileActivity extends AppCompatActivity {
+public class UserProfileActivity extends BaseActivity {
 
     private static final String tempAvatarImageName = "avatar.jpg";
     private final String TAG = this.getClass().getSimpleName();
@@ -63,7 +63,6 @@ public class UserProfileActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         binding = ActivityUserProfileBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), (v, insets) -> {

@@ -116,7 +116,7 @@ public class MainFragment extends Fragment {
         userViewModel = ViewModelUtils.getViewModel(requireActivity(), UserViewModel.class);
         if (userViewModel.isLoggedIn()) {
             // 已登录时获取用户信息
-            userViewModel.getCurrentUserProfile();
+            userViewModel.loadCurrentUserProfile();
         }
 
         // 设置ViewModel观察者

@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:fitsSystemWindows="true">
+
+    <!-- 背景横幅图片 -->
+    <ImageView
+        android:id="@+id/userProfileBannerImage"
+        android:layout_width="match_parent"
+        android:layout_height="160dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/test_res2"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:src="@drawable/test_res2"/>
+
+    <!-- 用户头像 -->
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/userAvatarImage"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="-40dp"
+        android:padding="4dp"
+        android:background="@android:color/white"
+        android:scaleType="centerCrop"
+        android:src="@drawable/test_cover"
+        app:shapeAppearanceOverlay="@style/UserAvatarCircle"
+        app:layout_constraintTop_toBottomOf="@id/userProfileBannerImage"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:src="@drawable/test_cover"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintTop_toBottomOf="@id/userProfileBannerImage"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- 关注用户按钮 -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/followUserButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Follow"
+            android:textAllCaps="false"
+            app:icon="@drawable/ic_add_24px"
+            android:layout_marginHorizontal="4dp"
+            android:visibility="gone"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            tools:visibility="visible"/>
+
+        <!-- 编辑个人资料按钮 -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/editProfileButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Edit"
+            android:textAllCaps="false"
+            android:layout_marginHorizontal="4dp"
+            app:icon="@drawable/ic_edit_24px"
+            style="@style/Widget.Material3.Button.OutlinedButton" />
+
+    </LinearLayout>
+
+    <!-- 用户名称 -->
+    <TextView
+        android:id="@+id/userDisplayName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:textAppearance="?attr/textAppearanceHeadline6"
+        android:textStyle="bold"
+        android:maxLines="1"
+        android:ellipsize="end"
+        tools:text="用户名称"
+        app:layout_constraintTop_toBottomOf="@id/userAvatarImage"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- 用户ID -->
+    <TextView
+        android:id="@+id/userHandle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:textAppearance="?attr/textAppearanceBody2"
+        android:textColor="?android:attr/textColorSecondary"
+        tools:text="用户ID"
+        app:layout_constraintTop_toBottomOf="@id/userDisplayName"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- 用户简介 -->
+    <TextView
+        android:id="@+id/userBio"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:textAppearance="?attr/textAppearanceBody1"
+        tools:text="用户简介内容"
+        app:layout_constraintTop_toBottomOf="@id/userHandle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- 关注信息 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/userBio"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <!-- 关注数 -->
+        <TextView
+            android:id="@+id/userFollowing"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:textAppearance="?attr/textAppearanceBody2"
+            tools:text="123 关注" />
+
+        <!-- 粉丝数 -->
+        <TextView
+            android:id="@+id/userFollowers"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceBody2"
+            tools:text="456 粉丝" />
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

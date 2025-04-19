@@ -9,7 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import net.hearnsoft.tcm.R;
 import net.hearnsoft.tcm.databinding.ActivitySearchBinding;
 
-public class SearchActivity extends AppCompatActivity {
+public class SearchActivity extends BaseActivity {
 
     private ActivitySearchBinding binding;
 

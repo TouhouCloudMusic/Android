@@ -300,6 +300,8 @@ public class UserProfileActivity extends BaseActivity {
                             R.string.toast_profile_upload_avatar_succ,
                             Toast.LENGTH_SHORT
                         ).show();
+                        // 上传完成后刷新用户信息
+                        userViewModel.loadCurrentUserProfile();
                     }
                 });
 

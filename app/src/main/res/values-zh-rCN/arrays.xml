@@ -2,7 +2,7 @@
 <resources>
     <string-array name="user_roles">
         <item>管理员</item>
-        <item>审核员</item>
+        <item>版主</item>
         <item>普通用户</item>
     </string-array>
 </resources>

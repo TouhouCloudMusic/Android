@@ -23,4 +23,8 @@ public enum UserRole {
         }
         return Option.none();
     }
+
+    public int getIndex() {
+        return ordinal() + 1;
+    }
 }

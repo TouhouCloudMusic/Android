@@ -35,6 +35,8 @@ import com.yalantis.ucrop.UCrop;
 
 import net.hearnsoft.tcm.R;
 import net.hearnsoft.tcm.databinding.ActivityUserProfileBinding;
+import net.hearnsoft.tcm.domain.model.user.UserProfileModel;
+import net.hearnsoft.tcm.domain.model.user.UserRole;
 import net.hearnsoft.tcm.infrastructure.adapter.http.Constants;
 import net.hearnsoft.tcm.ui.model.UserViewModel;
 import net.hearnsoft.tcm.ui.widgets.ProfileItem;
@@ -42,6 +44,7 @@ import net.hearnsoft.tcm.utils.Logs;
 import net.hearnsoft.tcm.utils.OffsetDateTimeFormater;
 import net.hearnsoft.tcm.utils.ViewModelUtils;
 import net.hearnsoft.thcdb_sdk.model.UserProfile;
+import net.hearnsoft.thcdb_sdk.model.UserProfileRoles;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -56,8 +59,6 @@ public class UserProfileActivity extends BaseActivity {
     private UserProfileAdapter adapter;
     private ActivityResultLauncher<PickVisualMediaRequest> pickAvatar;
     private AlertDialog errorDialog;
-
-    private List<String> userRoles;
     private boolean isEditMode = false;
 
     @Override
@@ -80,8 +81,6 @@ public class UserProfileActivity extends BaseActivity {
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new UserProfileAdapter();
         binding.recyclerView.setAdapter(adapter);
-
-        loadUserRolesList();
 
         pickAvatar = registerForActivityResult(
             new ActivityResultContracts.PickVisualMedia(), uri -> {
@@ -141,7 +140,7 @@ public class UserProfileActivity extends BaseActivity {
         });
     }
 
-    private void setupUserProfileList(UserProfile data) {
+    private void setupUserProfileList(UserProfileModel data) {
         if (data != null) {
             List<ProfileItem> items = new ArrayList<>();
             items.add(new ProfileItem(
@@ -228,17 +227,6 @@ public class UserProfileActivity extends BaseActivity {
         }
     }
 
-    private void loadUserRolesList() {
-        if (userViewModel.getUserRoleList() != null) {
-            userRoles = userViewModel.getUserRoleList().getValue();
-            return;
-        }
-        userViewModel.getUserRoles();
-        userViewModel.getUserRoleList().observe(this, roles -> {
-            userRoles = roles;
-        });
-    }
-
     private boolean isAdminUser(int[] rolesList) {
         if (rolesList == null) {
             return false;
@@ -251,30 +239,23 @@ public class UserProfileActivity extends BaseActivity {
         return false;
     }
 
-    private String getUserRoleString(List<String> rolesList) {
-        StringBuilder sb = new StringBuilder();
-        if (rolesList == null || rolesList.isEmpty() || userRoles == null) {
-            return "";
+    private String getUserRoleString(List<UserRole> rolesList) {
+        if (rolesList == null || rolesList.isEmpty()) {
+            return getString(R.string.profile_label_unset);
         }
-        for (String role : rolesList) {
-            sb.append(role).append(",");
-        }
-        return sb.length() > 0 ? sb.substring(0, sb.length() - 1) : "";
-    }
 
-    /*private String getUserRoleString(int[] rolesList) {
+        String[] roleNames = getResources().getStringArray(R.array.user_roles);
         StringBuilder sb = new StringBuilder();
-        if (rolesList == null || rolesList.length == 0 || userRoles == null) {
-            return "";
-        }
-        for (int role : rolesList) {
-            if (role < userRoles.size()) {
-                // 用户权限索引从1开始
-                sb.append(userRoles.get(role - 1)).append(",");
+
+        for (UserRole role : rolesList) {
+            if (role != null && role.getIndex() > 0 && role.getIndex() <= roleNames.length) {
+                // 用户权限索引从1开始，数组索引从0开始
+                sb.append(roleNames[role.getIndex() - 1]).append(", ");
             }
         }
-        return sb.length() > 0 ? sb.substring(0, sb.length() - 1) : "";
-    }*/
+
+        return sb.length() > 0 ? sb.substring(0, sb.length() - 2) : getString(R.string.profile_label_unset);
+    }
 
     private void openImagePicker() {
         // TODO: 待实现

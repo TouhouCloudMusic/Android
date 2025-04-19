@@ -9,11 +9,12 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import net.hearnsoft.tcm.domain.model.user.UserProfileModel;
+import net.hearnsoft.tcm.domain.repository.UserRepository;
 import net.hearnsoft.tcm.infrastructure.adapter.http.Constants;
 import net.hearnsoft.tcm.infrastructure.adapter.http.ThcdbApiAdapter;
 import net.hearnsoft.tcm.infrastructure.adapter.http.ThcdbApiAdapter.ThcdbApiException;
 import net.hearnsoft.thcdb_sdk.model.AuthCredential;
-import net.hearnsoft.thcdb_sdk.model.UserProfile;
 
 import java.util.List;
 
@@ -23,10 +24,12 @@ public class UserViewModel extends AndroidViewModel {
     private static final String TAG = UserViewModel.class.getSimpleName();
 
     private final ThcdbApiAdapter apiAdapter;
+    private final UserRepository userRepository;
+
     // 当前登录用户的资料
-    private final MutableLiveData<UserProfile> currentUserProfileLiveData = new MutableLiveData<>();
+    private final MutableLiveData<UserProfileModel> currentUserProfileLiveData = new MutableLiveData<>();
     // 查看的用户资料（可以是当前用户或其他用户）
-    private final MutableLiveData<UserProfile> viewingUserProfileLiveData = new MutableLiveData<>();
+    private final MutableLiveData<UserProfileModel> viewingUserProfileLiveData = new MutableLiveData<>();
     private final MutableLiveData<String> errorLiveData = new MutableLiveData<>();
     private final MutableLiveData<Boolean> successLiveData = new MutableLiveData<>();
     private final MutableLiveData<List<String>> userRoleListLiveData = new MutableLiveData<>();
@@ -35,15 +38,16 @@ public class UserViewModel extends AndroidViewModel {
     public UserViewModel(@NonNull Application application) {
         super(application);
         apiAdapter = new ThcdbApiAdapter(application, Constants.API_HOST);
+        userRepository = new UserRepository(apiAdapter);
     }
 
     // 获取当前登录用户资料的LiveData
-    public LiveData<UserProfile> getCurrentUserProfile() {
+    public LiveData<UserProfileModel> getCurrentUserProfile() {
         return currentUserProfileLiveData;
     }
 
     // 获取正在查看的用户资料的LiveData
-    public LiveData<UserProfile> getUserProfile() {
+    public LiveData<UserProfileModel> getUserProfile() {
         return viewingUserProfileLiveData;
     }
 
@@ -64,13 +68,13 @@ public class UserViewModel extends AndroidViewModel {
     }
 
     public boolean isLoggedIn() {
-        return apiAdapter.isLoggedIn();
+        return userRepository.isLoggedIn();
     }
 
     public void login(String username, String password) {
         loadingLiveData.postValue(true);
 
-        Future.fromCompletableFuture(apiAdapter.getUser().signIn(username, password))
+        Future.fromCompletableFuture(userRepository.signIn(username, password))
             .onSuccess(profile -> {
                 currentUserProfileLiveData.postValue(profile);
                 viewingUserProfileLiveData.postValue(profile); // 登录时两者都是当前用户
@@ -87,7 +91,7 @@ public class UserViewModel extends AndroidViewModel {
     public void login(AuthCredential auth) {
         loadingLiveData.postValue(true);
 
-        Future.fromCompletableFuture(apiAdapter.getUser().signIn(auth))
+        Future.fromCompletableFuture(userRepository.signIn(auth))
             .onSuccess(profile -> {
                 currentUserProfileLiveData.postValue(profile);
                 viewingUserProfileLiveData.postValue(profile);
@@ -104,7 +108,7 @@ public class UserViewModel extends AndroidViewModel {
     public void register(String username, String password) {
         loadingLiveData.postValue(true);
 
-        Future.fromCompletableFuture(apiAdapter.getUser().signUp(username, password))
+        Future.fromCompletableFuture(userRepository.signUp(username, password))
             .onSuccess(profile -> {
                 currentUserProfileLiveData.postValue(profile);
                 viewingUserProfileLiveData.postValue(profile);
@@ -121,7 +125,7 @@ public class UserViewModel extends AndroidViewModel {
     public void register(AuthCredential auth) {
         loadingLiveData.postValue(true);
 
-        Future.fromCompletableFuture(apiAdapter.getUser().signUp(auth))
+        Future.fromCompletableFuture(userRepository.signUp(auth))
             .onSuccess(profile -> {
                 currentUserProfileLiveData.postValue(profile);
                 viewingUserProfileLiveData.postValue(profile);
@@ -138,7 +142,7 @@ public class UserViewModel extends AndroidViewModel {
     public void logout() {
         loadingLiveData.postValue(true);
 
-        Future.fromCompletableFuture(apiAdapter.getUser().signOut())
+        Future.fromCompletableFuture(userRepository.signOut())
             .onSuccess(success -> {
                 if (success) {
                     // 清空当前用户信息
@@ -166,7 +170,7 @@ public class UserViewModel extends AndroidViewModel {
 
         loadingLiveData.postValue(true);
 
-        Future.fromCompletableFuture(apiAdapter.getUser().profileWithName(username))
+        Future.fromCompletableFuture(userRepository.profileWithName(username))
             .onSuccess(profile -> {
                 viewingUserProfileLiveData.postValue(profile);
                 loadingLiveData.postValue(false);
@@ -179,7 +183,7 @@ public class UserViewModel extends AndroidViewModel {
 
     // 获取当前登录用户的资料，并设置为查看的用户
     public void loadCurrentUserProfile() {
-        if (!apiAdapter.isLoggedIn()) {
+        if (!userRepository.isLoggedIn()) {
             errorLiveData.postValue("Not logged in");
             return;
         }
@@ -189,7 +193,7 @@ public class UserViewModel extends AndroidViewModel {
 
         loadingLiveData.postValue(true);
 
-        Future.fromCompletableFuture(apiAdapter.getUser().profile())
+        Future.fromCompletableFuture(userRepository.getCurrentUserProfile())
             .onSuccess(profile -> {
                 currentUserProfileLiveData.postValue(profile);
                 viewingUserProfileLiveData.postValue(profile);
@@ -228,7 +232,7 @@ public class UserViewModel extends AndroidViewModel {
 
         loadingLiveData.postValue(true);
 
-        Future.fromCompletableFuture(apiAdapter.getUser().uploadAvatar(avatarUri, resolver))
+        Future.fromCompletableFuture(userRepository.uploadAvatar(avatarUri, resolver))
             .onSuccess(success -> {
                 if (success) {
                     successLiveData.postValue(true);
@@ -255,7 +259,7 @@ public class UserViewModel extends AndroidViewModel {
 
         loadingLiveData.postValue(true);
 
-        Future.fromCompletableFuture(apiAdapter.getUser().uploadProfileBanner(bannerUri, resolver))
+        Future.fromCompletableFuture(userRepository.uploadProfileBanner(bannerUri, resolver))
             .onSuccess(success -> {
                 if (success) {
                     successLiveData.postValue(true);
@@ -281,7 +285,7 @@ public class UserViewModel extends AndroidViewModel {
 
             if (errorCode != null && errorCode == 401) {
                 // Handle unauthorized error specially - e.g., clear local session
-                apiAdapter.clearSession();
+                userRepository.clearSession();
                 errorLiveData.postValue("Session expired. Please login again.");
             } else {
                 errorLiveData.postValue(apiError.getMessage());

@@ -16,12 +16,16 @@ import com.flyjingfish.openimagelib.enums.MediaType;
 import net.hearnsoft.tcm.R;
 import net.hearnsoft.tcm.databinding.ActivityUserHomepageBinding;
 import net.hearnsoft.tcm.databinding.UserHomepageHeaderBinding;
+import net.hearnsoft.tcm.domain.model.user.UserProfileModel;
+import net.hearnsoft.tcm.domain.model.user.UserRole;
 import net.hearnsoft.tcm.infrastructure.adapter.http.Constants;
 import net.hearnsoft.tcm.ui.model.UserViewModel;
 import net.hearnsoft.tcm.utils.OffsetDateTimeFormater;
 import net.hearnsoft.tcm.utils.Logs;
 import net.hearnsoft.tcm.utils.ViewModelUtils;
 import net.hearnsoft.thcdb_sdk.model.UserProfile;
+
+import java.util.List;
 
 public class UserHomePageActivity extends BaseActivity {
     private static final String TAG = UserHomePageActivity.class.getSimpleName();
@@ -89,7 +93,7 @@ public class UserHomePageActivity extends BaseActivity {
         }
     }
 
-    private void updateUserProfileUI(UserProfile profile) {
+    private void updateUserProfileUI(UserProfileModel profile) {
         if (profile == null) {
             Logs.e(TAG, "Received null user profile");
             finish();
@@ -131,8 +135,7 @@ public class UserHomePageActivity extends BaseActivity {
         getSupportActionBar().setTitle(profile.getName());
 
         // 设置用户ID（这里显示角色信息）
-        String roles = TextUtils.join(", ", profile.getRoles());
-        headerBinding.userHandle.setText(roles);
+        headerBinding.userHandle.setText(getUserRoleString(profile.getRoles()));
 
         // 设置用户简介（显示最后登录时间）
         String lastLoginText = getString(R.string.usercard_last_login_desc,
@@ -178,6 +181,24 @@ public class UserHomePageActivity extends BaseActivity {
             return null;
         }
         return Constants.API_STATIC_IMAGE_URL + fileName;
+    }
+
+    private String getUserRoleString(List<UserRole> rolesList) {
+        if (rolesList == null || rolesList.isEmpty()) {
+            return getString(R.string.profile_label_unset);
+        }
+
+        String[] roleNames = getResources().getStringArray(R.array.user_roles);
+        StringBuilder sb = new StringBuilder();
+
+        for (UserRole role : rolesList) {
+            if (role != null && role.getIndex() > 0 && role.getIndex() <= roleNames.length) {
+                // 用户权限索引从1开始，数组索引从0开始
+                sb.append(roleNames[role.getIndex() - 1]).append(", ");
+            }
+        }
+
+        return sb.length() > 0 ? sb.substring(0, sb.length() - 2) : getString(R.string.profile_label_unset);
     }
 
     @Override

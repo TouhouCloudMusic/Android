@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="user_roles">
+        <item>Admin</item>
+        <item>Moderator</item>
+        <item>User</item>
+    </string-array>
+</resources>

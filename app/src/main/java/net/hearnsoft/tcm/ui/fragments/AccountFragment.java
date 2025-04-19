@@ -7,7 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -15,6 +14,7 @@ import androidx.fragment.app.Fragment;
 
 import net.hearnsoft.tcm.R;
 import net.hearnsoft.tcm.databinding.FragmentAccountBinding;
+import net.hearnsoft.tcm.domain.model.user.UserProfileModel;
 import net.hearnsoft.tcm.infrastructure.adapter.http.Constants;
 import net.hearnsoft.tcm.ui.activity.UserHomePageActivity;
 import net.hearnsoft.tcm.ui.activity.UserLoginActivity;
@@ -23,10 +23,7 @@ import net.hearnsoft.tcm.ui.model.UserViewModel;
 import net.hearnsoft.tcm.ui.widgets.UserCardView;
 import net.hearnsoft.tcm.utils.Logs;
 import net.hearnsoft.tcm.utils.OffsetDateTimeFormater;
-import net.hearnsoft.tcm.utils.SettingsPrefUtils;
 import net.hearnsoft.tcm.utils.ViewModelUtils;
-
-import net.hearnsoft.thcdb_sdk.model.UserProfile;
 
 public class AccountFragment extends Fragment {
 
@@ -67,7 +64,7 @@ public class AccountFragment extends Fragment {
             userViewModel.getCurrentUserProfile();
         } else {
             // Use cached profile if available
-            UserProfile cachedProfile = userViewModel.getUserProfile().getValue();
+            UserProfileModel cachedProfile = userViewModel.getUserProfile().getValue();
             if (cachedProfile != null) {
                 updateUserProfile(cachedProfile);
             } else {
@@ -104,7 +101,7 @@ public class AccountFragment extends Fragment {
         }
     }
 
-    private void updateUserProfile(UserProfile data) {
+    private void updateUserProfile(UserProfileModel data) {
         if (data == null || !isAdded()) {
             setUserCardForLoggedOutState();
             return;

@@ -37,7 +37,7 @@
 
     <string name="profile_title">Your profile</string>
     <string name="profile_title_avatar">Avatar</string>
-    <string name="profile_title_avatar_content">Click to set avatar</string>
+    <string name="profile_title_avatar_content">Click \'Edit\' button to set avatar</string>
     <string name="profile_title_username">Username</string>
     <string name="profile_title_last_login">Last login</string>
     <string name="profile_title_user_permission">Permission</string>
@@ -45,6 +45,8 @@
     <string name="profile_title_logout">Logout</string>
     <string name="profile_title_logout_title">@string/profile_title_logout</string>
     <string name="profile_title_admin_mode">Admin mode</string>
+    <string name="profile_title_banner_image">Profile Banner</string>
+    <string name="profile_title_banner_content">Click \'Edit\' button to set profile banner</string>
     <string name="admin_mode_notice">Admin mode is enabled, you can manage users and roles or test API.</string>
 
     <string name="error_username_empty">Username must not be empty</string>
@@ -67,6 +69,8 @@
     <string name="toast_profile_err_session_expired">Session expired, please re-login</string>
     <string name="toast_profile_upload_avatar_succ">Upload avatar successful!</string>
     <string name="toast_profile_upload_avatar_err">Failed to upload avatar, reason:</string>
+    <string name="toast_profile_upload_banner_succ">Upload banner successful!</string>
+    <string name="toast_profile_upload_banner_err">Failed to upload banner, reason:</string>
     <string name="toast_profile_logout_succ">Logout successful</string>
     <string name="toast_profile_logout_err">Logout error</string>
     <string name="music_tab_music_title">Music</string>

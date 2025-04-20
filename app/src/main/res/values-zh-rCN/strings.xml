@@ -38,7 +38,7 @@
 
     <string name="profile_title">你的信息</string>
     <string name="profile_title_avatar">头像</string>
-    <string name="profile_title_avatar_content">点击以设置头像</string>
+    <string name="profile_title_avatar_content">点击右上角的"编辑"按钮以设置头像</string>
     <string name="profile_title_username">名字</string>
     <string name="profile_title_last_login">上次登录</string>
     <string name="profile_title_user_permission">权限</string>
@@ -46,6 +46,8 @@
     <string name="profile_title_logout">注销登录</string>
     <string name="profile_title_logout_title">@string/profile_title_logout</string>
     <string name="profile_title_admin_mode">管理员功能</string>
+    <string name="profile_title_banner_image">个人资料横幅图片</string>
+    <string name="profile_title_banner_content">点击右上角的"编辑"按钮进行修改</string>
     <string name="admin_mode_notice">管理员模式已启用，您可以管理用户和权限或进行API测试。</string>
 
 
@@ -69,6 +71,8 @@
     <string name="toast_profile_err_session_expired">登录已过期，请重新登录！</string>
     <string name="toast_profile_upload_avatar_succ">上传头像成功！</string>
     <string name="toast_profile_upload_avatar_err">上传头像失败，原因：</string>
+    <string name="toast_profile_upload_banner_succ">上传背景图成功!</string>
+    <string name="toast_profile_upload_banner_err">上传背景图失败，原因：</string>
     <string name="toast_profile_logout_succ">注销登录成功</string>
     <string name="toast_profile_logout_err">注销登录失败</string>
     <string name="music_tab_music_title">歌曲</string>

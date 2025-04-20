@@ -118,7 +118,7 @@ public class AccountFragment extends Fragment {
         });
         userCard.setUserCardEditClickListener(v -> openUserProfile());
         userCard.setUserAvatarFromUrl(getAvatarUrl(data.getAvatarUrl()));
-        userCard.setUserCardBackgroundFromUrl(getAvatarUrl(data.getAvatarUrl()));
+        userCard.setUserCardBackgroundFromUrl(getAvatarUrl(data.getBannerUrl()));
     }
 
     private void handleError(String errorMessage) {

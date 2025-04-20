@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/profileBannerImageView"
+        android:layout_width="0dp"
+        android:layout_height="180dp"
+        android:scaleType="centerCrop"
+        android:contentDescription="@string/profile_title_banner_image"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:src="@tools:sample/backgrounds/scenic"/>
+
+    <!-- 添加渐变遮罩，让文字更易读 -->
+    <View
+        android:id="@+id/gradientOverlay"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/banner_gradient"
+        app:layout_constraintBottom_toBottomOf="@id/profileBannerImageView"
+        app:layout_constraintEnd_toEndOf="@id/profileBannerImageView"
+        app:layout_constraintStart_toStartOf="@id/profileBannerImageView"
+        app:layout_constraintTop_toTopOf="@id/profileBannerImageView" />
+
+    <TextView
+        android:id="@+id/profileNameTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        android:shadowColor="@android:color/black"
+        android:text="@string/profile_title_banner_content"
+        android:shadowDx="1"
+        android:shadowDy="1"
+        android:shadowRadius="2"
+        android:ellipsize="end"
+        android:maxLines="1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/profileBannerImageView"
+        tools:text="点击编辑按钮更换背景图"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

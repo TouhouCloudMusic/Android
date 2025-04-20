@@ -294,4 +294,8 @@ public class UserViewModel extends AndroidViewModel {
             errorLiveData.postValue(error.getMessage());
         }
     }
+
+    public void clearError() {
+        errorLiveData.postValue(null);
+    }
 }

@@ -21,7 +21,7 @@ public class AvatarComponent extends BaseProfileComponent {
     private ActivityResultLauncher<PickVisualMediaRequest> pickAvatar;
 
     public interface AvatarCallback {
-        void onPickImage(Uri uri);
+        void onPickAvatarImage(Uri uri);
     }
 
     private final AvatarCallback callback;
@@ -37,7 +37,7 @@ public class AvatarComponent extends BaseProfileComponent {
 
     @Override
     public int getPriority() {
-        return 1000; // 最高优先级，显示在顶部
+        return 900; // 最高优先级，显示在顶部
     }
 
     @Override

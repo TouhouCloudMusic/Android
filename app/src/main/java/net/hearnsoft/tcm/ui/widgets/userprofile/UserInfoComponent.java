@@ -27,7 +27,7 @@ public class UserInfoComponent extends BaseProfileComponent {
 
     @Override
     public int getPriority() {
-        return 900; // 次优先级
+        return 800; // 次优先级
     }
 
     @Override

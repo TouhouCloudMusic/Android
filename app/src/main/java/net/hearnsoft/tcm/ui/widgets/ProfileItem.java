@@ -5,6 +5,7 @@ public class ProfileItem {
     public static final int TYPE_INFO = 1;
     public static final int TYPE_BUTTON = 2;  // 按钮类型，专用于登出按钮
     public static final int TYPE_PREFERENCE_ITEM = 3;
+    public static final int TYPE_BANNER = 4;
 
     private int type;
     private String title;

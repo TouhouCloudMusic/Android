@@ -29,6 +29,7 @@ import net.hearnsoft.tcm.ui.model.UserViewModel;
 import net.hearnsoft.tcm.ui.widgets.ProfileItem;
 import net.hearnsoft.tcm.ui.widgets.userprofile.AdminComponent;
 import net.hearnsoft.tcm.ui.widgets.userprofile.AvatarComponent;
+import net.hearnsoft.tcm.ui.widgets.userprofile.BannerComponent;
 import net.hearnsoft.tcm.ui.widgets.userprofile.LogoutComponent;
 import net.hearnsoft.tcm.ui.widgets.userprofile.ProfileComponentManager;
 import net.hearnsoft.tcm.ui.widgets.userprofile.UserInfoComponent;
@@ -41,14 +42,19 @@ import java.util.List;
 public class UserProfileActivity extends BaseActivity implements
     AvatarComponent.AvatarCallback,
     UserInfoComponent.UserInfoCallback,
-    LogoutComponent.LogoutCallback {
+    LogoutComponent.LogoutCallback,
+    BannerComponent.BannerCallback {
 
     private static final String tempAvatarImageName = "avatar.jpg";
+    private static final String tempBannerImageName = "banner.jpg";
+    private static final int REQUEST_FROM_AVATAR = 0;
+    private static final int REQUEST_FROM_BANNER = 1;
+
     private final String TAG = this.getClass().getSimpleName();
     private ActivityUserProfileBinding binding;
     private UserViewModel userViewModel;
     private UserProfileAdapter adapter;
-    private ActivityResultLauncher<PickVisualMediaRequest> pickAvatar;
+    private ActivityResultLauncher<PickVisualMediaRequest> pickAvatar, pickBanner;
     private AlertDialog errorDialog;
     private boolean isEditMode = false;
 
@@ -79,6 +85,29 @@ public class UserProfileActivity extends BaseActivity implements
         binding.recyclerView.setAdapter(adapter);
 
         // 初始化图片选择器回调
+        setupAvatarPicker();
+        // 设置Banner图片选择器
+        setupBannerPicker();
+
+        // 初始化组件管理器
+        setupComponentManager();
+        // 载入用户资料
+        loadUserProfile();
+    }
+
+
+    private void setupComponentManager() {
+        componentManager = new ProfileComponentManager(this);
+
+        // 添加各个组件
+        componentManager.addComponent(new BannerComponent(this, userViewModel, pickBanner, this));
+        componentManager.addComponent(new AvatarComponent(this, userViewModel, pickAvatar, this));
+        componentManager.addComponent(new UserInfoComponent(this, userViewModel, this));
+        componentManager.addComponent(new AdminComponent(this, userViewModel));
+        componentManager.addComponent(new LogoutComponent(this, userViewModel, this));
+    }
+
+    private void setupAvatarPicker() {
         pickAvatar = registerForActivityResult(
             new ActivityResultContracts.PickVisualMedia(), uri -> {
                 if (uri != null) {
@@ -93,7 +122,7 @@ public class UserProfileActivity extends BaseActivity implements
                             .withAspectRatio(1, 1)
                             .withMaxResultSize(500, 500)
                             .withOptions(options)
-                            .start(UserProfileActivity.this);
+                            .start(UserProfileActivity.this, REQUEST_FROM_AVATAR);
                     } else {
                         runOnUiThread(() -> Toast.makeText(
                             this,
@@ -106,21 +135,36 @@ public class UserProfileActivity extends BaseActivity implements
                 }
             }
         );
-
-        // 初始化组件管理器
-        setupComponentManager();
-        // 载入用户资料
-        loadUserProfile();
     }
 
-    private void setupComponentManager() {
-        componentManager = new ProfileComponentManager(this);
-
-        // 添加各个组件
-        componentManager.addComponent(new AvatarComponent(this, userViewModel, pickAvatar, this));
-        componentManager.addComponent(new UserInfoComponent(this, userViewModel, this));
-        componentManager.addComponent(new AdminComponent(this, userViewModel));
-        componentManager.addComponent(new LogoutComponent(this, userViewModel, this));
+    private void setupBannerPicker() {
+        pickBanner = registerForActivityResult(
+            new ActivityResultContracts.PickVisualMedia(), uri -> {
+                if (uri != null) {
+                    String mimeType = getContentResolver().getType(uri);
+                    if (isValidImageType(mimeType)) {
+                        UCrop.Options options = new UCrop.Options();
+                        // 图片格式
+                        options.setCompressionFormat(Bitmap.CompressFormat.JPEG);
+                        // 设置图片压缩质量
+                        options.setCompressionQuality(100);
+                        UCrop.of(uri, Uri.fromFile(new File(getCacheDir(), tempBannerImageName)))
+                            .withAspectRatio(3, 1)
+                            .withMaxResultSize(1500, 500)
+                            .withOptions(options)
+                            .start(UserProfileActivity.this, REQUEST_FROM_BANNER);
+                    } else {
+                        runOnUiThread(() -> Toast.makeText(
+                            this,
+                            R.string.toast_err_image_wrong,
+                            Toast.LENGTH_SHORT
+                        ).show());
+                    }
+                } else {
+                    Logs.d(TAG, "No media selected");
+                }
+            }
+        );
     }
 
     private void loadUserProfile() {
@@ -131,6 +175,7 @@ public class UserProfileActivity extends BaseActivity implements
             if (error != null) {
                 Logs.e(TAG, "failed to load profile, msg: " + error);
                 showErrorDialog(error);
+                userViewModel.clearError();
             }
         });
     }
@@ -170,8 +215,12 @@ public class UserProfileActivity extends BaseActivity implements
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (resultCode == RESULT_OK && requestCode == UCrop.REQUEST_CROP) {
-            uploadAvatar(UCrop.getOutput(data));
+        if (resultCode == RESULT_OK) {
+            if (requestCode == REQUEST_FROM_AVATAR) {
+                uploadAvatar(UCrop.getOutput(data));
+            } else if (requestCode == REQUEST_FROM_BANNER) {
+                uploadBanner(UCrop.getOutput(data));
+            }
         } else if (resultCode == UCrop.RESULT_ERROR) {
             Toast.makeText(
                 UserProfileActivity.this,
@@ -222,6 +271,46 @@ public class UserProfileActivity extends BaseActivity implements
         }
     }
 
+    private void uploadBanner(Uri uri) {
+        if (uri != null) {
+            Logs.d(TAG, "Selected URI: " + uri);
+
+            try {
+                userViewModel.uploadProfileBanner(uri, getContentResolver());
+
+                userViewModel.getSuccess().observe(this, success -> {
+                    if (success != null && success) {
+                        Toast.makeText(
+                            UserProfileActivity.this,
+                            R.string.toast_profile_upload_banner_succ,
+                            Toast.LENGTH_SHORT
+                        ).show();
+                        // 上传完成后刷新用户信息
+                        userViewModel.loadCurrentUserProfile();
+                    }
+                });
+
+                userViewModel.getError().observe(this, error -> {
+                    if (error != null) {
+                        Logs.e(TAG, error);
+                        Toast.makeText(
+                            UserProfileActivity.this,
+                            getString(R.string.toast_profile_upload_banner_err) + "\n" + error,
+                            Toast.LENGTH_SHORT
+                        ).show();
+                    }
+                });
+            } catch (Exception e) {
+                Logs.e(TAG, "Error creating file from Uri: " + e.getMessage());
+                Toast.makeText(
+                    UserProfileActivity.this,
+                    R.string.toast_profile_upload_banner_err,
+                    Toast.LENGTH_SHORT
+                ).show();
+            }
+        }
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_user_profile, menu);
@@ -262,8 +351,14 @@ public class UserProfileActivity extends BaseActivity implements
     }
 
     @Override
-    public void onPickImage(Uri uri) {
+    public void onPickAvatarImage(Uri uri) {
         pickAvatar.launch(new PickVisualMediaRequest.Builder().setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
+            .build());
+    }
+
+    @Override
+    public void onPickBannerImage(Uri uri) {
+        pickBanner.launch(new PickVisualMediaRequest.Builder().setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
             .build());
     }
 

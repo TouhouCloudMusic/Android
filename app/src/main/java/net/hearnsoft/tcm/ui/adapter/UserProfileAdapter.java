@@ -39,6 +39,11 @@ public class UserProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         View view;
         RecyclerView.ViewHolder holder;
         switch (viewType) {
+            case ProfileItem.TYPE_BANNER:
+                view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_user_profile_banner, parent, false);
+                holder = new BannerViewHolder(view);
+                break;
             case ProfileItem.TYPE_AVATAR:
                 view = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.item_user_profile_avatar, parent, false);
@@ -80,6 +85,8 @@ public class UserProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             bindButtonViewHolder((ButtonViewHolder) holder, item);
         } else if (holder instanceof PreferenceViewHolder) {
             bindPreferenceViewHolder((PreferenceViewHolder) holder, item);
+        } else if (holder instanceof BannerViewHolder) {
+            bindBannerViewHolder((BannerViewHolder) holder, item);
         }
     }
 
@@ -88,6 +95,19 @@ public class UserProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             .load(item.getContent())
             .placeholder(R.drawable.default_avatar)
             .into(holder.avatarImageView);
+        setClickListener(holder.itemView, item, isEditMode);
+
+        if (isEditMode && item.isClickable()) {
+            holder.itemView.setBackgroundResource(R.drawable.bg_editable_item);
+        } else {
+            holder.itemView.setBackgroundResource(0);
+        }
+    }
+
+    private void bindBannerViewHolder(BannerViewHolder holder, ProfileItem item) {
+        Glide.with(holder.itemView.getContext())
+            .load(item.getContent())
+            .into(holder.bannerImageView);
         setClickListener(holder.itemView, item, isEditMode);
 
         if (isEditMode && item.isClickable()) {
@@ -180,6 +200,15 @@ public class UserProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         ButtonViewHolder(View itemView) {
             super(itemView);
             button = itemView.findViewById(R.id.profileButton);
+        }
+    }
+
+    static class BannerViewHolder extends RecyclerView.ViewHolder {
+        ImageView bannerImageView;
+
+        BannerViewHolder(View itemView) {
+            super(itemView);
+            bannerImageView = itemView.findViewById(R.id.profileBannerImageView);
         }
     }
 }

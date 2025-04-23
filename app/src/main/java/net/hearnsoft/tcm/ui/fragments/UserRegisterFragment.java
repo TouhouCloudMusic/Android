@@ -137,30 +137,15 @@ public class UserRegisterFragment extends Fragment {
         if (!hasError) {
             binding.userRegister.setEnabled(false);
 
-            // 提前清除旧的观察者以避免重复观察
-            userViewModel.getSuccess().removeObservers(getViewLifecycleOwner());
-            userViewModel.getError().removeObservers(getViewLifecycleOwner());
-
-            // 设置新的观察者
-            userViewModel.getSuccess().observe(getViewLifecycleOwner(), success -> {
-                if (success != null && success) {
-                    onSuccess();
-                    // 登录成功后移除观察者
-                    userViewModel.getUserProfile().removeObservers(getViewLifecycleOwner());
-                }
-            });
-
-            userViewModel.getError().observe(getViewLifecycleOwner(), error -> {
-                if (error != null) {
-                    onError(error);
-                    // 错误处理后移除观察者
-                    userViewModel.getError().removeObservers(getViewLifecycleOwner());
-                }
-            });
-
             // 注册操作
             AuthCredential auth = new AuthCredential(username, password);
-            userViewModel.register(auth);
+            userViewModel.register(auth).thenAccept(result -> {
+                if (result.isSuccess()) {
+                    onSuccess();
+                } else {
+                    onError(result.getError());
+                }
+            });
         }
     }
 

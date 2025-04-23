@@ -177,14 +177,6 @@ public class UserProfileActivity extends BaseActivity implements
     private void loadUserProfile() {
         // Set up observers
         userViewModel.getUserProfile().observe(this, this::setupUserProfileList);
-
-        userViewModel.getError().observe(this, error -> {
-            if (error != null) {
-                Logs.e(TAG, "failed to load profile, msg: " + error);
-                showErrorDialog(error);
-                userViewModel.clearError();
-            }
-        });
     }
 
     private void setupUserProfileList(UserProfileModel data) {
@@ -243,30 +235,26 @@ public class UserProfileActivity extends BaseActivity implements
             Logs.d(TAG, "Selected URI: " + uri);
 
             try {
-                userViewModel.uploadAvatar(uri, getContentResolver());
-
-                userViewModel.getSuccess().observe(this, success -> {
-                    if (success != null && success) {
-                        Toast.makeText(
-                            UserProfileActivity.this,
-                            R.string.toast_profile_upload_avatar_succ,
-                            Toast.LENGTH_SHORT
-                        ).show();
-                        // 上传完成后刷新用户信息
-                        userViewModel.loadCurrentUserProfile();
-                    }
-                });
-
-                userViewModel.getError().observe(this, error -> {
-                    if (error != null) {
-                        Logs.e(TAG, error);
-                        Toast.makeText(
-                            UserProfileActivity.this,
-                            getString(R.string.toast_profile_upload_avatar_err) + "\n" + error,
-                            Toast.LENGTH_SHORT
-                        ).show();
-                    }
-                });
+                userViewModel.uploadAvatar(uri, getContentResolver())
+                    .thenApply(result -> {
+                        if (result.isSuccess()) {
+                            Toast.makeText(
+                                UserProfileActivity.this,
+                                R.string.toast_profile_upload_avatar_succ,
+                                Toast.LENGTH_SHORT
+                            ).show();
+                            // 上传完成后刷新用户信息
+                            userViewModel.loadCurrentUserProfile();
+                        } else {
+                            Logs.e(TAG, result.getError());
+                            Toast.makeText(
+                                UserProfileActivity.this,
+                                getString(R.string.toast_profile_upload_avatar_err) + "\n" + result.getError(),
+                                Toast.LENGTH_SHORT
+                            ).show();
+                        }
+                        return result;
+                    });
             } catch (Exception e) {
                 Logs.e(TAG, "Error creating file from Uri: " + e.getMessage());
                 Toast.makeText(
@@ -283,30 +271,25 @@ public class UserProfileActivity extends BaseActivity implements
             Logs.d(TAG, "Selected URI: " + uri);
 
             try {
-                userViewModel.uploadProfileBanner(uri, getContentResolver());
-
-                userViewModel.getSuccess().observe(this, success -> {
-                    if (success != null && success) {
-                        Toast.makeText(
-                            UserProfileActivity.this,
-                            R.string.toast_profile_upload_banner_succ,
-                            Toast.LENGTH_SHORT
-                        ).show();
-                        // 上传完成后刷新用户信息
-                        userViewModel.loadCurrentUserProfile();
-                    }
-                });
-
-                userViewModel.getError().observe(this, error -> {
-                    if (error != null) {
-                        Logs.e(TAG, error);
-                        Toast.makeText(
-                            UserProfileActivity.this,
-                            getString(R.string.toast_profile_upload_banner_err) + "\n" + error,
-                            Toast.LENGTH_SHORT
-                        ).show();
-                    }
-                });
+                userViewModel.uploadProfileBanner(uri, getContentResolver())
+                    .thenAccept(result -> {
+                        if (result.isSuccess()) {
+                            Toast.makeText(
+                                UserProfileActivity.this,
+                                R.string.toast_profile_upload_banner_succ,
+                                Toast.LENGTH_SHORT
+                            ).show();
+                            // 上传完成后刷新用户信息
+                            userViewModel.loadCurrentUserProfile();
+                        } else {
+                            Logs.e(TAG, result.getError());
+                            Toast.makeText(
+                                UserProfileActivity.this,
+                                getString(R.string.toast_profile_upload_banner_err) + "\n" + result.getError(),
+                                Toast.LENGTH_SHORT
+                            ).show();
+                        }
+                    });
             } catch (Exception e) {
                 Logs.e(TAG, "Error creating file from Uri: " + e.getMessage());
                 Toast.makeText(
@@ -375,38 +358,8 @@ public class UserProfileActivity extends BaseActivity implements
         builder.setTitle(R.string.profile_title_logout);
         builder.setMessage(R.string.profile_title_logout_content);
         builder.setPositiveButton(android.R.string.ok, (dialog, which) -> {
-            // Set up observers for logout
-            userViewModel.getSuccess().observe(this, success -> {
-                if (success != null && success) {
-                    Toast.makeText(
-                        UserProfileActivity.this,
-                        R.string.toast_profile_logout_succ,
-                        Toast.LENGTH_SHORT
-                    ).show();
-
-                    if (dialog != null) {
-                        dialog.dismiss();
-                    }
-                    finish();
-                }
-            });
-
-            userViewModel.getError().observe(this, error -> {
-                if (error != null) {
-                    Logs.e(TAG, "failed to logout, msg: " + error);
-                    Toast.makeText(
-                        UserProfileActivity.this,
-                        R.string.toast_profile_logout_err,
-                        Toast.LENGTH_SHORT
-                    ).show();
-                    if (dialog != null) {
-                        dialog.dismiss();
-                    }
-                }
-            });
-
-            // Execute logout
-            userViewModel.logout();
+            onLogout();
+            dialog.dismiss();
         });
 
         builder.setNegativeButton(android.R.string.cancel, (dialog, which) ->
@@ -415,6 +368,29 @@ public class UserProfileActivity extends BaseActivity implements
         if (!dialog.isShowing()) {
             dialog.show();
         }
+    }
+
+    private void onLogout() {
+        // Execute logout
+        userViewModel.logout().thenAccept(result -> {
+            runOnUiThread(() -> {
+                if (result.isSuccess()) {
+                    Toast.makeText(
+                        UserProfileActivity.this,
+                        R.string.toast_profile_logout_succ,
+                        Toast.LENGTH_SHORT
+                    ).show();
+                    finish();
+                } else {
+                    Logs.e(TAG, "failed to logout, msg: " + result.getError());
+                    Toast.makeText(
+                        UserProfileActivity.this,
+                        R.string.toast_profile_logout_err,
+                        Toast.LENGTH_SHORT
+                    ).show();
+                }
+            });
+        });
     }
 
     @Override
@@ -442,18 +418,16 @@ public class UserProfileActivity extends BaseActivity implements
             .setPositiveButton(android.R.string.ok, (dialog, which) -> {
                 String newBio = editText.getText().toString().trim();
                 if (userViewModel != null) {
-                    userViewModel.getSuccess().observe(this, success -> {
-                        if (success != null && success) {
+                    userViewModel.updateBio(newBio).thenAccept(result -> {
+                        if (result.isSuccess()) {
                             Toast.makeText(
                                 UserProfileActivity.this,
                                 R.string.toast_profile_edit_bio_succ,
                                 Toast.LENGTH_SHORT
                             ).show();
-                            dialog.dismiss();
                         }
+                        dialog.dismiss();
                     });
-
-                    userViewModel.updateBio(newBio);
                 }
             })
             .setNegativeButton(android.R.string.cancel, (dialog, which) ->

@@ -57,7 +57,6 @@ public class AccountFragment extends Fragment {
 
         // Set up observers for the shared LiveData
         userViewModel.getUserProfile().observe(getViewLifecycleOwner(), this::updateUserProfile);
-        userViewModel.getError().observe(getViewLifecycleOwner(), this::handleError);
 
         // Check if we need to refresh the profile
         if (userViewModel.getUserProfile().getValue() == null && userViewModel.isLoggedIn()) {

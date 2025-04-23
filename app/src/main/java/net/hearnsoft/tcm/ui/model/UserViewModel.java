@@ -17,6 +17,7 @@ import net.hearnsoft.tcm.infrastructure.adapter.http.ThcdbApiAdapter.ThcdbApiExc
 import net.hearnsoft.thcdb_sdk.model.AuthCredential;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import io.vavr.concurrent.Future;
 
@@ -30,8 +31,6 @@ public class UserViewModel extends AndroidViewModel {
     private final MutableLiveData<UserProfileModel> currentUserProfileLiveData = new MutableLiveData<>();
     // 查看的用户资料（可以是当前用户或其他用户）
     private final MutableLiveData<UserProfileModel> viewingUserProfileLiveData = new MutableLiveData<>();
-    private final MutableLiveData<String> errorLiveData = new MutableLiveData<>();
-    private final MutableLiveData<Boolean> successLiveData = new MutableLiveData<>();
     private final MutableLiveData<List<String>> userRoleListLiveData = new MutableLiveData<>();
     private final MutableLiveData<Boolean> loadingLiveData = new MutableLiveData<>(false);
 
@@ -51,178 +50,174 @@ public class UserViewModel extends AndroidViewModel {
         return viewingUserProfileLiveData;
     }
 
-    public LiveData<String> getError() {
-        return errorLiveData;
-    }
-
-    public LiveData<Boolean> getSuccess() {
-        return successLiveData;
-    }
-
-    public LiveData<Boolean> isLoading() {
-        return loadingLiveData;
-    }
-
-    public LiveData<List<String>> getUserRoleList() {
-        return userRoleListLiveData;
-    }
-
     public boolean isLoggedIn() {
         return userRepository.isLoggedIn();
     }
 
-    public void login(String username, String password) {
+    public CompletableFuture<Result<UserProfileModel>> login(String username, String password) {
         loadingLiveData.postValue(true);
 
-        Future.fromCompletableFuture(userRepository.signIn(username, password))
-            .onSuccess(profile -> {
-                currentUserProfileLiveData.postValue(profile);
-                viewingUserProfileLiveData.postValue(profile); // 登录时两者都是当前用户
-                successLiveData.postValue(true);
-                loadingLiveData.postValue(false);
-            })
-            .onFailure(error -> {
-                handleError(error);
-                successLiveData.postValue(false);
-                loadingLiveData.postValue(false);
-            });
-    }
-
-    public void login(AuthCredential auth) {
-        loadingLiveData.postValue(true);
-
-        Future.fromCompletableFuture(userRepository.signIn(auth))
-            .onSuccess(profile -> {
+        return userRepository.signIn(username, password)
+            .thenApply(profile -> {
                 currentUserProfileLiveData.postValue(profile);
                 viewingUserProfileLiveData.postValue(profile);
-                successLiveData.postValue(true);
                 loadingLiveData.postValue(false);
+                return Result.success(profile);
             })
-            .onFailure(error -> {
-                handleError(error);
-                successLiveData.postValue(false);
+            .exceptionally(error -> {
                 loadingLiveData.postValue(false);
+                return Result.error(error.getMessage());
             });
     }
 
-    public void register(String username, String password) {
+    public CompletableFuture<Result<UserProfileModel>> login(AuthCredential auth) {
         loadingLiveData.postValue(true);
 
-        Future.fromCompletableFuture(userRepository.signUp(username, password))
-            .onSuccess(profile -> {
+        return userRepository.signIn(auth)
+            .thenApply(profile -> {
                 currentUserProfileLiveData.postValue(profile);
                 viewingUserProfileLiveData.postValue(profile);
-                successLiveData.postValue(true);
                 loadingLiveData.postValue(false);
+                return Result.success(profile);
             })
-            .onFailure(error -> {
-                handleError(error);
-                successLiveData.postValue(false);
+            .exceptionally(error -> {
                 loadingLiveData.postValue(false);
+                return Result.error(error.getMessage());
             });
     }
 
-    public void register(AuthCredential auth) {
+    public CompletableFuture<Result<UserProfileModel>> register(String username, String password) {
         loadingLiveData.postValue(true);
 
-        Future.fromCompletableFuture(userRepository.signUp(auth))
-            .onSuccess(profile -> {
+        return userRepository.signUp(username, password)
+            .thenApply(profile -> {
                 currentUserProfileLiveData.postValue(profile);
                 viewingUserProfileLiveData.postValue(profile);
-                successLiveData.postValue(true);
                 loadingLiveData.postValue(false);
+                return Result.success(profile);
             })
-            .onFailure(error -> {
-                handleError(error);
-                successLiveData.postValue(false);
+            .exceptionally(error -> {
                 loadingLiveData.postValue(false);
+                return Result.error(error.getMessage());
             });
     }
 
-    public void logout() {
+    public CompletableFuture<Result<UserProfileModel>> register(AuthCredential auth) {
         loadingLiveData.postValue(true);
 
-        Future.fromCompletableFuture(userRepository.signOut())
-            .onSuccess(success -> {
+        return userRepository.signUp(auth)
+            .thenApply(profile -> {
+                currentUserProfileLiveData.postValue(profile);
+                viewingUserProfileLiveData.postValue(profile);
+                loadingLiveData.postValue(false);
+                return Result.success(profile);
+            })
+            .exceptionally(error -> {
+                loadingLiveData.postValue(false);
+                return Result.error(error.getMessage());
+            });
+    }
+
+    public CompletableFuture<Result<?>> logout() {
+        loadingLiveData.postValue(true);
+
+        return userRepository.signOut()
+            .thenApply(success -> {
                 if (success) {
                     // 清空当前用户信息
                     currentUserProfileLiveData.postValue(null);
                     viewingUserProfileLiveData.postValue(null);
-                    successLiveData.postValue(true);
+                    loadingLiveData.postValue(false);
+                    return Result.success(true);
                 } else {
-                    errorLiveData.postValue("Logout failed");
-                    successLiveData.postValue(false);
+                    loadingLiveData.postValue(false);
+                    return Result.error("Logout error");
                 }
-                loadingLiveData.postValue(false);
             })
-            .onFailure(error -> {
-                handleError(error);
-                successLiveData.postValue(false);
+            .exceptionally(error -> {
                 loadingLiveData.postValue(false);
+                return Result.error(error.getMessage());
             });
     }
 
-    public void updateBio(String bio) {
+    public CompletableFuture<Result<?>> updateBio(String bio) {
         loadingLiveData.postValue(true);
 
-        Future.fromCompletableFuture(userRepository.postBio(bio))
-            .onSuccess(success -> {
+        return userRepository.postBio(bio)
+            .thenApply(success -> {
                 if (success) {
                     // 更新当前用户资料
-                    currentUserProfileLiveData.postValue(currentUserProfileLiveData.getValue());
-                    viewingUserProfileLiveData.postValue(viewingUserProfileLiveData.getValue());
-                    successLiveData.postValue(true);
+                    UserProfileModel currentProfile = currentUserProfileLiveData.getValue();
+                    if (currentProfile != null) {
+                        currentProfile.setBio(bio);
+                        currentUserProfileLiveData.postValue(currentProfile);
+                        viewingUserProfileLiveData.postValue(currentProfile);
+                    }
+                    loadingLiveData.postValue(false);
+                    return Result.success(true);
                 } else {
-                    errorLiveData.postValue("Update bio failed");
-                    successLiveData.postValue(false);
+                    loadingLiveData.postValue(false);
+                    return Result.error("更新个人简介失败");
                 }
             })
-            .onFailure(error -> {
-                handleError(error);
-                successLiveData.postValue(false);
+            .exceptionally(error -> {
+                loadingLiveData.postValue(false);
+                return Result.error(error.getMessage());
             });
     }
 
     // 获取指定用户名的用户资料（查看其他用户资料）
-    public void getProfileByUsername(String username) {
+    public CompletableFuture<Result<UserProfileModel>> getProfileByUsername(String username) {
         if (userRoleListLiveData.getValue() == null) {
             getUserRoles();
         }
 
         loadingLiveData.postValue(true);
 
-        Future.fromCompletableFuture(userRepository.profileWithName(username))
-            .onSuccess(profile -> {
+        return userRepository.profileWithName(username)
+            .thenApply(profile -> {
                 viewingUserProfileLiveData.postValue(profile);
                 loadingLiveData.postValue(false);
+                return Result.success(profile);
             })
-            .onFailure(error -> {
-                handleError(error);
+            .exceptionally(error -> {
                 loadingLiveData.postValue(false);
+                return Result.error(error.getMessage());
             });
     }
 
     // 获取当前登录用户的资料，并设置为查看的用户
-    public void loadCurrentUserProfile() {
+    public CompletableFuture<Result<UserProfileModel>> loadCurrentUserProfile() {
         if (!userRepository.isLoggedIn()) {
-            errorLiveData.postValue("Not logged in");
-            return;
+            return CompletableFuture.completedFuture(Result.error("未登录"));
         }
+
         if (userRoleListLiveData.getValue() == null) {
             getUserRoles();
         }
 
         loadingLiveData.postValue(true);
 
-        Future.fromCompletableFuture(userRepository.getCurrentUserProfile())
-            .onSuccess(profile -> {
+        return userRepository.getCurrentUserProfile()
+            .thenApply(profile -> {
                 currentUserProfileLiveData.postValue(profile);
                 viewingUserProfileLiveData.postValue(profile);
                 loadingLiveData.postValue(false);
+                return Result.success(profile);
             })
-            .onFailure(error -> {
-                handleError(error);
+            .exceptionally(error -> {
                 loadingLiveData.postValue(false);
+                String errorMsg = error.getMessage();
+
+                if (error instanceof ThcdbApiException &&
+                    ((ThcdbApiException) error).getErrorCode() != null &&
+                    ((ThcdbApiException) error).getErrorCode() == 401) {
+                    // 处理未授权错误 - 清除本地会话
+                    userRepository.clearSession();
+                    errorMsg = "会话已过期，请重新登录";
+                }
+
+                return Result.error(errorMsg);
             });
     }
 
@@ -233,90 +228,81 @@ public class UserViewModel extends AndroidViewModel {
             .onSuccess(roles -> {
                 List<String> rolesList = roles.getData();
                 if (rolesList == null) {
-                    handleError(new ThcdbApiException("Roles list is null"));
                     loadingLiveData.postValue(false);
                     return;
                 }
                 userRoleListLiveData.postValue(rolesList);
                 loadingLiveData.postValue(false);
             }).onFailure(error -> {
-                handleError(error);
                 loadingLiveData.postValue(false);
             });
     }
 
-    public void uploadAvatar(Uri avatarUri, ContentResolver resolver) {
+    public CompletableFuture<Result<Boolean>> uploadAvatar(Uri avatarUri, ContentResolver resolver) {
         if (avatarUri == null) {
-            errorLiveData.postValue("Image URI is null");
-            return;
+            return CompletableFuture.completedFuture(Result.error("图片URI为空"));
         }
 
         loadingLiveData.postValue(true);
 
-        Future.fromCompletableFuture(userRepository.uploadAvatar(avatarUri, resolver))
-            .onSuccess(success -> {
+        return userRepository.uploadAvatar(avatarUri, resolver)
+            .thenCompose(success -> {
                 if (success) {
-                    successLiveData.postValue(true);
-                    // After successful upload, refresh user profile to get the updated avatar
-                    getCurrentUserProfile();
+                    // 上传成功后刷新用户资料以获取更新的头像
+                    return userRepository.getCurrentUserProfile()
+                        .thenApply(profile -> {
+                            currentUserProfileLiveData.postValue(profile);
+                            viewingUserProfileLiveData.postValue(profile);
+                            loadingLiveData.postValue(false);
+                            return Result.success(true);
+                        })
+                        .exceptionally(error -> {
+                            loadingLiveData.postValue(false);
+                            // 头像上传成功但刷新资料失败，仍然返回成功结果
+                            return Result.success(true);
+                        });
                 } else {
-                    errorLiveData.postValue("Avatar upload failed");
-                    successLiveData.postValue(false);
+                    loadingLiveData.postValue(false);
+                    return CompletableFuture.completedFuture(Result.error("头像上传失败"));
                 }
-                loadingLiveData.postValue(false);
             })
-            .onFailure(error -> {
-                handleError(error);
-                successLiveData.postValue(false);
+            .exceptionally(error -> {
                 loadingLiveData.postValue(false);
+                return Result.error(error.getMessage());
             });
     }
 
-    public void uploadProfileBanner(Uri bannerUri, ContentResolver resolver) {
+    public CompletableFuture<Result<Boolean>> uploadProfileBanner(Uri bannerUri, ContentResolver resolver) {
         if (bannerUri == null) {
-            errorLiveData.postValue("Image URI is null");
-            return;
+            return CompletableFuture.completedFuture(Result.error("图片URI为空"));
         }
 
         loadingLiveData.postValue(true);
 
-        Future.fromCompletableFuture(userRepository.uploadProfileBanner(bannerUri, resolver))
-            .onSuccess(success -> {
+        return userRepository.uploadProfileBanner(bannerUri, resolver)
+            .thenCompose(success -> {
                 if (success) {
-                    successLiveData.postValue(true);
-                    // After successful upload, refresh user profile to get the updated banner
-                    getCurrentUserProfile();
+                    // 上传成功后刷新用户资料以获取更新的背景图
+                    return userRepository.getCurrentUserProfile()
+                        .thenApply(profile -> {
+                            currentUserProfileLiveData.postValue(profile);
+                            viewingUserProfileLiveData.postValue(profile);
+                            loadingLiveData.postValue(false);
+                            return Result.success(true);
+                        })
+                        .exceptionally(error -> {
+                            loadingLiveData.postValue(false);
+                            // 背景图上传成功但刷新资料失败，仍然返回成功结果
+                            return Result.success(true);
+                        });
                 } else {
-                    errorLiveData.postValue("Banner upload failed");
-                    successLiveData.postValue(false);
+                    loadingLiveData.postValue(false);
+                    return CompletableFuture.completedFuture(Result.error("背景图上传失败"));
                 }
-                loadingLiveData.postValue(false);
             })
-            .onFailure(error -> {
-                handleError(error);
-                successLiveData.postValue(false);
+            .exceptionally(error -> {
                 loadingLiveData.postValue(false);
+                return Result.error(error.getMessage());
             });
-    }
-
-    private void handleError(Throwable error) {
-        if (error instanceof ThcdbApiException) {
-            ThcdbApiException apiError = (ThcdbApiException) error;
-            Integer errorCode = apiError.getErrorCode();
-
-            if (errorCode != null && errorCode == 401) {
-                // Handle unauthorized error specially - e.g., clear local session
-                userRepository.clearSession();
-                errorLiveData.postValue("Session expired. Please login again.");
-            } else {
-                errorLiveData.postValue(apiError.getMessage());
-            }
-        } else {
-            errorLiveData.postValue(error.getMessage());
-        }
-    }
-
-    public void clearError() {
-        errorLiveData.postValue(null);
     }
 }

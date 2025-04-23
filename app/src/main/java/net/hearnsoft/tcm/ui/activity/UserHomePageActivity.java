@@ -64,25 +64,12 @@ public class UserHomePageActivity extends BaseActivity {
     private void setupObservers() {
         // 观察查看的用户资料变化
         userViewModel.getUserProfile().observe(this, this::updateUserProfileUI);
-
-        // 观察错误信息
-        userViewModel.getError().observe(this, error -> {
-            if (error != null) {
-                Logs.e(TAG, "Failed to load user profile: " + error);
-                Toast.makeText(this, getString(R.string.profile_dialog_err_msg) + "\n" + error,
-                    Toast.LENGTH_LONG).show();
-            }
-        });
-
-        // 观察加载状态
-        userViewModel.isLoading().observe(this, isLoading -> {
-            // 可以在这里添加加载指示器
-        });
     }
 
     private void loadUserProfile() {
         // 从Intent获取用户名
         String username = getIntent().getStringExtra(EXTRA_USERNAME);
+        Logs.d(TAG, "Loading user profile for username: " + username);
 
         if (TextUtils.isEmpty(username)) {
             // 如果没有传入用户名，加载当前登录用户的资料
@@ -96,6 +83,8 @@ public class UserHomePageActivity extends BaseActivity {
     private void updateUserProfileUI(UserProfileModel profile) {
         if (profile == null) {
             Logs.e(TAG, "Received null user profile");
+            Toast.makeText(this, getString(R.string.profile_dialog_err_msg),
+                Toast.LENGTH_LONG).show();
             finish();
             return;
         }

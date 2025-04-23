@@ -58,17 +58,32 @@ public class AccountFragment extends Fragment {
         // Set up observers for the shared LiveData
         userViewModel.getUserProfile().observe(getViewLifecycleOwner(), this::updateUserProfile);
 
-        // Check if we need to refresh the profile
-        if (userViewModel.getUserProfile().getValue() == null && userViewModel.isLoggedIn()) {
-            userViewModel.getCurrentUserProfile();
-        } else {
-            // Use cached profile if available
-            UserProfileModel cachedProfile = userViewModel.getUserProfile().getValue();
-            if (cachedProfile != null) {
-                updateUserProfile(cachedProfile);
+        // Check if the user is logged in
+        if (!userViewModel.isLoggedIn()) {
+            // Check if the current user profile is null
+            if (userViewModel.getCurrentUserProfile().getValue() == null) {
+                // Load the current user profile from API
+                userViewModel.loadCurrentUserProfile()
+                    .thenAccept(result -> {
+                        if (result.isSuccess()) {
+                            updateUserProfile(result.getData());
+                        } else {
+                            setUserCardForLoggedOutState();
+                        }
+                    })
+                    // If we have an error, log it and set the user card for logged out state
+                    .exceptionally(throwable -> {
+                        Logs.e(TAG, "loadCurrentUserProfile error: " + throwable.getMessage());
+                        setUserCardForLoggedOutState();
+                        return null;
+                    });
             } else {
-                setUserCardForLoggedOutState();
+                // If we have a current user profile, update the user card
+                updateUserProfile(userViewModel.getCurrentUserProfile().getValue());
             }
+        } else {
+            // Show logout state
+            setUserCardForLoggedOutState();
         }
     }
 

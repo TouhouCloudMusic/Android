@@ -17,6 +17,7 @@ public class UserProfileModel {
     private OffsetDateTime lastLogin;
     private List<UserRole> roles = new ArrayList<>();
     private boolean isFollowing;
+    private String bio;
 
     public UserProfileModel() {
     }
@@ -27,7 +28,8 @@ public class UserProfileModel {
         String bannerUrl,
         OffsetDateTime lastLogin,
         List<UserRole> roles,
-        boolean isFollowing
+        boolean isFollowing,
+        String bio
     ) {
         this.name = name;
         this.avatarUrl = avatarUrl;
@@ -35,6 +37,7 @@ public class UserProfileModel {
         this.lastLogin = lastLogin;
         this.roles = roles;
         this.isFollowing = isFollowing;
+        this.bio = bio;
     }
 
     // 用于从API数据模型转换为领域模型
@@ -49,7 +52,8 @@ public class UserProfileModel {
             apiProfile.getBannerUrl(),
             apiProfile.getLastLogin(),
             domainRoles,
-            apiProfile.isFollowing()
+            apiProfile.isFollowing(),
+            apiProfile.getBio()
         );
     }
 

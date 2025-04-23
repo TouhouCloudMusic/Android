@@ -162,6 +162,27 @@ public class UserViewModel extends AndroidViewModel {
             });
     }
 
+    public void updateBio(String bio) {
+        loadingLiveData.postValue(true);
+
+        Future.fromCompletableFuture(userRepository.postBio(bio))
+            .onSuccess(success -> {
+                if (success) {
+                    // 更新当前用户资料
+                    currentUserProfileLiveData.postValue(currentUserProfileLiveData.getValue());
+                    viewingUserProfileLiveData.postValue(viewingUserProfileLiveData.getValue());
+                    successLiveData.postValue(true);
+                } else {
+                    errorLiveData.postValue("Update bio failed");
+                    successLiveData.postValue(false);
+                }
+            })
+            .onFailure(error -> {
+                handleError(error);
+                successLiveData.postValue(false);
+            });
+    }
+
     // 获取指定用户名的用户资料（查看其他用户资料）
     public void getProfileByUsername(String username) {
         if (userRoleListLiveData.getValue() == null) {

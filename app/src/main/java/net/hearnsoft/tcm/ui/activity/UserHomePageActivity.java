@@ -138,10 +138,8 @@ public class UserHomePageActivity extends BaseActivity {
         headerBinding.userHandle.setText(getUserRoleString(profile.getRoles()));
 
         // 设置用户简介（显示最后登录时间）
-        String lastLoginText = getString(R.string.usercard_last_login_desc,
-            OffsetDateTimeFormater.format(profile.getLastLogin(),
-                getString(R.string.date_format_str)));
-        headerBinding.userBio.setText(lastLoginText);
+        String bio = profile.getBio() != null ? profile.getBio() : getString(R.string.profile_title_bio_content);
+        headerBinding.userBio.setText(bio);
 
         // 设置关注状态
         headerBinding.followUserButton.setText(R.string.full_player_artist_follow);

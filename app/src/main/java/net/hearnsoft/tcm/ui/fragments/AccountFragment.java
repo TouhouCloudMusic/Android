@@ -107,11 +107,8 @@ public class AccountFragment extends Fragment {
             return;
         }
 
-        String lastLoginDate = getString(
-            R.string.usercard_last_login_desc,
-            OffsetDateTimeFormater.format(data.getLastLogin(), getString(R.string.date_format_str))
-        );
-        setUserCardInfo(data.getName(), lastLoginDate, null);
+        String bio = data.getBio() != null ? data.getBio() : getString(R.string.profile_title_bio_content);
+        setUserCardInfo(data.getName(), bio, null);
         userCard.setOnUserCardClickListener(v -> {
             Intent userHomePage = new Intent(getContext(), UserHomePageActivity.class);
             startActivity(userHomePage);

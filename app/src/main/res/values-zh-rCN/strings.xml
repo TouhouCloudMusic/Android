@@ -48,6 +48,9 @@
     <string name="profile_title_admin_mode">管理员功能</string>
     <string name="profile_title_banner_image">个人资料横幅图片</string>
     <string name="profile_title_banner_content">点击右上角的"编辑"按钮进行修改</string>
+    <string name="profile_title_bio_title">简介</string>
+    <string name="profile_title_bio_content">好像还没有简介…</string>
+    <string name="profile_title_edit_bio">修改简介</string>
     <string name="admin_mode_notice">管理员模式已启用，您可以管理用户和权限或进行API测试。</string>
 
 
@@ -75,6 +78,7 @@
     <string name="toast_profile_upload_banner_err">上传背景图失败，原因：</string>
     <string name="toast_profile_logout_succ">注销登录成功</string>
     <string name="toast_profile_logout_err">注销登录失败</string>
+    <string name="toast_profile_edit_bio_succ">更新简介成功！</string>
     <string name="music_tab_music_title">歌曲</string>
     <string name="music_tab_artists_title">艺术家</string>
     <string name="music_tab_album_title">专辑</string>

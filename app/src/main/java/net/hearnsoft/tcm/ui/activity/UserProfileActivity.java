@@ -4,13 +4,20 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.InputType;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.PickVisualMediaRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.graphics.Insets;
@@ -413,6 +420,48 @@ public class UserProfileActivity extends BaseActivity implements
     @Override
     public void onEditName(String currentName) {
         // TODO: 待实现
+    }
+
+    @Override
+    public void onEditBio(String bio) {
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        EditText editText = new EditText(this);
+        editText.setText(bio);
+        editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+        editText.setMinLines(1);
+        editText.setMaxLines(5);
+        editText.setGravity(Gravity.TOP);
+        editText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+        editText.setPadding(16, 16, 16, 16);
+        layout.addView(editText);
+
+        AlertDialog bioEditDialog = new MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.profile_title_edit_bio)
+            .setView(layout)
+            .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                String newBio = editText.getText().toString().trim();
+                if (userViewModel != null) {
+                    userViewModel.getSuccess().observe(this, success -> {
+                        if (success != null && success) {
+                            Toast.makeText(
+                                UserProfileActivity.this,
+                                R.string.toast_profile_edit_bio_succ,
+                                Toast.LENGTH_SHORT
+                            ).show();
+                            dialog.dismiss();
+                        }
+                    });
+
+                    userViewModel.updateBio(newBio);
+                }
+            })
+            .setNegativeButton(android.R.string.cancel, (dialog, which) ->
+                dialog.dismiss())
+            .create();
+        if (!bioEditDialog.isShowing()) {
+            bioEditDialog.show();
+        }
     }
 
     @Override

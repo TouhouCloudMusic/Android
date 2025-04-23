@@ -35,8 +35,6 @@ import retrofit2.Response;
  * 内部管理Cookie和会话，应用层无需处理身份验证细节
  */
 public class ThcdbApiAdapter {
-    // 默认的后台线程执行器
-    private static final Executor executor = Executors.newCachedThreadPool();
 
     // API客户端实例，内部已集成Cookie管理
     @Getter

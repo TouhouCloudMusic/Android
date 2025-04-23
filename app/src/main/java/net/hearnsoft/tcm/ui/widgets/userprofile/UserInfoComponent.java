@@ -16,6 +16,7 @@ public class UserInfoComponent extends BaseProfileComponent {
 
     public interface UserInfoCallback {
         void onEditName(String currentName);
+        void onEditBio(String currentBio);
     }
 
     private final UserInfoCallback callback;
@@ -43,6 +44,15 @@ public class UserInfoComponent extends BaseProfileComponent {
                 data.getName(),
                 true,
                 item -> callback.onEditName(item.getContent())
+            ));
+
+            // 用户简介
+            items.add(new ProfileItem(
+                ProfileItem.TYPE_INFO,
+                context.getString(R.string.profile_title_bio_title),
+                data.getBio() != null ? data.getBio() : context.getString(R.string.profile_title_bio_content) ,
+                true,
+                item -> callback.onEditBio(item.getContent())
             ));
 
             // 最后登录时间

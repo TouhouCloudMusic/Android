@@ -47,6 +47,9 @@
     <string name="profile_title_admin_mode">Admin mode</string>
     <string name="profile_title_banner_image">Profile Banner</string>
     <string name="profile_title_banner_content">Click \'Edit\' button to set profile banner</string>
+    <string name="profile_title_bio_title">Bio</string>
+    <string name="profile_title_bio_content">No bio yet…</string>
+    <string name="profile_title_edit_bio">Edit bio</string>
     <string name="admin_mode_notice">Admin mode is enabled, you can manage users and roles or test API.</string>
 
     <string name="error_username_empty">Username must not be empty</string>
@@ -73,6 +76,7 @@
     <string name="toast_profile_upload_banner_err">Failed to upload banner, reason:</string>
     <string name="toast_profile_logout_succ">Logout successful</string>
     <string name="toast_profile_logout_err">Logout error</string>
+    <string name="toast_profile_edit_bio_succ">Update bio successful!</string>
     <string name="music_tab_music_title">Music</string>
     <string name="music_tab_artists_title">Artists</string>
     <string name="music_tab_album_title">Album</string>

@@ -210,6 +210,32 @@ public class UserApiAdapter extends BaseApiAdapter {
     }
 
     /**
+     * 更新已登录用户个人简介
+     * @param bio 个人简介
+     * @return 包含操作结果的CompletableFuture
+     */
+    public CompletableFuture<Boolean> updateBio(String bio) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                Response<BaseResponse<Void>> response = api.updateBio(bio).execute();
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    return true;
+                } else {
+                    ThcdbApiAdapter.ThcdbApiException exception = createApiException(response);
+                    handleApiError(exception);
+                    throw exception;
+                }
+            } catch (IOException e) {
+                ThcdbApiAdapter.ThcdbApiException exception = new ThcdbApiAdapter.ThcdbApiException(e);
+                handleApiError(exception);
+                throw exception;
+            }
+        }, executor);
+    }
+
+
+
+    /**
      * 上传用户头像(使用Uri)
      * @param avatarUri 头像文件的URI
      * @param contentResolver 用于访问URI内容的ContentResolver

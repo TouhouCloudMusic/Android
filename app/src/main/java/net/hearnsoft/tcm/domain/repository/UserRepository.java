@@ -52,6 +52,18 @@ public class UserRepository {
             });
     }
 
+    public CompletableFuture<Boolean> postBio(String bio) {
+        return apiAdapter.getUser().updateBio(bio)
+            .thenCompose(success -> {
+                if (success) {
+                    // 刷新缓存的用户信息
+                    return getCurrentUserProfile().thenApply(userProfile -> true);
+                } else {
+                    return CompletableFuture.completedFuture(false);
+                }
+            });
+    }
+
     public CompletableFuture<UserProfileModel> getCurrentUserProfile() {
         CompletableFuture<UserProfileModel> future;
         if (!apiAdapter.isLoggedIn()) {

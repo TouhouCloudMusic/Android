@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,8 +12,10 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.graphics.Insets;
+import androidx.core.view.GravityCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.media3.common.MediaItem;
@@ -99,6 +102,16 @@ public class MainFragment extends Fragment {
 
         // Initially hide now playing bar
         binding.nowPlayingBar.setVisibility(View.GONE);
+
+        // 设置Toolbar点击事件
+        binding.toolbarMenu.setOnClickListener(v -> {
+            DrawerLayout drawerLayout = requireActivity().findViewById(R.id.rootDrawerContainer);
+            if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+            } else {
+                drawerLayout.openDrawer(GravityCompat.START);
+            }
+        });
 
         // 设置播放控制
         binding.nowPlayingBar.setOnPlayingBarClickListener(v -> {

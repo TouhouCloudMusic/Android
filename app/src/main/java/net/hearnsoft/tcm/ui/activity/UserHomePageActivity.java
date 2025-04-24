@@ -63,7 +63,7 @@ public class UserHomePageActivity extends BaseActivity {
 
     private void setupObservers() {
         // 观察查看的用户资料变化
-        userViewModel.getUserProfile().observe(this, this::updateUserProfileUI);
+        userViewModel.getCurrentUserProfile().observe(this, this::updateUserProfileUI);
     }
 
     private void loadUserProfile() {
@@ -73,10 +73,21 @@ public class UserHomePageActivity extends BaseActivity {
 
         if (TextUtils.isEmpty(username)) {
             // 如果没有传入用户名，加载当前登录用户的资料
-            userViewModel.loadCurrentUserProfile();
+            if (userViewModel.isLoggedIn() && userViewModel.getCurrentUserProfile().getValue() == null) {
+                userViewModel.loadCurrentUserProfile().thenAccept(result -> {
+                    if (result.isSuccess()) {
+                        runOnUiThread(() -> updateUserProfileUI(result.getData()));
+                    }
+                });
+            }
         } else {
             // 加载指定用户名的资料
-            userViewModel.getProfileByUsername(username);
+            userViewModel.getProfileByUsername(username)
+                .thenAccept(result -> {
+                    if (result.isSuccess()) {
+                        runOnUiThread(() -> updateUserProfileUI(result.getData()));
+                    }
+                });
         }
     }
 
@@ -135,17 +146,20 @@ public class UserHomePageActivity extends BaseActivity {
 
         // 只在查看其他用户时显示关注按钮
         String viewingUsername = getIntent().getStringExtra(EXTRA_USERNAME);
+        boolean isViewingSelf = TextUtils.isEmpty(viewingUsername)
+            || userViewModel.getCurrentUserProfile().getValue() == null
+            || userViewModel.getCurrentUserProfile().getValue().getName().equals(viewingUsername);
+
+        // 设置按钮可见性
         headerBinding.followUserButton.setVisibility(
-            !TextUtils.isEmpty(viewingUsername) ?
-                android.view.View.VISIBLE : android.view.View.GONE);
+            isViewingSelf ? android.view.View.GONE : android.view.View.VISIBLE);
+        headerBinding.editProfileButton.setVisibility(
+            isViewingSelf ? android.view.View.VISIBLE : android.view.View.GONE);
 
         headerBinding.editProfileButton.setOnClickListener(v -> {
             Intent profilePage = new Intent(this, UserProfileActivity.class);
             startActivity(profilePage);
         });
-
-        // 设置页面标题
-        getSupportActionBar().setTitle(profile.getName());
     }
 
     private void adjustBannerHeight() {
@@ -190,7 +204,7 @@ public class UserHomePageActivity extends BaseActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
-        onBackPressed();
+        finish();
         return true;
     }
 }

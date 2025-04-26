@@ -121,7 +121,6 @@ public class UserHomePageActivity extends BaseActivity {
         String bannerUrl = getImageUrl(profile.getBannerUrl());
         Glide.with(this)
             .load(bannerUrl)
-            .placeholder(R.drawable.test_res2) // 使用默认背景
             .into(headerBinding.userProfileBannerImage);
 
         // 设置背景横幅点击事件

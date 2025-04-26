@@ -109,10 +109,12 @@ public class UserHomePageActivity extends BaseActivity {
 
         // 设置用户头像点击事件
         headerBinding.userAvatarImage.setOnClickListener(v -> {
-            OpenImage.with(this)
-                .setClickImageView(headerBinding.userAvatarImage)
-                .setImageUrl(avatarUrl, MediaType.IMAGE)
-                .show();
+            if (!TextUtils.isEmpty(profile.getAvatarUrl())) {
+                OpenImage.with(this)
+                    .setClickImageView(headerBinding.userAvatarImage)
+                    .setImageUrl(avatarUrl, MediaType.IMAGE)
+                    .show();
+            }
         });
 
         // 设置背景横幅
@@ -124,10 +126,12 @@ public class UserHomePageActivity extends BaseActivity {
 
         // 设置背景横幅点击事件
         headerBinding.userProfileBannerImage.setOnClickListener(v -> {
-            OpenImage.with(this)
-                .setClickImageView(headerBinding.userProfileBannerImage)
-                .setImageUrl(bannerUrl, MediaType.IMAGE)
-                .show();
+            if (!TextUtils.isEmpty(profile.getAvatarUrl())) {
+                OpenImage.with(this)
+                    .setClickImageView(headerBinding.userProfileBannerImage)
+                    .setImageUrl(bannerUrl, MediaType.IMAGE)
+                    .show();
+            }
         });
 
         // 设置用户名称

@@ -24,3 +24,4 @@ rootProject.name = "TouhouCloudMusic"
 include ':app'
 
 include ':thcdb-sdk'
+include ':alist-sdk'

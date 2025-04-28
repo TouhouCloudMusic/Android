@@ -50,6 +50,7 @@ android {
 
 dependencies {
     implementation project(':thcdb-sdk')
+    implementation project(':alist-sdk')
     implementation fileTree(include: ['*.jar','*.aar'], dir: 'libs')
 
     implementation libs.appcompat

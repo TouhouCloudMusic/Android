@@ -1,3 +1,6 @@
 [submodule "thcdb-sdk"]
 	path = thcdb-sdk
 	url = https://github.com/TouhouCloudMusic/thcdb-sdk-android
+[submodule "alist-sdk"]
+	path = alist-sdk
+	url = https://github.com/Yuyuko1024/Alist-sdk.git

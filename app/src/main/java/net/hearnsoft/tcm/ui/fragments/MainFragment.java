@@ -8,6 +8,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -179,8 +180,17 @@ public class MainFragment extends Fragment {
         // 检查是否已加载音乐
         if (viewModel.getPlaylist().getValue() == null) {
             // 让ViewModel处理扫描
-            viewModel.scanAndLoadMusic(requireContext());
+            viewModel.scanAndLoadMusic();
         }
+
+        viewModel.getPlaybackError().observe(getViewLifecycleOwner(), errorMsg -> {
+            if (errorMsg != null && !errorMsg.isEmpty()) {
+                Toast.makeText(requireContext(), errorMsg, Toast.LENGTH_SHORT).show();
+
+                // 清除错误信息，防止重复显示
+                viewModel.clearPlaybackError();
+            }
+        });
     }
 
     private void updateNowPlayingBar(MediaItem mediaItem) {

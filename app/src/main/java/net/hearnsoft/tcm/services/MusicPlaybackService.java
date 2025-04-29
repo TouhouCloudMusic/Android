@@ -4,13 +4,14 @@ import android.app.PendingIntent;
 import android.content.Intent;
 
 import androidx.annotation.Nullable;
-import androidx.annotation.OptIn;
 import androidx.media3.common.AudioAttributes;
 import androidx.media3.common.C;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.Player;
 import androidx.media3.common.util.UnstableApi;
+import androidx.media3.datasource.DataSource;
 import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
 import androidx.media3.session.DefaultMediaNotificationProvider;
 import androidx.media3.session.LibraryResult;
 import androidx.media3.session.MediaLibraryService;
@@ -22,6 +23,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 import net.hearnsoft.tcm.R;
 import net.hearnsoft.tcm.ui.activity.MainActivity;
+import net.hearnsoft.tcm.utils.AlistDataSourceFactory;
 import net.hearnsoft.tcm.utils.Logs;
 
 import java.util.ArrayList;
@@ -52,8 +54,11 @@ public class MusicPlaybackService extends MediaLibraryService {
     }
 
     private void initializePlayer() {
+        AlistDataSourceFactory dataSourceFactory = new AlistDataSourceFactory(this);
+
         // 创建ExoPlayer实例
         player = new ExoPlayer.Builder(this)
+            .setMediaSourceFactory(new DefaultMediaSourceFactory(dataSourceFactory))
                 .setAudioAttributes(
                         new AudioAttributes.Builder()
                                 .setUsage(C.USAGE_MEDIA)
@@ -63,6 +68,8 @@ public class MusicPlaybackService extends MediaLibraryService {
                 .build();
 
         // 设置为循环播放
+        player.setHandleAudioBecomingNoisy(true);
+        player.setPlayWhenReady(false);
         player.setRepeatMode(Player.REPEAT_MODE_ALL);
     }
 

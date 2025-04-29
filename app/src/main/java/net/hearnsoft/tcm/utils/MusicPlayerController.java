@@ -120,6 +120,12 @@ public class MusicPlayerController {
         }
     }
 
+    public void addErrorListener(Player.Listener errorListener) {
+        if (mediaController != null) {
+            mediaController.addListener(errorListener);
+        }
+    }
+
     public interface ConnectionCallback {
         void onConnected(MediaController controller);
     }

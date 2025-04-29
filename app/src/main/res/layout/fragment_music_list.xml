@@ -28,14 +28,24 @@
             android:layout_weight="1"/>
 
         <com.google.android.material.button.MaterialButton
-            style="@style/Widget.Material3.Button.OutlinedButton.Icon"
+            android:id="@+id/musicRepositorySelect"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="4dp"
+            android:text="本地音乐"
+            android:textAllCaps="false"
+            android:layout_marginHorizontal="8dp"
+            app:icon="@drawable/ic_storage_24px"
+            app:iconGravity="start" />
+
+        <ImageButton
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="8dp"
             android:layout_gravity="center_vertical"
             android:id="@+id/musicLocationButton"
-            android:text="@string/button_locate_to_current"
-            app:icon="@drawable/ic_location_24px"/>
+            android:src="@drawable/ic_location_24px"/>
 
     </LinearLayout>
 

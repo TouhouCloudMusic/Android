@@ -28,6 +28,10 @@ public class SettingsPrefUtils {
         return sharedPreferences.getBoolean(key, false);
     }
 
+    public boolean readBooleanSettings(String key, boolean defValue) {
+        return sharedPreferences.getBoolean(key, defValue);
+    }
+
     public int readIntSettings(String key) {
         return sharedPreferences.getInt(key, 0);
     }

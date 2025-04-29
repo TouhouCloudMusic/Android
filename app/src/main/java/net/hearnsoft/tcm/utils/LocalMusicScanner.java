@@ -108,4 +108,25 @@ public class LocalMusicScanner {
         return LocalMusicSorter.sortMusicList(items, rule);
     }
 
+    public static List<MediaItem> searchMusicList(List<MediaItem> mediaItems, String query) {
+        if (mediaItems == null || mediaItems.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<MediaItem> filteredList = new ArrayList<>();
+        for (MediaItem mediaItem : mediaItems) {
+            String title = mediaItem.mediaMetadata.title != null ?
+                mediaItem.mediaMetadata.title.toString() : "";
+            String artist = mediaItem.mediaMetadata.artist != null ?
+                mediaItem.mediaMetadata.artist.toString() : "";
+            String album = mediaItem.mediaMetadata.albumTitle != null ?
+                mediaItem.mediaMetadata.albumTitle.toString() : "";
+            if (title.toLowerCase().contains(query.toLowerCase()) ||
+                artist.toLowerCase().contains(query.toLowerCase()) ||
+                album.toLowerCase().contains(query.toLowerCase())) {
+                filteredList.add(mediaItem);
+            }
+        }
+        return filteredList;
+    }
+
 }

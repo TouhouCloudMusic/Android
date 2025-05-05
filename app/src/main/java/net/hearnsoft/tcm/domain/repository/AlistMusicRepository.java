@@ -27,12 +27,10 @@ public class AlistMusicRepository implements MediaRepository {
     private final MutableLiveData<MediaRepositoryState> repositoryStateLiveData = new MutableLiveData<>(MediaRepositoryState.initial());
     private final String rootPath;
     private String repositoryName;
-    private String password = "";
 
     public AlistMusicRepository(String name, String host, String username, String password, String rootPath, boolean isAnonymous) {
         this.repositoryName = name;
         this.rootPath = rootPath;
-        this.password = password;
 
         // 初始化Alist客户端
         AlistConfig config = new AlistConfig(host, username, password, isAnonymous);
@@ -57,7 +55,7 @@ public class AlistMusicRepository implements MediaRepository {
                 repositoryStateLiveData.postValue(MediaRepositoryState.loading());
 
                 // 获取文件列表
-                List<Map<String, String>> fileInfos = alistClient.getAllFilesInfo(rootPath, password);
+                List<Map<String, String>> fileInfos = alistClient.getAllFilesInfo(rootPath);
 
                 // 过滤并转换为MediaItems
                 List<MediaItem> mediaItems = fileInfos.stream()

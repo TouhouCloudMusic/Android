@@ -2,6 +2,8 @@ package net.hearnsoft.tcm.ui.model;
 
 import android.app.Application;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -55,10 +57,10 @@ public class PlaybackViewModel extends AndroidViewModel {
     // 当前PlayerController的播放列表，通常是由UI控件增删监控这个列表
     private final MutableLiveData<List<MediaItem>> currentPlaylist = new MutableLiveData<>();
     private final MutableLiveData<Integer> repeatMode = new MutableLiveData<>(0);
-    private final MutableLiveData<String> playbackError = new MutableLiveData<>(null);
 
     // 仓库管理器
     private MediaRepositoryManager repositoryManager;
+    private Handler handler;
 
     // 标记控制器是否已连接
     private boolean isControllerActive = false;
@@ -88,6 +90,8 @@ public class PlaybackViewModel extends AndroidViewModel {
         if (isControllerActive) {
             return; // 如果已连接，避免重复连接
         }
+
+        handler = new Handler(Looper.getMainLooper());
 
         isControllerActive = true;
 
@@ -131,7 +135,10 @@ public class PlaybackViewModel extends AndroidViewModel {
             @Override
             public void onPlayerError(PlaybackException error) {
                 Logs.e("PlaybackViewModel", "播放出错: " + getReadableErrorMessage(error));
-                playbackError.postValue(getReadableErrorMessage(error));
+                handler.post(() ->
+                    Toast.makeText(getApplication().getApplicationContext(),
+                        getReadableErrorMessage(error), Toast.LENGTH_SHORT).show()
+                );
             }
         });
 
@@ -225,7 +232,6 @@ public class PlaybackViewModel extends AndroidViewModel {
                     Logs.d("PlaybackViewModel", "加载到 " + mediaItems.size() + " 个 Alist 媒体文件");
                 } catch (Exception e) {
                     Logs.e("PlaybackViewModel", "加载 Alist 媒体失败: " + e.getMessage());
-                    playbackError.postValue("加载失败: " + e.getMessage());
                 } finally {
                     isScanning.postValue(false);
                 }
@@ -298,7 +304,6 @@ public class PlaybackViewModel extends AndroidViewModel {
                 Logs.d("PlaybackViewModel", "已加载媒体: " + mediaItems.size() + " 个项目");
             } catch (Exception e) {
                 Logs.e("PlaybackViewModel", "加载媒体失败: " + e.getMessage());
-                playbackError.postValue("加载媒体失败: " + e.getMessage());
             } finally {
                 isScanning.postValue(false);
             }
@@ -661,16 +666,6 @@ public class PlaybackViewModel extends AndroidViewModel {
     // 获取重复模式
     public LiveData<Integer> getRepeatMode() {
         return repeatMode;
-    }
-
-    // 提供访问方法
-    public LiveData<String> getPlaybackError() {
-        return playbackError;
-    }
-
-    // 清除错误
-    public void clearPlaybackError() {
-        playbackError.postValue(null);
     }
 
 

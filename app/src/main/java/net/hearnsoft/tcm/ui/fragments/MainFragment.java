@@ -182,15 +182,6 @@ public class MainFragment extends Fragment {
             // 让ViewModel处理扫描
             viewModel.scanAndLoadMusic();
         }
-
-        viewModel.getPlaybackError().observe(getViewLifecycleOwner(), errorMsg -> {
-            if (errorMsg != null && !errorMsg.isEmpty()) {
-                Toast.makeText(requireContext(), errorMsg, Toast.LENGTH_SHORT).show();
-
-                // 清除错误信息，防止重复显示
-                viewModel.clearPlaybackError();
-            }
-        });
     }
 
     private void updateNowPlayingBar(MediaItem mediaItem) {

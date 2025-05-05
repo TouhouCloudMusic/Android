@@ -1,0 +1,4 @@
+# Define the remote server URL here and rename this file as server.properties
+# The URL should include the protocol (http or https) and port if necessary
+# e.g. http://localhost:8080
+REMOTE_SERVER=

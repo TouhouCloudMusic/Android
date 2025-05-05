@@ -20,7 +20,9 @@ android {
             serverProps.load(new FileInputStream(serverPropsFile))
             buildConfigField "String", "REMOTE_SERVER", "\"${serverProps['REMOTE_SERVER']}\""
         } else {
-            throw new GradleException("server.properties file not found")
+            def errMsg = "server.properties file not found. " +
+                    "Please create this file at project root and add the endpoint URL of the remote API server."
+            throw new GradleException(errMsg)
         }
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

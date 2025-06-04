@@ -41,7 +41,7 @@
         android:id="@+id/full_player_controls_play_pause"
         android:layout_gravity="center_vertical"
         android:src="@drawable/avd_play_to_pause"
-        android:tint="?attr/colorControlNormal"
+        app:backgroundTint="?attr/colorSurface"
         app:elevation="2dp"
         app:iconGravity="textStart"
         app:iconPadding="0dp"

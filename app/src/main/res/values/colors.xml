@@ -1,15 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- 基础颜色 -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="icon_background">#FFFD2B58</color>
-    <color name="background">#FFFFFBFF</color>
-    <color name="system_accent">#9C27B0</color>
-    <color name="system_accent_darker">#7B1FA2</color>
-    <color name="system_accent_soft">#E1BEE7</color>
-    <color name="system_accent_2">#7E57C2</color>
-    <color name="netrual_color">#EEEEEE</color>
-    <color name="error">#FFC1666B</color>
-    <color name="title_color">#6750A4</color>
-    <color name="ripple_color_translucent">#33808080</color>  <!-- 33表示20%的不透明度 -->
+    
+    <!-- 主色调 (Reimu 色系) - 中国应用常用的暖红色 -->
+    <color name="primary">#ef5a5a</color> <!-- reimu-600 -->
+    <color name="primary_dark">#bd2631</color> <!-- reimu-800 -->
+    <color name="primary_light">#ff9f9a</color> <!-- reimu-400 -->
+    <color name="primary_variant">#d83b42</color> <!-- reimu-700 -->
+    <color name="primary_soft">#ffd5d1</color> <!-- reimu-300 -->
+    <color name="primary_soft_second">#fff0ef</color> <!-- reimu-100 -->
+    
+    <!-- 次要色 (Marisa 色系) - 温暖的金黄色 -->
+    <color name="secondary">#b6832e</color> <!-- marisa-600 -->
+    <color name="secondary_dark">#885907</color> <!-- marisa-800 -->
+    <color name="secondary_light">#d7b568</color> <!-- marisa-400 -->
+    
+    <!-- 背景色系 -->
+    <color name="background">#ffffff</color>
+    <color name="surface">#f3f4f5</color> <!-- slate-100 -->
+    <color name="surface_variant">#e8eaed</color> <!-- slate-200 -->
+    
+    <!-- 文字颜色 -->
+    <color name="text_primary">#32363f</color> <!-- slate-1000 -->
+    <color name="text_secondary">#707783</color> <!-- slate-700 -->
+    <color name="text_hint">#9da2ab</color> <!-- slate-500 -->
+    <color name="text_on_primary">#ffffff</color>
+    
+    <!-- 分割线和边框 -->
+    <color name="divider">#dddfe3</color> <!-- slate-300 -->
+    <color name="outline">#b5b9c0</color> <!-- slate-400 -->
+    
+    <!-- 功能色 -->
+    <color name="error">#d83b42</color> <!-- reimu-700 -->
+    <color name="success">#1ca247</color> <!-- green-600 -->
+    <color name="warning">#b6832e</color> <!-- marisa-600 -->
+    <color name="info">#5986ff</color> <!-- blue-600 -->
+    
+    <!-- 特殊用途 -->
+    <color name="icon_background">#ef5a5a</color>
+    <color name="ripple_color">#33ff9f9a</color> <!-- primary_light的20%透明度 -->
+    <color name="card_background">@color/mbottomnavigationbar_background_color</color><!-- 外部引用 使用底部导航栏背景色 -->
+    <color name="toolbar_background">#ffffff</color>
 </resources>

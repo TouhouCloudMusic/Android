@@ -60,17 +60,18 @@
         android:orientation="vertical"
         android:layout_margin="@dimen/activity_login_margin">
 
-        <com.google.android.material.button.MaterialButton
+        <net.hearnsoft.uiwidgets.button.MButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/user_login"
+            style="@style/UIWidgets.MButton.Primary"
             android:text="@string/login_btn_login"
             app:icon="@drawable/ic_login"/>
 
-        <com.google.android.material.button.MaterialButton
+        <net.hearnsoft.uiwidgets.button.MButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            style="@style/Widget.Material3.Button.OutlinedButton"
+            style="@style/UIWidgets.MButton.Secondary"
             android:id="@+id/user_register"
             android:text="@string/login_btn_register"
             app:icon="@drawable/ic_register"/>

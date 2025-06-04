@@ -6,8 +6,7 @@
     android:id="@+id/nowPlayingBarContainer"
     style="@style/Theme.TouhouCloudMusic.NowPlayingBar.CardView"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    app:cardBackgroundColor="?attr/colorSurfaceContainer">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -69,10 +68,13 @@
             android:layout_height="wrap_content">
 
             <com.google.android.material.progressindicator.CircularProgressIndicator
+                app:trackColor="@color/surface"
+                app:indicatorColor="@color/primary"
                 android:id="@+id/circularProgressIndicator"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"/>
+                android:layout_gravity="center"
+                tools:progress="30"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/playPauseMaterialButton"

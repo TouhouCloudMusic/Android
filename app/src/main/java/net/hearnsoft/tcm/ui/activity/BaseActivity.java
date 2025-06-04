@@ -8,14 +8,20 @@ import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import net.hearnsoft.tcm.R;
+import net.hearnsoft.uiwidgets.activity.MActivity;
+
 import java.util.Objects;
 
-public abstract class BaseActivity extends AppCompatActivity {
+public abstract class BaseActivity extends MActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
+        // 设置主题
+        this.setTheme(R.style.Theme_TouhouCloudMusic);
+        // 设置ActionBar可见
+        this.setMActionBarVisible(false);
 
         // 小米 沉浸式状态栏
         if (Objects.equals(Build.BRAND, "Xiaomi") || Objects.equals(Build.BRAND, "Redmi")) {

@@ -1,40 +1,59 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+    <!-- 基础应用主题 -->
     <style name="Base.Theme.TouhouCloudMusic" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
-        <item name="colorPrimary">@color/system_accent</item>
-        <item name="colorPrimaryDark">@color/system_accent_darker</item>
-        <item name="colorSecondary">@color/system_accent_2</item>
-
+        <!-- 主要颜色 -->
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorPrimaryVariant">@color/primary_variant</item>
+        
+        <!-- 次要颜色 -->
+        <item name="colorSecondary">@color/secondary</item>
+        <item name="colorSecondaryVariant">@color/secondary_dark</item>
+        
+        <!-- 表面颜色 -->
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorSurfaceVariant">@color/surface_variant</item>
+        
+        <!-- 背景颜色 -->
+        <item name="android:colorBackground">@color/background</item>
+        
+        <!-- 文字颜色 -->
+        <item name="colorOnPrimary">@color/text_on_primary</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="colorOnBackground">@color/text_primary</item>
+        
+        <!-- 功能颜色 -->
         <item name="colorError">@color/error</item>
-
-        <item name="colorPrimaryVariant">@color/system_accent</item>
-        <item name="colorSecondaryVariant">@color/system_accent_2</item>
-        <item name="scrimBackground">@color/netrual_color</item>
-
-        <item name="colorSurface">@color/netrual_color</item>
-        <item name="colorSecondaryContainer">@color/system_accent_soft</item>
+        
+        <!-- 分割线 -->
+        <item name="colorOutline">@color/outline</item>
+        <item name="colorOutlineVariant">@color/divider</item>
     </style>
 
+    <!-- 主应用主题 -->
     <style name="Theme.TouhouCloudMusic" parent="Base.Theme.TouhouCloudMusic">
-        <item name="android:colorBackground">@color/background</item>
-        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <!-- 状态栏和导航栏 -->
         <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowLightNavigationBar">true</item>
     </style>
 
+    <!-- 搜索页面主题 -->
     <style name="Theme.TouhouCloudMusic.Search" parent="Theme.TouhouCloudMusic">
-        <!-- 启用内容过渡 -->
         <item name="android:windowContentTransitions">true</item>
-        <!-- 设置共享元素过渡动画 -->
         <item name="android:windowSharedElementEnterTransition">@transition/search_transition</item>
         <item name="android:windowSharedElementExitTransition">@transition/search_transition</item>
     </style>
 
-    <style name="BottomSheet" parent="@style/Widget.Design.BottomSheet.Modal">
-        <item name="android:background">@drawable/sheet_background</item>
+    <!-- 底部弹窗主题 -->
+    <style name="BottomSheetDialogTheme" parent="Theme.Material3.DayNight.BottomSheetDialog">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:listPreferredItemPaddingStart">24dp</item>
+        <item name="android:listPreferredItemPaddingEnd">16dp</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="bottomSheetStyle">@style/BottomSheet</item>
     </style>
 
     <style name="BaseBottomSheetDialog" parent="@style/Theme.MaterialComponents.DayNight.BottomSheetDialog">
@@ -42,15 +61,12 @@
         <item name="bottomSheetStyle">@style/BottomSheet</item>
     </style>
 
-    <style name="BottomSheetDialogTheme" parent="BaseBottomSheetDialog">
-        <item name="android:listPreferredItemPaddingStart">24dp</item>
-        <item name="android:listPreferredItemPaddingLeft">24dp</item>
-        <item name="android:listPreferredItemPaddingEnd">16dp</item>
-        <item name="android:listPreferredItemPaddingRight">16dp</item>
-        <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowTranslucentNavigation">true</item>
+
+    <style name="BottomSheet" parent="Widget.Material3.BottomSheet.Modal">
+        <item name="android:background">@drawable/sheet_background</item>
     </style>
 
+    <!-- 通用组件样式 -->
     <style name="UserAvatarCircle">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">50%</item>
@@ -61,6 +77,7 @@
         <item name="cornerSize">10%</item>
     </style>
 
+    <!-- 用户卡片样式 -->
     <style name="UserCard_UserSubText">
         <item name="android:textColor">@color/white</item>
         <item name="android:textSize">12sp</item>
@@ -101,22 +118,21 @@
         <item name="android:textColor">?attr/colorOnSurface</item>
     </style>
 
-    <!-- Now playing bar -->
-    <style name="Theme.TouhouCloudMusic.NowPlayingBar.CardView" parent="@style/Widget.Material3.CardView.Filled">
-        <item name="shapeAppearanceOverlay">
-            @style/Theme.TouhouCloudMusic.NowPlayingBar.CardView.ShapeAppearanceOverlay
-        </item>
+    <!-- 播放栏样式 -->
+    <style name="Theme.TouhouCloudMusic.NowPlayingBar.CardView" parent="Widget.Material3.CardView.Filled">
+        <item name="shapeAppearanceOverlay">@style/NowPlayingBarCardShape</item>
         <item name="android:clickable">true</item>
+        <item name="cardBackgroundColor">@color/card_background</item>
     </style>
 
-    <style name="Theme.TouhouCloudMusic.NowPlayingBar.CardView.ShapeAppearanceOverlay" parent="@style/ShapeAppearanceOverlay.Material3.Corner.Top">
+    <style name="NowPlayingBarCardShape" parent="ShapeAppearanceOverlay.Material3.Corner.Top">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSizeTopLeft">12dp</item>
         <item name="cornerSizeTopRight">12dp</item>
     </style>
 
-    <!-- RatingBar -->
-    <style name="Theme.TouhouCloudMusic.RatingBar" parent="@style/Widget.AppCompat.RatingBar.Indicator">
+    <!-- 评分条样式 -->
+    <style name="Theme.TouhouCloudMusic.RatingBar" parent="Widget.AppCompat.RatingBar.Indicator">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:numStars">5</item>
@@ -124,11 +140,6 @@
         <item name="android:scaleX">0.8</item>
         <item name="android:scaleY">0.8</item>
         <item name="android:isIndicator">false</item>
-        <item name="android:tint">@color/system_accent</item>
-        <item name="minHeight">40dp</item>
-        <item name="maxHeight">40dp</item>
-        <item name="minWidth">10dp</item>
-        <item name="maxWidth">10dp</item>
-        <item name="android:padding">0dp</item>
+        <item name="android:tint">@color/primary</item>
     </style>
 </resources>

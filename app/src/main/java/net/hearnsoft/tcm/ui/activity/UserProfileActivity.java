@@ -42,6 +42,8 @@ import net.hearnsoft.tcm.ui.widgets.userprofile.ProfileComponentManager;
 import net.hearnsoft.tcm.ui.widgets.userprofile.UserInfoComponent;
 import net.hearnsoft.tcm.utils.Logs;
 import net.hearnsoft.tcm.utils.ViewModelUtils;
+import net.hearnsoft.uiwidgets.dialog.MDialog;
+import net.hearnsoft.uiwidgets.menu.MPopupMenu;
 
 import java.io.File;
 import java.util.List;
@@ -78,13 +80,13 @@ public class UserProfileActivity extends BaseActivity implements
             v.setPadding(0, statusBar.top, 0, 0);
             return insets;
         });
+        this.setMActionBarVisible(true);
 
         // 初始化UserViewModel
         userViewModel = ViewModelUtils.getViewModel(this, UserViewModel.class);
 
         // 初始化Toolbar
-        setSupportActionBar(binding.topAppbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getMActionBar().setBackButtonVisible(true);
 
         // 初始化RecyclerView
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -302,21 +304,17 @@ public class UserProfileActivity extends BaseActivity implements
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_user_profile, menu);
-        return super.onCreateOptionsMenu(menu);
+    protected int onCreatePopupMenu() {
+        return R.menu.menu_user_profile;
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            finish();
-            return true;
-        } else if (item.getItemId() == R.id.menu_profile_edit) {
+    protected boolean onPopupMenuItemSelected(MPopupMenu.MMenuItem item) {
+        if (item.getId() == R.id.menu_profile_edit) {
             toggleEditMode();
             return true;
         }
-        return super.onOptionsItemSelected(item);
+        return super.onPopupMenuItemSelected(item);
     }
 
     private void toggleEditMode() {
@@ -325,19 +323,6 @@ public class UserProfileActivity extends BaseActivity implements
         List<ProfileItem> updatedItems = componentManager.updateEditMode(isEditMode);
         adapter.setEditMode(isEditMode);
         adapter.setItems(updatedItems);
-
-        updateEditModeUI();
-    }
-
-    private void updateEditModeUI() {
-        MenuItem editItem = binding.topAppbar.getMenu().findItem(R.id.menu_profile_edit);
-        if (isEditMode) {
-            editItem.setIcon(R.drawable.ic_check_finish_24px); // 使用一个"完成"图标
-            editItem.setTitle(R.string.menu_profile_edit_done);
-        } else {
-            editItem.setIcon(R.drawable.ic_edit_24px); // 使用一个"编辑"图标
-            editItem.setTitle(R.string.menu_profile_edit);
-        }
     }
 
     @Override
@@ -354,7 +339,7 @@ public class UserProfileActivity extends BaseActivity implements
 
     @Override
     public void onLogoutRequested() {
-        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
+        MDialog.Builder builder = new MDialog.Builder(this);
         builder.setTitle(R.string.profile_title_logout);
         builder.setMessage(R.string.profile_title_logout_content);
         builder.setPositiveButton(android.R.string.ok, (dialog, which) -> {
@@ -364,7 +349,7 @@ public class UserProfileActivity extends BaseActivity implements
 
         builder.setNegativeButton(android.R.string.cancel, (dialog, which) ->
             dialog.dismiss());
-        AlertDialog dialog = builder.create();
+        MDialog dialog = builder.create();
         if (!dialog.isShowing()) {
             dialog.show();
         }
@@ -412,7 +397,7 @@ public class UserProfileActivity extends BaseActivity implements
         editText.setPadding(16, 16, 16, 16);
         layout.addView(editText);
 
-        AlertDialog bioEditDialog = new MaterialAlertDialogBuilder(this)
+        MDialog bioEditDialog = new MDialog.Builder(this)
             .setTitle(R.string.profile_title_edit_bio)
             .setView(layout)
             .setPositiveButton(android.R.string.ok, (dialog, which) -> {

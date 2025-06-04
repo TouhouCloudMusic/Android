@@ -8,7 +8,7 @@
     android:layout_margin="@dimen/account_cardview_margin"
     app:cardElevation="@dimen/account_cardview_elevation"
     app:cardCornerRadius="@dimen/account_cardview_corner_radius"
-    app:cardBackgroundColor="@color/system_accent_soft">
+    app:cardBackgroundColor="@color/primary_light">
 
     <FrameLayout
         android:layout_width="match_parent"

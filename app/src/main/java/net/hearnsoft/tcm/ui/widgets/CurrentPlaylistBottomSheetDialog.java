@@ -22,6 +22,7 @@ import net.hearnsoft.tcm.ui.interfaces.OnMusicPlaylistItemClickListener;
 import net.hearnsoft.tcm.ui.model.PlaybackViewModel;
 import net.hearnsoft.tcm.ui.utils.LinearTopSmoothScroller;
 import net.hearnsoft.tcm.utils.Logs;
+import net.hearnsoft.uiwidgets.dialog.MDialog;
 
 @UnstableApi
 public class CurrentPlaylistBottomSheetDialog extends BaseSheetDialog implements
@@ -68,7 +69,7 @@ public class CurrentPlaylistBottomSheetDialog extends BaseSheetDialog implements
 
         // 设置清空按钮事件
         binding.dialogClearPlaylistButton.setOnClickListener(v -> {
-            AlertDialog dialog = createClearPlaylistDialog();
+            MDialog dialog = createClearPlaylistDialog();
             dialog.show();
         });
 
@@ -125,8 +126,8 @@ public class CurrentPlaylistBottomSheetDialog extends BaseSheetDialog implements
         });
     }
 
-    private AlertDialog createClearPlaylistDialog() {
-        return new MaterialAlertDialogBuilder(requireContext())
+    private MDialog createClearPlaylistDialog() {
+        return new MDialog.Builder(requireContext())
             .setTitle(R.string.dialog_playlist_clear_title)
             .setMessage(R.string.dialog_playlist_clear_msg)
             .setPositiveButton(android.R.string.ok, (dialog, which) -> {

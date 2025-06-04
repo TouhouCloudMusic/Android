@@ -1,30 +1,23 @@
 package net.hearnsoft.tcm.ui.activity;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import net.hearnsoft.tcm.R;
 import net.hearnsoft.tcm.databinding.ActivityUserLoginBinding;
 import net.hearnsoft.tcm.domain.model.user.UserAuthenticationType;
-import net.hearnsoft.tcm.infrastructure.adapter.http.Constants;
 import net.hearnsoft.tcm.ui.adapter.AppViewPagerAdapter;
 import net.hearnsoft.tcm.ui.fragments.UserLoginFragment;
 import net.hearnsoft.tcm.ui.fragments.UserRegisterFragment;
 import net.hearnsoft.tcm.ui.model.AuthStateViewModel;
-import net.hearnsoft.tcm.ui.model.UserViewModel;
-import net.hearnsoft.tcm.utils.SettingsPrefUtils;
 import net.hearnsoft.tcm.utils.UserLoginPortal;
 import net.hearnsoft.tcm.utils.ViewModelUtils;
 
@@ -47,15 +40,11 @@ public class UserLoginActivity extends BaseActivity implements UserLoginPortal {
             v.setPadding(0, statusBar.top, 0, 0);
             return insets;
         });
+        this.setMActionBarVisible(true);
+        this.setBackButtonVisible(true);
 
         adapter = new AppViewPagerAdapter(this);
         initUserLoginPage();
-        setSupportActionBar(binding.topAppbar);
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setHomeButtonEnabled(true);
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
 
         loginActivity = this;
     }
@@ -78,7 +67,7 @@ public class UserLoginActivity extends BaseActivity implements UserLoginPortal {
     @Override
     public void setActivityTitle(String title) {
         if (!TextUtils.isEmpty(title)) {
-            binding.topAppbar.setTitle(title);
+            getMActionBar().setTitle(title);
         }
     }
 

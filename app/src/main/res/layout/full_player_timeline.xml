@@ -11,7 +11,10 @@
         android:id="@+id/full_player_slider"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:valueFrom="0.0" />
+        android:valueFrom="0.0"
+        app:trackColor="@color/primary_soft"
+        app:thumbColor="@color/primary"
+        app:tickColor="@color/primary_soft"/>
 
     <LinearLayout
         android:layout_width="match_parent"

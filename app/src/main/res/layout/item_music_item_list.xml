@@ -82,16 +82,6 @@
             style="@style/Widget.Material3.Button.IconButton"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:id="@+id/itemAddToPlaylist"
-            app:icon="@drawable/ic_add_24px"
-            app:iconGravity="textStart"
-            app:iconSize="24dp"
-            app:iconPadding="0dp"/>
-
-        <com.google.android.material.button.MaterialButton
-            style="@style/Widget.Material3.Button.IconButton"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
             android:id="@+id/itemMoreAction"
             app:icon="@drawable/ic_more_vert_24px"
             app:iconGravity="textStart"

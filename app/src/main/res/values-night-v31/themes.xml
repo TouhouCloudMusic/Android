@@ -1,27 +1,16 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Theme.TouhouCloudMusic" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/system_accent</item>
-        <item name="colorPrimaryDark">@color/system_accent_darker</item>
-        <item name="colorSecondary">@color/system_accent</item>
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
 
-        <item name="colorError">@color/error</item>
-
-        <item name="colorPrimaryVariant">@color/system_accent</item>
-        <item name="colorSecondaryVariant">@color/system_accent_2</item>
-        <item name="scrimBackground">@color/netrual_color</item>
-
-        <item name="colorSurface">@color/netrual_color</item>
-        <item name="colorSecondaryContainer">@color/system_accent_soft</item>
-
-        <item name="android:colorBackground">@color/background</item>
-        <item name="android:navigationBarColor">@android:color/transparent</item>
+    <style name="Theme.TouhouCloudMusic" parent="Base.Theme.TouhouCloudMusic">
+        <!-- 状态栏和导航栏 -->
         <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowBlurBehindEnabled">true</item>
-        <item name="android:windowBlurBehindRadius">12dp</item>
+        <item name="android:windowLightNavigationBar">false</item>
+
+        <!-- 启动画面配置 -->
+        <item name="android:windowSplashScreenBackground">@color/background</item>
         <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
         <item name="android:windowSplashScreenBrandingImage">@drawable/splash_banner_long</item>
-        <item name="android:windowSplashScreenBackground">@color/background</item>
     </style>
 </resources>

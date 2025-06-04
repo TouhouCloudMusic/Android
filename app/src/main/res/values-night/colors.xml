@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 主色调 (夜间模式稍微柔和) -->
+    <color name="primary">#fe7976</color> <!-- reimu-500 -->
+    <color name="primary_dark">#ff9f9a</color> <!-- reimu-400 -->
+    <color name="primary_light">#ffd5d1</color> <!-- reimu-300 -->
+    <color name="primary_variant">#ef5a5a</color> <!-- reimu-600 -->
+    <color name="primary_soft_second">#fff0ef</color> <!-- reimu-100 -->
+    
+    <!-- 次要色 -->
+    <color name="secondary">#c89b48</color> <!-- marisa-500 -->
+    <color name="secondary_dark">#d7b568</color> <!-- marisa-400 -->
+    <color name="secondary_light">#eedfa6</color> <!-- marisa-300 -->
+    
+    <!-- 背景色系 -->
+    <color name="background">#1c1e23</color> <!-- slate-1100 -->
+    <color name="surface">#32363f</color> <!-- slate-1000 -->
+    <color name="surface_variant">#494e5b</color> <!-- slate-900 -->
+    
+    <!-- 文字颜色 -->
+    <color name="text_primary">#f3f4f5</color> <!-- slate-100 -->
+    <color name="text_secondary">#b5b9c0</color> <!-- slate-400 -->
+    <color name="text_hint">#888d98</color> <!-- slate-600 -->
+    <color name="text_on_primary">#ffffff</color>
+    
+    <!-- 分割线和边框 -->
+    <color name="divider">#5d6372</color> <!-- slate-800 -->
+    <color name="outline">#707783</color> <!-- slate-700 -->
+    
+    <!-- 功能色 -->
+    <color name="error">#ff9f9a</color> <!-- reimu-400 -->
+    <color name="success">#5bcf7d</color> <!-- green-400 -->
+    <color name="warning">#d7b568</color> <!-- marisa-400 -->
+    <color name="info">#75a0ff</color> <!-- blue-500 -->
+    
+    <!-- 特殊用途 -->
+    <color name="icon_background">#fe7976</color>
+    <color name="ripple_color">#33fe7976</color>
+    <color name="card_background">@color/mbottomnavigationbar_background_color</color><!-- 外部引用 使用底部导航栏背景色 -->
+    <color name="toolbar_background">#32363f</color>
+</resources>

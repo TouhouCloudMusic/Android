@@ -78,7 +78,7 @@
         app:layout_constraintStart_toStartOf="parent"
         tools:visibility="visible"/>
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
+    <net.hearnsoft.uiwidgets.navigation.MBottomNavigationBar
         android:id="@+id/nav_bar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

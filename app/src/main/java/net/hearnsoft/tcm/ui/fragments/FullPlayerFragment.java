@@ -3,6 +3,7 @@ package net.hearnsoft.tcm.ui.fragments;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.drawable.AnimatedVectorDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -40,6 +41,7 @@ import net.hearnsoft.tcm.ui.fragments.fullplayer.FullPlayerLyricsFragment;
 import net.hearnsoft.tcm.ui.model.PlaybackViewModel;
 import net.hearnsoft.tcm.ui.widgets.CurrentPlaylistBottomSheetDialog;
 import net.hearnsoft.tcm.utils.Logs;
+import net.hearnsoft.tcm.utils.SystemMediaDialogUtils;
 
 import java.util.Locale;
 
@@ -221,11 +223,8 @@ public class FullPlayerFragment extends Fragment {
         binding.fullPlayerToolbarMedia.setOnClickListener(v -> {
             // 这里可以添加投屏逻辑
             Logs.d("FullPlayerFragment", "Cast button clicked");
-            Intent intent = new Intent();
-            intent.setPackage("com.android.systemui");
-            intent.setAction("com.android.systemui.action.LAUNCH_MEDIA_OUTPUT_DIALOG");
-            intent.putExtra("package_name", requireActivity().getPackageName());
-            requireActivity().sendBroadcast(intent);
+            SystemMediaDialogUtils.getInstance(requireActivity())
+                    .showSystemMediaDialog();
         });
     }
 

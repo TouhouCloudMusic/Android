@@ -1,5 +1,7 @@
 package net.hearnsoft.tcm.ui.fragments;
 
+import android.content.ComponentName;
+import android.content.Intent;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -16,6 +18,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.util.UnstableApi;
 import androidx.navigation.NavController;
@@ -211,6 +214,18 @@ public class FullPlayerFragment extends Fragment {
             // 创建并显示BottomSheetDialog
             CurrentPlaylistBottomSheetDialog dialog = new CurrentPlaylistBottomSheetDialog();
             dialog.show(getParentFragmentManager(), "playlist_dialog");
+        });
+
+        // 设置Toolbar按钮
+        // 绑定Toolbar中的cast按钮
+        binding.fullPlayerToolbarMedia.setOnClickListener(v -> {
+            // 这里可以添加投屏逻辑
+            Logs.d("FullPlayerFragment", "Cast button clicked");
+            Intent intent = new Intent();
+            intent.setPackage("com.android.systemui");
+            intent.setAction("com.android.systemui.action.LAUNCH_MEDIA_OUTPUT_DIALOG");
+            intent.putExtra("package_name", requireActivity().getPackageName());
+            requireActivity().sendBroadcast(intent);
         });
     }
 

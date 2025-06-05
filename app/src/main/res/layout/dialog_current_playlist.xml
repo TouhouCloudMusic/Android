@@ -83,6 +83,7 @@
             style="@style/Widget.Material3.Button.TonalButton.Icon"
             android:text="@string/dialog_current_playlist_chip_shuffle"
             android:id="@+id/dialogPlaylistShuffleButton"
+            android:backgroundTint="@color/primary_soft"
             app:icon="@drawable/ic_shuffle_one"/>
 
     </LinearLayout>

@@ -1,27 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.drawerlayout.widget.DrawerLayout
+<androidx.fragment.app.FragmentContainerView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/rootDrawerContainer"
+    android:id="@+id/navHostFragment"
+    android:name="androidx.navigation.fragment.NavHostFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:openDrawer="start">
-
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/navHostFragment"
-        android:name="androidx.navigation.fragment.NavHostFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:defaultNavHost="true"
-        app:navGraph="@navigation/fragment_main"
-        tools:context=".ui.activity.MainActivity" />
-
-    <com.google.android.material.navigation.NavigationView
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:id="@+id/slideListView"
-        android:layout_gravity="start"
-        app:menu="@menu/main_drawer"/>
-
-</androidx.drawerlayout.widget.DrawerLayout>
+    app:defaultNavHost="true"
+    app:navGraph="@navigation/fragment_main"
+    tools:context=".ui.activity.MainActivity" />

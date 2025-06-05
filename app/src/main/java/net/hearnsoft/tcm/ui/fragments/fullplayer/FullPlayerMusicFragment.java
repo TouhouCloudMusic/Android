@@ -15,6 +15,9 @@ import androidx.media3.common.MediaItem;
 import androidx.media3.common.util.UnstableApi;
 
 import com.bumptech.glide.Glide;
+import com.flyjingfish.openimagelib.OpenImage;
+import com.flyjingfish.openimagelib.beans.OpenImageUrl;
+import com.flyjingfish.openimagelib.enums.MediaType;
 import com.google.android.material.chip.Chip;
 
 import net.hearnsoft.tcm.R;
@@ -93,5 +96,15 @@ public class FullPlayerMusicFragment extends Fragment {
             // 设置默认图片
             albumArtImageView.setImageResource(R.drawable.ic_nav_music);
         }
+
+        // 设置封面点击事件
+        albumArtImageView.setOnClickListener(v -> {
+            if (mediaItem.mediaMetadata.artworkUri != null) {
+                OpenImage.with(this)
+                    .setClickImageView(albumArtImageView)
+                    .setImageUrl(String.valueOf(mediaItem.mediaMetadata.artworkUri), MediaType.IMAGE)
+                    .show();
+            }
+        });
     }
 }

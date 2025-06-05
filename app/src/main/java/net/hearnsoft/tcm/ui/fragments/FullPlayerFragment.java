@@ -242,17 +242,12 @@ public class FullPlayerFragment extends Fragment {
             @Override
             public void onStartTrackingTouch(@NonNull Slider slider) {
                 userIsSeeking = true;
-
-                viewModel.togglePlayPause(false);
             }
 
             @Override
             public void onStopTrackingTouch(@NonNull Slider slider) {
                 viewModel.seekTo((long) (slider.getValue() * 1000));
                 userIsSeeking = false;
-
-                // Resume playback if it was playing before
-                viewModel.togglePlayPause(true);
             }
         });
 

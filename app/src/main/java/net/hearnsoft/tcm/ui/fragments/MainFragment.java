@@ -34,7 +34,6 @@ import net.hearnsoft.tcm.utils.ViewModelUtils;
 
 @UnstableApi
 public class MainFragment extends Fragment {
-    private static final String KEY_SELECTED_NAV_ITEM = "nav_selected";
     private static final int DEFAULT_NAV_ITEM = R.id.fragment_explore;
 
     private FragmentMainBinding binding;
@@ -52,21 +51,6 @@ public class MainFragment extends Fragment {
             progressHandler.postDelayed(this, 1000); // 每秒更新一次
         }
     };
-
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        // Save the current navigation state
-        outState.putInt(KEY_SELECTED_NAV_ITEM, currentNavSelected);
-    }
-
-    @Override
-    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
-        super.onViewStateRestored(savedInstanceState);
-        if (savedInstanceState != null) {
-            currentNavSelected = savedInstanceState.getInt(KEY_SELECTED_NAV_ITEM, DEFAULT_NAV_ITEM);
-        }
-    }
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -91,7 +75,7 @@ public class MainFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), (v, insets) -> {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.mainContainer, (v, insets) -> {
             Insets statusBar = insets.getInsets(WindowInsetsCompat.Type.statusBars());
             v.setPadding(0, statusBar.top, 0, 0);
             return insets;
@@ -105,7 +89,7 @@ public class MainFragment extends Fragment {
 
         // 设置Toolbar点击事件
         binding.toolbarMenu.setOnClickListener(v -> {
-            DrawerLayout drawerLayout = requireActivity().findViewById(R.id.rootDrawerContainer);
+            DrawerLayout drawerLayout = binding.rootDrawerContainer;
             if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
                 drawerLayout.closeDrawer(GravityCompat.START);
             } else {
@@ -139,8 +123,6 @@ public class MainFragment extends Fragment {
         startProgressTracking();
     }
 
-
-
     private void initNavBar() {
         navController = Navigation.findNavController(requireActivity(), R.id.app_main_view);
         NavigationUI.setupWithNavController(binding.navBar, navController);
@@ -167,11 +149,31 @@ public class MainFragment extends Fragment {
                 stopProgressTracking();
             }
         });
-
+        
         viewModel.getCurrentPosition().observe(getViewLifecycleOwner(), position -> {
+            // 检查position是否有效
+            if (position < 0) {
+                position = 0L;
+            }
+            
             Long duration = viewModel.getDuration().getValue();
-            if (duration != null) {
+            // 只有当duration不为null且大于0时才更新进度
+            if (duration != null && duration > 0) {
                 binding.nowPlayingBar.updateDurationCurrentPositionMs(duration, position);
+            }
+        });
+
+        // 观察duration变化，确保当duration从无效值变为有效值时能及时更新
+        viewModel.getDuration().observe(getViewLifecycleOwner(), duration -> {
+            if (duration != null && duration > 0) {
+                Long position = viewModel.getCurrentPosition().getValue();
+                if (position != null) {
+                    // 确保position为有效值
+                    if (position < 0) {
+                        position = 0L;
+                    }
+                    binding.nowPlayingBar.updateDurationCurrentPositionMs(duration, position);
+                }
             }
         });
 

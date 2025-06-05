@@ -63,13 +63,26 @@ public class PlaybackViewModel extends AndroidViewModel {
                 if (playerController.getMediaController() != null) {
                     int currentIdx = playerController.getMediaController().getCurrentMediaItemIndex();
                     currentIndex.postValue(currentIdx);
+                    
+                    // 当媒体项切换时，重新获取duration
+                    long durationValue = playerController.getMediaController().getDuration();
+                    // 确保duration不为负值
+                    if (durationValue < 0) {
+                        durationValue = 0L;
+                    }
+                    duration.postValue(durationValue);
                 }
             }
 
             @Override
             public void onPlaybackStateChanged(int playbackState) {
                 if (playerController.getMediaController() != null) {
-                    duration.postValue(playerController.getMediaController().getDuration());
+                    long durationValue = playerController.getMediaController().getDuration();
+                    // 确保duration不为负值
+                    if (durationValue < 0) {
+                        durationValue = 0L;
+                    }
+                    duration.postValue(durationValue);
                 }
             }
 
@@ -99,7 +112,13 @@ public class PlaybackViewModel extends AndroidViewModel {
                 currentMediaItem.postValue(item);
             }
             isPlaying.postValue(playerController.getMediaController().isPlaying());
-            duration.postValue(playerController.getMediaController().getDuration());
+            
+            long durationValue = playerController.getMediaController().getDuration();
+            // 确保duration不为负值
+            if (durationValue < 0) {
+                durationValue = 0L;
+            }
+            duration.postValue(durationValue);
 
             // 初始化播放模式
             repeatMode.postValue(playerController.getMediaController().getRepeatMode());
@@ -170,7 +189,12 @@ public class PlaybackViewModel extends AndroidViewModel {
     public void updatePosition() {
         ensureControllerConnected();
         if (playerController.getMediaController() != null) {
-            currentPosition.postValue(playerController.getMediaController().getCurrentPosition());
+            long position = playerController.getMediaController().getCurrentPosition();
+            // 确保position不为负值
+            if (position < 0) {
+                position = 0L;
+            }
+            currentPosition.postValue(position);
 
             // 同时更新当前索引
             int index = playerController.getMediaController().getCurrentMediaItemIndex();

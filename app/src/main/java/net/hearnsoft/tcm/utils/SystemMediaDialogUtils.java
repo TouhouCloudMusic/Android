@@ -67,7 +67,7 @@ public class SystemMediaDialogUtils {
                     intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
                     intent.setAction("com.android.settings.panel.action.MEDIA_OUTPUT");
                     intent.putExtra("com.android.settings.panel.extra.PACKAGE_NAME", context.getPackageName());
-                    context.sendBroadcast(intent);
+                    startIntent(intent);
                 }
                 break;
         }
@@ -78,7 +78,7 @@ public class SystemMediaDialogUtils {
         intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
         intent.setAction("com.android.settings.panel.action.MEDIA_OUTPUT");
         intent.putExtra("com.android.settings.panel.extra.PACKAGE_NAME", context.getPackageName());
-        context.sendBroadcast(intent);
+        startIntent(intent);
     }
 
     @RequiresApi(UPSIDE_DOWN_CAKE)

@@ -37,6 +37,8 @@ public class PlaybackViewModel extends AndroidViewModel {
     //当前PlayerController的播放列表，通常是由UI控件增删监控这个列表
     private final MutableLiveData<List<MediaItem>> currentPlaylist = new MutableLiveData<>();
     private final MutableLiveData<Integer> repeatMode = new MutableLiveData<>(0);
+    // 随机播放状态标志
+    private final MutableLiveData<Boolean> isShuffleMode = new MutableLiveData<>(false);
 
     // 标记控制器是否已连接
     private boolean isControllerActive = false;
@@ -233,6 +235,46 @@ public class PlaybackViewModel extends AndroidViewModel {
         }
     }
 
+    public void toggleRepeatMode() {
+        ensureControllerConnected();
+        if (playerController.getMediaController() != null) {
+            int currentMode = playerController.getMediaController().getRepeatMode();
+            Boolean currentShuffleState = isShuffleMode.getValue();
+            boolean isCurrentlyShuffle = currentShuffleState != null && currentShuffleState;
+            
+            int newMode;
+            boolean newShuffleState = false;
+            
+            // 如果当前是随机播放模式
+            if (isCurrentlyShuffle) {
+                // 从随机播放切换到单曲循环
+                newMode = Player.REPEAT_MODE_ONE;
+                newShuffleState = false;
+            } else {
+                switch (currentMode) {
+                    case Player.REPEAT_MODE_OFF:
+                        newMode = Player.REPEAT_MODE_ONE;
+                        break;
+                    case Player.REPEAT_MODE_ONE:
+                        newMode = Player.REPEAT_MODE_ALL;
+                        break;
+                    case Player.REPEAT_MODE_ALL:
+                    default:
+                        // 从列表循环切换到随机播放
+                        newMode = Player.REPEAT_MODE_OFF;
+                        newShuffleState = true;
+                        // 执行随机播放
+                        shuffleCurrentPlaylist();
+                        break;
+                }
+            }
+            
+            playerController.getMediaController().setRepeatMode(newMode);
+            this.repeatMode.postValue(newMode);
+            this.isShuffleMode.postValue(newShuffleState);
+        }
+    }
+
     /**
      * 打乱当前播放列表并开始播放
      * 当前正在播放的歌曲会被放在打乱后的列表的开头
@@ -270,11 +312,15 @@ public class PlaybackViewModel extends AndroidViewModel {
         // 保存打乱后的列表
         currentPlaylist.postValue(shuffledList);
 
-        // 将打乱后的列表设置回播放器，随机一首开始播放
-        Random random = new Random();
-        int startIndex = random.nextInt(shuffledList.size());
-        playMusic(shuffledList, startIndex);
-        currentIndex.postValue(startIndex);
+        // 将打乱后的列表设置回播放器，并保持当前播放的歌曲在第0位
+        if (currentItem != null) {
+            playMusic(shuffledList, 0, true);
+            currentIndex.postValue(0);
+        } else {
+            // 如果没有当前播放项，则正常播放第一首
+            playMusic(shuffledList, 0, true);
+            currentIndex.postValue(0);
+        }
     }
 
     public void skipToQueueItem(int position) {
@@ -317,8 +363,12 @@ public class PlaybackViewModel extends AndroidViewModel {
             }
         }
     }
-
+    
     public void playMusic(List<MediaItem> playlist, int startIndex) {
+        playMusic(playlist, startIndex, false);
+    }
+
+    public void playMusic(List<MediaItem> playlist, int startIndex, boolean isShuffleCall) {
         ensureControllerConnected();
         if (playerController.getMediaController() != null) {
             playerController.playMusic(playlist, startIndex);
@@ -326,6 +376,11 @@ public class PlaybackViewModel extends AndroidViewModel {
             this.currentIndex.postValue(startIndex);
             // 将当前设备媒体列表同步给当前播放列表
             this.currentPlaylist.postValue(new ArrayList<>(playlist));
+            
+            // 如果不是随机播放调用，则重置随机播放状态
+            if (!isShuffleCall) {
+                this.isShuffleMode.postValue(false);
+            }
         }
     }
 
@@ -422,6 +477,38 @@ public class PlaybackViewModel extends AndroidViewModel {
     // 获取重复模式
     public LiveData<Integer> getRepeatMode() {
         return repeatMode;
+    }
+
+    // 获取随机播放状态
+    public LiveData<Boolean> getIsShuffleMode() {
+        return isShuffleMode;
+    }
+    
+    /**
+     * 设置随机播放模式
+     * @param enableShuffle 是否启用随机播放
+     */
+    public void setShuffleMode(boolean enableShuffle) {
+        ensureControllerConnected();
+        if (playerController.getMediaController() != null) {
+            if (enableShuffle) {
+                // 启用随机播放：设置为REPEAT_MODE_OFF并标记为shuffle
+                playerController.getMediaController().setRepeatMode(Player.REPEAT_MODE_OFF);
+                this.repeatMode.postValue(Player.REPEAT_MODE_OFF);
+                this.isShuffleMode.postValue(true);
+                // 执行随机播放
+                shuffleCurrentPlaylist();
+            } else {
+                // 禁用随机播放：恢复到正常的顺序播放
+                this.isShuffleMode.postValue(false);
+                // 可以选择设置为其他模式，这里设置为正常播放
+                playerController.getMediaController().setRepeatMode(Player.REPEAT_MODE_OFF);
+                this.repeatMode.postValue(Player.REPEAT_MODE_OFF);
+                
+                // 可以选择恢复原始播放列表顺序
+                // 这里我们保持当前列表，只是取消随机播放状态
+            }
+        }
     }
 
 

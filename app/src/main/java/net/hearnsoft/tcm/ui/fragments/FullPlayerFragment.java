@@ -1,9 +1,6 @@
 package net.hearnsoft.tcm.ui.fragments;
 
-import android.content.ComponentName;
-import android.content.Intent;
 import android.graphics.drawable.AnimatedVectorDrawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -14,13 +11,14 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.media3.common.MediaItem;
+import androidx.media3.common.Player;
 import androidx.media3.common.util.UnstableApi;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -61,6 +59,7 @@ public class FullPlayerFragment extends Fragment {
     private MaterialButton prevButton;
     private MaterialButton nextButton;
     private MaterialButton playlistButton;
+    private MaterialButton repeatButton;
     private Slider timelineSlider;
     private TextView currentTimeTextView;
     private TextView durationTextView;
@@ -195,6 +194,7 @@ public class FullPlayerFragment extends Fragment {
         prevButton = binding.fullPlayerControlsAction.fullPlayerControlsPrevious;
         nextButton = binding.fullPlayerControlsAction.fullPlayerControlsNext;
         playlistButton = binding.fullPlayerControlsAction.fullPlayerControlsPlaylist;
+        repeatButton = binding.fullPlayerControlsAction.fullPlayerControlsPlaymode;
 
         // 设置播放/暂停按钮点击事件
         playPauseButton.setOnClickListener(v -> {
@@ -216,6 +216,11 @@ public class FullPlayerFragment extends Fragment {
             // 创建并显示BottomSheetDialog
             CurrentPlaylistBottomSheetDialog dialog = new CurrentPlaylistBottomSheetDialog();
             dialog.show(getParentFragmentManager(), "playlist_dialog");
+        });
+
+        repeatButton.setOnClickListener(v -> {
+            // 切换播放器的重复模式
+            viewModel.toggleRepeatMode();
         });
 
         // 设置Toolbar按钮
@@ -289,6 +294,46 @@ public class FullPlayerFragment extends Fragment {
                 }
             }
         });
+
+        // 观察播放器重复模式
+        viewModel.getRepeatMode().observe(getViewLifecycleOwner(), repeatMode -> {
+            updatePlayModeUI(repeatMode, viewModel.getIsShuffleMode().getValue());
+        });
+
+        // 观察随机播放状态
+        viewModel.getIsShuffleMode().observe(getViewLifecycleOwner(), isShuffleMode -> {
+            updatePlayModeUI(viewModel.getRepeatMode().getValue(), isShuffleMode);
+        });
+    }
+
+    private void updatePlayModeUI(Integer repeatMode, Boolean isShuffleMode) {
+        if (repeatMode == null) return;
+        
+        boolean shuffle = isShuffleMode != null && isShuffleMode;
+        
+        Logs.d("FullPlayerFragment", "Play mode changed - Repeat: " + repeatMode + ", Shuffle: " + shuffle);
+        
+        if (shuffle) {
+            // 随机播放模式
+            binding.fullPlayerControlsAction.fullPlayerControlsPlaymode
+                .setIcon(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_shuffle_one, requireContext().getTheme()));
+        } else {
+            switch (repeatMode) {
+                case Player.REPEAT_MODE_ONE:
+                    binding.fullPlayerControlsAction.fullPlayerControlsPlaymode
+                        .setIcon(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_play_once, requireContext().getTheme()));
+                    break;
+                case Player.REPEAT_MODE_ALL:
+                    binding.fullPlayerControlsAction.fullPlayerControlsPlaymode
+                        .setIcon(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_play_cycle, requireContext().getTheme()));
+                    break;
+                case Player.REPEAT_MODE_OFF:
+                default:
+                    binding.fullPlayerControlsAction.fullPlayerControlsPlaymode
+                        .setIcon(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_normal_play, requireContext().getTheme()));
+                    break;
+            }
+        }
     }
 
     private void updateMediaInfo(MediaItem mediaItem) {

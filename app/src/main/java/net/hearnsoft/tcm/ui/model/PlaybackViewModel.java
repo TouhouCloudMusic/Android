@@ -483,33 +483,6 @@ public class PlaybackViewModel extends AndroidViewModel {
     public LiveData<Boolean> getIsShuffleMode() {
         return isShuffleMode;
     }
-    
-    /**
-     * 设置随机播放模式
-     * @param enableShuffle 是否启用随机播放
-     */
-    public void setShuffleMode(boolean enableShuffle) {
-        ensureControllerConnected();
-        if (playerController.getMediaController() != null) {
-            if (enableShuffle) {
-                // 启用随机播放：设置为REPEAT_MODE_OFF并标记为shuffle
-                playerController.getMediaController().setRepeatMode(Player.REPEAT_MODE_OFF);
-                this.repeatMode.postValue(Player.REPEAT_MODE_OFF);
-                this.isShuffleMode.postValue(true);
-                // 执行随机播放
-                shuffleCurrentPlaylist();
-            } else {
-                // 禁用随机播放：恢复到正常的顺序播放
-                this.isShuffleMode.postValue(false);
-                // 可以选择设置为其他模式，这里设置为正常播放
-                playerController.getMediaController().setRepeatMode(Player.REPEAT_MODE_OFF);
-                this.repeatMode.postValue(Player.REPEAT_MODE_OFF);
-                
-                // 可以选择恢复原始播放列表顺序
-                // 这里我们保持当前列表，只是取消随机播放状态
-            }
-        }
-    }
 
 
     @Override

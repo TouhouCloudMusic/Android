@@ -74,7 +74,7 @@ public class FullPlayerFragment extends Fragment {
         @Override
         public void run() {
             viewModel.updatePosition();
-            progressHandler.postDelayed(this, 1000); // 每秒更新一次
+            progressHandler.postDelayed(this, 100); // 每100毫秒更新一次
         }
     };
 

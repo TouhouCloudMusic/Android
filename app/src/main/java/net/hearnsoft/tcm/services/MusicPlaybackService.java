@@ -2,19 +2,27 @@ package net.hearnsoft.tcm.services;
 
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.os.Bundle;
+import android.os.Handler;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
 import androidx.media3.common.AudioAttributes;
 import androidx.media3.common.C;
+import androidx.media3.common.Format;
 import androidx.media3.common.MediaItem;
+import androidx.media3.common.MediaMetadata;
 import androidx.media3.common.Player;
+import androidx.media3.common.Tracks;
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.exoplayer.analytics.AnalyticsListener;
 import androidx.media3.session.DefaultMediaNotificationProvider;
 import androidx.media3.session.LibraryResult;
 import androidx.media3.session.MediaLibraryService;
 import androidx.media3.session.MediaSession;
+import androidx.media3.session.SessionCommand;
+import androidx.media3.session.SessionResult;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.Futures;
@@ -23,15 +31,33 @@ import com.google.common.util.concurrent.ListenableFuture;
 import net.hearnsoft.tcm.R;
 import net.hearnsoft.tcm.ui.activity.MainActivity;
 import net.hearnsoft.tcm.utils.Logs;
+import net.hearnsoft.tcm.utils.LyricsExtractor;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.Getter;
+import lombok.Setter;
+
 @UnstableApi
-public class MusicPlaybackService extends MediaLibraryService {
+public class MusicPlaybackService extends MediaLibraryService implements AnalyticsListener {
+
     private MediaLibrarySession mediaLibrarySession;
     private ExoPlayer player;
     private final List<MediaItem> playlist = new ArrayList<>();
+
+    // 歌词相关
+    @Getter
+    private String currentLyrics = "";
+    private LyricsExtractor.LyricsFormat lyricsFormat = LyricsExtractor.LyricsFormat.UNKNOWN;
+    // 添加歌词回调接口
+    public interface LyricsUpdateListener {
+        void onLyricsUpdated(String lyrics, LyricsExtractor.LyricsFormat format);
+    }
+
+    // 提供静态方法供ViewModel注册监听器
+    @Setter
+    private static LyricsUpdateListener lyricsUpdateListener;
 
     @Override
     public void onCreate() {
@@ -49,6 +75,8 @@ public class MusicPlaybackService extends MediaLibraryService {
                 }
             }
         });
+
+        player.addAnalyticsListener(this);
     }
 
     private void initializePlayer() {
@@ -90,6 +118,69 @@ public class MusicPlaybackService extends MediaLibraryService {
         setMediaNotificationProvider(provider);
     }
 
+    @Override
+    public void onTracksChanged(EventTime eventTime, Tracks tracks) {
+        /*AnalyticsListener.super.onTracksChanged(eventTime, tracks);*/
+        MediaItem currentItem = player.getCurrentMediaItem();
+        if (currentItem == null) {
+            return;
+        }
+
+        Logs.d("MusicPlaybackService", "Tracks changed, extracting lyrics for: " +
+            currentItem.mediaMetadata.title);
+
+        new Thread(() -> {
+            String extractedLyrics = null;
+            LyricsExtractor.LyricsFormat format = LyricsExtractor.LyricsFormat.UNKNOWN;
+
+            // 遍历所有轨道组来查找歌词
+            for (Tracks.Group group : tracks.getGroups()) {
+                for (int i = 0; i < group.length; i++) {
+                    if (!group.isTrackSelected(i)) continue;
+
+                    Format trackFormat = group.getTrackFormat(i);
+                    if (trackFormat.metadata != null) {
+                        // 尝试从元数据中提取歌词
+                        LyricsExtractor.LyricsOptions options = new LyricsExtractor.LyricsOptions(
+                            true,
+                            "Unable to extract lyrics"
+                        );
+
+                        LyricsExtractor.LyricsResult result =
+                            LyricsExtractor.extractLyricsFromMetadata(trackFormat.metadata, options);
+
+                        if (result != null) {
+                            extractedLyrics = result.getLyricsText();
+                            format = result.getFormat();
+                            Logs.d("MusicPlaybackService",
+                                "Lyrics extracted successfully, format: " + format);
+                            break;
+                        }
+                    }
+                }
+                // 找到歌词后退出循环
+                if (extractedLyrics != null) break;
+            }
+
+            // 更新歌词状态
+            currentLyrics = extractedLyrics;
+            lyricsFormat = format;
+
+            if (lyricsUpdateListener != null) {
+                new Handler(getMainLooper()).post(() -> {
+                    lyricsUpdateListener.onLyricsUpdated(currentLyrics, lyricsFormat);
+                });
+            }
+
+            if (extractedLyrics != null) {
+                Logs.d("MusicPlaybackService", "Lyrics found: " +
+                    extractedLyrics.substring(0, Math.min(100, extractedLyrics.length())) + "...");
+            } else {
+                Logs.d("MusicPlaybackService", "No lyrics found for current track");
+            }
+        }).start();
+    }
+
     @Nullable
     @Override
     public MediaLibrarySession onGetSession(MediaSession.ControllerInfo controllerInfo) {
@@ -107,6 +198,7 @@ public class MusicPlaybackService extends MediaLibraryService {
             player.release();
             player = null;
         }
+        lyricsUpdateListener = null; // 清除歌词更新监听器
         super.onDestroy();
     }
 

@@ -14,7 +14,10 @@ import androidx.media3.common.util.UnstableApi;
 
 import net.hearnsoft.tcm.domain.model.song.SongSortingRule;
 import net.hearnsoft.tcm.domain.model.song.SongSortingStrategy;
+import net.hearnsoft.tcm.services.MusicPlaybackService;
 import net.hearnsoft.tcm.utils.LocalMusicScanner;
+import net.hearnsoft.tcm.utils.Logs;
+import net.hearnsoft.tcm.utils.LyricsExtractor;
 import net.hearnsoft.tcm.utils.MusicPlayerController;
 
 import java.util.ArrayList;
@@ -39,6 +42,8 @@ public class PlaybackViewModel extends AndroidViewModel {
     private final MutableLiveData<Integer> repeatMode = new MutableLiveData<>(0);
     // 随机播放状态标志
     private final MutableLiveData<Boolean> isShuffleMode = new MutableLiveData<>(false);
+    // 歌词
+    private final MutableLiveData<String> currentLyrics = new MutableLiveData<>("");
 
     // 标记控制器是否已连接
     private boolean isControllerActive = false;
@@ -46,6 +51,12 @@ public class PlaybackViewModel extends AndroidViewModel {
     public PlaybackViewModel(@NonNull Application application) {
         super(application);
         playerController = MusicPlayerController.getInstance(application);
+
+        MusicPlaybackService.setLyricsUpdateListener((lyrics, format) -> {
+            currentLyrics.postValue(lyrics);
+            Logs.d("PlaybackViewModel", "Lyrics updated: " + lyrics);
+        });
+
         connectToService();
     }
 
@@ -484,11 +495,17 @@ public class PlaybackViewModel extends AndroidViewModel {
         return isShuffleMode;
     }
 
+    // 获取当前歌词
+    public LiveData<String> getCurrentLyrics() {
+        return currentLyrics;
+    }
+
 
     @Override
     protected void onCleared() {
         isControllerActive = false;
         playerController.release();
+        MusicPlaybackService.setLyricsUpdateListener(null);
         super.onCleared();
     }
 

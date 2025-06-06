@@ -15,4 +15,16 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        style="@style/Widget.Material3.FloatingActionButton.Surface"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/full_player_lyrics_translate_fab"
+        android:layout_margin="8dp"
+        android:src="@drawable/ic_lyrics_translate_24px"
+        app:elevation="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

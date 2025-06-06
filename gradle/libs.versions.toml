@@ -1,6 +1,8 @@
 [versions]
 agp = "8.7.3"
 bannerviewpager = "3.5.12"
+dynamicanimationKtx = "1.1.0"
+easeview = "e11c3208a9"
 glide = "4.14.2"
 glideTransformations = "4.3.0"
 gson = "2.10.1"
@@ -28,8 +30,10 @@ localbroadcastmanager = "1.0.0"
 vavr = "0.10.6"
 
 [libraries]
+androidx-dynamicanimation-ktx = { module = "androidx.dynamicanimation:dynamicanimation-ktx", version.ref = "dynamicanimationKtx" }
 bannerviewpager = { module = "com.github.zhpanvip:bannerviewpager", version.ref = "bannerviewpager" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
+easeview = { module = "com.github.cy745:EaseView", version.ref = "easeview" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 glide-transformations = { module = "jp.wasabeef:glide-transformations", version.ref = "glideTransformations" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }

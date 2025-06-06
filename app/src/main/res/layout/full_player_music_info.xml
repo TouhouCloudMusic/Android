@@ -15,7 +15,6 @@
         android:id="@+id/full_player_music_title"
         android:maxLines="1"
         android:ellipsize="marquee"
-        android:text="光の三妖精のHouseにハマってる方 feat. モリモリあつし"
         tools:text="光の三妖精のHouseにハマってる方 feat. モリモリあつし"/>
 
     <LinearLayout
@@ -32,7 +31,6 @@
             android:id="@+id/full_player_music_artist"
             android:maxLines="1"
             android:ellipsize="marquee"
-            android:text="モリモリあつし"
             tools:text="モリモリあつし"/>
 
         <com.google.android.material.button.MaterialButton

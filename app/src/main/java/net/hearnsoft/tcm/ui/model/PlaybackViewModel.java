@@ -44,6 +44,7 @@ public class PlaybackViewModel extends AndroidViewModel {
     private final MutableLiveData<Boolean> isShuffleMode = new MutableLiveData<>(false);
     // 歌词
     private final MutableLiveData<String> currentLyrics = new MutableLiveData<>("");
+    private final MutableLiveData<Boolean> showLyricsTranslate = new MutableLiveData<>(true);
 
     // 标记控制器是否已连接
     private boolean isControllerActive = false;
@@ -442,6 +443,11 @@ public class PlaybackViewModel extends AndroidViewModel {
         }
     }
 
+    public void toggleShowLyricsTranslate() {
+        boolean currentState = showLyricsTranslate.getValue() != null && showLyricsTranslate.getValue();
+        showLyricsTranslate.postValue(!currentState);
+    }
+
     // 获取LiveData
     public LiveData<MediaItem> getCurrentMediaItem() {
         return currentMediaItem;
@@ -498,6 +504,11 @@ public class PlaybackViewModel extends AndroidViewModel {
     // 获取当前歌词
     public LiveData<String> getCurrentLyrics() {
         return currentLyrics;
+    }
+
+    // 获取歌词翻译显示状态
+    public LiveData<Boolean> getShowLyricsTranslate() {
+        return showLyricsTranslate;
     }
 
 

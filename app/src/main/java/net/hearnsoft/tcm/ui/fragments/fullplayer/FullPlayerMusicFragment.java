@@ -16,7 +16,6 @@ import androidx.media3.common.util.UnstableApi;
 
 import com.bumptech.glide.Glide;
 import com.flyjingfish.openimagelib.OpenImage;
-import com.flyjingfish.openimagelib.beans.OpenImageUrl;
 import com.flyjingfish.openimagelib.enums.MediaType;
 import com.google.android.material.chip.Chip;
 
@@ -66,6 +65,10 @@ public class FullPlayerMusicFragment extends Fragment {
         viewModel = new ViewModelProvider(requireActivity()).get(PlaybackViewModel.class);
 
         // 观察媒体项变化
+        setupViewModelObservers();
+    }
+
+    private void setupViewModelObservers() {
         viewModel.getCurrentMediaItem().observe(getViewLifecycleOwner(), this::updateMediaInfo);
     }
 

@@ -2,16 +2,13 @@ package net.hearnsoft.tcm.services;
 
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.os.Bundle;
 import android.os.Handler;
 
 import androidx.annotation.Nullable;
-import androidx.annotation.OptIn;
 import androidx.media3.common.AudioAttributes;
 import androidx.media3.common.C;
 import androidx.media3.common.Format;
 import androidx.media3.common.MediaItem;
-import androidx.media3.common.MediaMetadata;
 import androidx.media3.common.Player;
 import androidx.media3.common.Tracks;
 import androidx.media3.common.util.UnstableApi;
@@ -21,8 +18,6 @@ import androidx.media3.session.DefaultMediaNotificationProvider;
 import androidx.media3.session.LibraryResult;
 import androidx.media3.session.MediaLibraryService;
 import androidx.media3.session.MediaSession;
-import androidx.media3.session.SessionCommand;
-import androidx.media3.session.SessionResult;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.Futures;
@@ -30,8 +25,8 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 import net.hearnsoft.tcm.R;
 import net.hearnsoft.tcm.ui.activity.MainActivity;
-import net.hearnsoft.tcm.utils.Logs;
 import net.hearnsoft.tcm.utils.LyricsExtractor;
+import net.hearnsoft.tcm.utils.Logs;
 
 import java.util.ArrayList;
 import java.util.List;

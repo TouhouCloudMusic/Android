@@ -25,7 +25,6 @@ import net.hearnsoft.tcm.utils.UserLoginPortal;
 import net.hearnsoft.tcm.utils.ViewModelUtils;
 
 import net.hearnsoft.thcdb_sdk.model.AuthCredential;
-import net.hearnsoft.thcdb_sdk.model.UserProfile;
 
 public class UserLoginFragment extends Fragment {
     private static final String TAG = UserLoginFragment.class.getSimpleName();

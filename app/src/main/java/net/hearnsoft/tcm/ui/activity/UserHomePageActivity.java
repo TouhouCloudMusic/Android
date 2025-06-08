@@ -20,10 +20,8 @@ import net.hearnsoft.tcm.domain.model.user.UserProfileModel;
 import net.hearnsoft.tcm.domain.model.user.UserRole;
 import net.hearnsoft.tcm.infrastructure.adapter.http.Constants;
 import net.hearnsoft.tcm.ui.model.UserViewModel;
-import net.hearnsoft.tcm.utils.OffsetDateTimeFormater;
 import net.hearnsoft.tcm.utils.Logs;
 import net.hearnsoft.tcm.utils.ViewModelUtils;
-import net.hearnsoft.thcdb_sdk.model.UserProfile;
 
 import java.util.List;
 

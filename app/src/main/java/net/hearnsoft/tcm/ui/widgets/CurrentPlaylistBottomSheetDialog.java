@@ -7,13 +7,9 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.media3.common.util.UnstableApi;
 import androidx.recyclerview.widget.LinearLayoutManager;
-
-import com.google.android.material.chip.Chip;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import net.hearnsoft.tcm.R;
 import net.hearnsoft.tcm.databinding.DialogCurrentPlaylistBinding;

@@ -22,7 +22,6 @@ import net.hearnsoft.tcm.ui.activity.UserProfileActivity;
 import net.hearnsoft.tcm.ui.model.UserViewModel;
 import net.hearnsoft.tcm.ui.widgets.UserCardView;
 import net.hearnsoft.tcm.utils.Logs;
-import net.hearnsoft.tcm.utils.OffsetDateTimeFormater;
 import net.hearnsoft.tcm.utils.ViewModelUtils;
 
 public class AccountFragment extends Fragment {

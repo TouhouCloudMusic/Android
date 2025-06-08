@@ -54,7 +54,7 @@ public class FullPlayerLyricsFragment extends Fragment {
                 binding.fullPlayerLyrics.loadLyric(lyrics, "");
             } else {
                 binding.fullPlayerLyrics.loadLyric(null, null);
-                binding.fullPlayerLyrics.setLabel("No Lyrics Available");
+                //binding.fullPlayerLyrics.setLabel("No Lyrics Available");
             }
         });
 

@@ -1,7 +1,6 @@
 package net.hearnsoft.tcm.ui.fragments;
 
 import android.os.Bundle;
-import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,17 +11,12 @@ import androidx.fragment.app.Fragment;
 import androidx.media3.common.util.UnstableApi;
 import androidx.viewpager2.widget.ViewPager2;
 
-import com.google.android.material.tabs.TabItem;
 import com.google.android.material.tabs.TabLayout;
 
 import net.hearnsoft.tcm.R;
 import net.hearnsoft.tcm.databinding.FragmentMusicBinding;
 import net.hearnsoft.tcm.ui.adapter.AppViewPagerAdapter;
 import net.hearnsoft.tcm.ui.fragments.music.MusicListFragment;
-import net.hearnsoft.tcm.utils.Logs;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @UnstableApi
 public class MusicFragment extends Fragment {

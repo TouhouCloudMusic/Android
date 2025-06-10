@@ -68,16 +68,6 @@ public class FullPlayerFragment extends Fragment {
     private boolean userIsSeeking = false;
     private boolean previousPlayingState = false;
 
-    // 用于定期更新进度的Handler和Runnable
-    private final Handler progressHandler = new Handler(Looper.getMainLooper());
-    private final Runnable progressRunnable = new Runnable() {
-        @Override
-        public void run() {
-            viewModel.updatePosition();
-            progressHandler.postDelayed(this, 100); // 每100毫秒更新一次
-        }
-    };
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -137,9 +127,6 @@ public class FullPlayerFragment extends Fragment {
 
         // 监控播放状态和进度
         observeViewModel();
-
-        // 启动进度更新
-        startProgressTracking();
     }
 
     private void initFullPlayerTabs() {
@@ -419,20 +406,6 @@ public class FullPlayerFragment extends Fragment {
         }
     }
 
-    private void startProgressTracking() {
-        // 清除已有的进度跟踪状态
-        stopProgressTracking();
-
-        // 只有在Fragment添加和非移除状态时，才启动进度跟踪
-        if (isAdded() && !isRemoving()) {
-            progressHandler.post(progressRunnable);
-        }
-    }
-
-    private void stopProgressTracking() {
-        progressHandler.removeCallbacks(progressRunnable);
-    }
-
     @Override
     public void onResume() {
         super.onResume();
@@ -441,19 +414,15 @@ public class FullPlayerFragment extends Fragment {
             viewModel.ensureControllerConnected();
             viewModel.updatePosition();
         }
-        startProgressTracking();
     }
 
     @Override
     public void onPause() {
-        // 进入onPause时始终停止进度跟踪
-        stopProgressTracking();
         super.onPause();
     }
 
     @Override
     public void onDestroyView() {
-        stopProgressTracking();
         super.onDestroyView();
     }
 }

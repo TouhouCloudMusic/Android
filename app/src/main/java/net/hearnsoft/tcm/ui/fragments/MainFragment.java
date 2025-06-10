@@ -43,15 +43,6 @@ public class MainFragment extends Fragment {
     private NavController navController;
     private int currentNavSelected = DEFAULT_NAV_ITEM;
 
-    private final Handler progressHandler = new Handler(Looper.getMainLooper());
-    private final Runnable progressRunnable = new Runnable() {
-        @Override
-        public void run() {
-            viewModel.updatePosition();
-            progressHandler.postDelayed(this, 1000); // 每秒更新一次
-        }
-    };
-
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
@@ -118,9 +109,6 @@ public class MainFragment extends Fragment {
 
         // 设置ViewModel观察者
         observeViewModel();
-
-        // 启动进度更新
-        startProgressTracking();
     }
 
     private void initNavBar() {
@@ -143,11 +131,6 @@ public class MainFragment extends Fragment {
 
         viewModel.getIsPlaying().observe(getViewLifecycleOwner(), isPlaying -> {
             binding.nowPlayingBar.updateIsPlaying(isPlaying);
-            if (isPlaying) {
-                startProgressTracking();
-            } else {
-                stopProgressTracking();
-            }
         });
         
         viewModel.getCurrentPosition().observe(getViewLifecycleOwner(), position -> {
@@ -203,20 +186,6 @@ public class MainFragment extends Fragment {
         binding.nowPlayingBar.setVisibility(View.VISIBLE);
     }
 
-    private void startProgressTracking() {
-        // Clear any existing callbacks first
-        stopProgressTracking();
-
-        // Only start if we're attached to an activity
-        if (isAdded() && !isRemoving()) {
-            progressHandler.post(progressRunnable);
-        }
-    }
-
-    private void stopProgressTracking() {
-        progressHandler.removeCallbacks(progressRunnable);
-    }
-
     @Override
     public void onResume() {
         // 只在当前选中项变更时才重新导航
@@ -234,7 +203,6 @@ public class MainFragment extends Fragment {
                 binding.nowPlayingBar.forceUpdatePlayPauseIcon(isPlaying);
             }
         }
-        startProgressTracking();
         super.onResume();
     }
 
@@ -242,13 +210,11 @@ public class MainFragment extends Fragment {
     public void onPause() {
         // Always stop tracking when the fragment pauses
         currentNavSelected = binding.navBar.getSelectedItemId();
-        stopProgressTracking();
         super.onPause();
     }
 
     @Override
     public void onDestroyView() {
-        stopProgressTracking();
         super.onDestroyView();
     }
 }

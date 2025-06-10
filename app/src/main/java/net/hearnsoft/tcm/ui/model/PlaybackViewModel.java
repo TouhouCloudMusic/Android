@@ -2,6 +2,8 @@ package net.hearnsoft.tcm.ui.model;
 
 import android.app.Application;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -47,6 +49,15 @@ public class PlaybackViewModel extends AndroidViewModel {
     // 标记控制器是否已连接
     private boolean isControllerActive = false;
 
+    private final Handler progressHandler = new Handler(Looper.getMainLooper());
+    private final Runnable progressUpdateRunnable = new Runnable() {
+        @Override
+        public void run() {
+            updatePosition();
+            progressHandler.postDelayed(this, 100); // 每100毫秒更新一次
+        }
+    };
+
     public PlaybackViewModel(@NonNull Application application) {
         super(application);
         playerController = MusicPlayerController.getInstance(application);
@@ -83,6 +94,10 @@ public class PlaybackViewModel extends AndroidViewModel {
                         durationValue = 0L;
                     }
                     duration.postValue(durationValue);
+                    // 如果之前有进度更新任务，先移除
+                    progressHandler.removeCallbacks(progressUpdateRunnable);
+                    // 启动新的进度更新任务
+                    progressHandler.post(progressUpdateRunnable);
                 }
             }
 
@@ -515,6 +530,7 @@ public class PlaybackViewModel extends AndroidViewModel {
         isControllerActive = false;
         playerController.release();
         MusicPlaybackService.setLyricsUpdateListener(null);
+        progressHandler.removeCallbacks(progressUpdateRunnable);
         super.onCleared();
     }
 

@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -101,6 +102,11 @@ dependencies {
     implementation libs.openimagefulllib
     // EaseView
     api libs.easeview
+    // AndroidX Room
+    implementation libs.androidx.room.runtime
+    implementation libs.androidx.room.ktx
+    ksp libs.androidx.room.compiler // Use kapt for annotation processing
+    implementation libs.kotlinx.coroutines.android // Coroutines support for Room
 
     testImplementation libs.junit
     // Lombok annotation processor

@@ -20,4 +20,15 @@ object Logs {
     fun i(tag: String, message: String) {
         Log.i(tag, message)
     }
+    @JvmStatic
+    fun w(tag: String, message: String) {
+        Log.w(tag, message)
+    }
+
+    @JvmStatic
+    fun e(tag: String, message: String, throwable: Throwable) {
+        if (BuildConfig.DEBUG) {
+            Log.e(tag, message, throwable)
+        }
+    }
 }

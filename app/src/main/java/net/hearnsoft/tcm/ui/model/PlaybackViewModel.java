@@ -1,11 +1,15 @@
 package net.hearnsoft.tcm.ui.model;
 
+import android.Manifest;
 import android.app.Application;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -14,10 +18,11 @@ import androidx.media3.common.MediaMetadata;
 import androidx.media3.common.Player;
 import androidx.media3.common.util.UnstableApi;
 
+import net.hearnsoft.tcm.db.LocalMusicDatabase;
+import net.hearnsoft.tcm.domain.repository.MusicRepository;
 import net.hearnsoft.tcm.domain.model.song.SongSortingRule;
 import net.hearnsoft.tcm.domain.model.song.SongSortingStrategy;
 import net.hearnsoft.tcm.services.MusicPlaybackService;
-import net.hearnsoft.tcm.utils.LocalMusicScanner;
 import net.hearnsoft.tcm.utils.Logs;
 import net.hearnsoft.tcm.utils.MusicPlayerController;
 
@@ -27,6 +32,8 @@ import java.util.List;
 @UnstableApi
 public class PlaybackViewModel extends AndroidViewModel {
     private MusicPlayerController playerController;
+    private MusicRepository musicRepository;
+    
     private final MutableLiveData<MediaItem> currentMediaItem = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isPlaying = new MutableLiveData<>(false);
     // 设备媒体库播放列表，默认为不要改动
@@ -45,6 +52,10 @@ public class PlaybackViewModel extends AndroidViewModel {
     // 歌词
     private final MutableLiveData<String> currentLyrics = new MutableLiveData<>("");
     private final MutableLiveData<Boolean> showLyricsTranslate = new MutableLiveData<>(true);
+    
+    // 新增：数据库加载状态
+    private final MutableLiveData<Boolean> isLoadingFromDatabase = new MutableLiveData<>(false);
+    private final MutableLiveData<String> loadingStatus = new MutableLiveData<>("");
 
     // 标记控制器是否已连接
     private boolean isControllerActive = false;
@@ -62,6 +73,9 @@ public class PlaybackViewModel extends AndroidViewModel {
         super(application);
         playerController = MusicPlayerController.getInstance(application);
 
+        // 初始化数据库和仓库
+        LocalMusicDatabase database = LocalMusicDatabase.Companion.getDatabase(application);
+        musicRepository = new MusicRepository(database.musicDao());
         MusicPlaybackService.setLyricsUpdateListener((lyrics, format) -> {
             currentLyrics.postValue(lyrics);
             Logs.d("PlaybackViewModel", "Lyrics updated: " + lyrics);
@@ -163,14 +177,93 @@ public class PlaybackViewModel extends AndroidViewModel {
     }
 
     public void scanAndLoadMusic(Context context) {
-        isScanning.postValue(true);
+        // 保持向后兼容，但建议使用 loadMusicLibrary
+        loadMusicLibrary(context);
+    }
 
-        // 在新线程中执行扫描操作
-        new Thread(() -> {
-            List<MediaItem> scannedMusic = LocalMusicScanner.scanDeviceMusic(context);
-            playlist.postValue(scannedMusic);
-            isScanning.postValue(false);
-        }).start();
+    /**
+     * 检查是否有存储权限
+     */
+    public boolean hasStoragePermission(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            return ContextCompat.checkSelfPermission(context, Manifest.permission.READ_MEDIA_AUDIO) 
+                == PackageManager.PERMISSION_GRANTED;
+        } else {
+            return ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) 
+                == PackageManager.PERMISSION_GRANTED;
+        }
+    }
+
+    /**
+     * 只有在有权限的情况下才加载音乐库
+     */
+    public void loadMusicLibraryIfPermitted(Context context) {
+        if (hasStoragePermission(context)) {
+            loadMusicLibrary(context);
+        } else {
+            Logs.w("PlaybackViewModel", "存储权限未授予，无法加载音乐库");
+            loadingStatus.postValue("需要存储权限才能加载音乐");
+        }
+    }
+
+    /**
+     * 加载音乐库 - 首先尝试从数据库加载，如果为空则扫描设备
+     */
+    public void loadMusicLibrary(Context context) {
+        isLoadingFromDatabase.postValue(true);
+        loadingStatus.postValue("正在加载音乐库...");
+        
+        // 首先检查数据库中是否有音乐数据
+        musicRepository.getMusicCountAsync()
+            .thenCompose(musicCount -> {
+                if (musicCount > 0) {
+                    // 从数据库加载
+                    loadingStatus.postValue("从数据库加载音乐...");
+                    return musicRepository.loadMusicFromDatabaseAsync();
+                } else {
+                    // 数据库为空，执行首次扫描
+                    loadingStatus.postValue("首次启动，正在扫描设备音乐...");
+                    isScanning.postValue(true);
+                    return musicRepository.scanAndSaveMusicAsync(context);
+                }
+            })
+            .thenAccept(musicList -> {
+                playlist.postValue(musicList);
+                loadingStatus.postValue("音乐库加载完成");
+                Logs.d("PlaybackViewModel", "加载了 " + musicList.size() + " 首音乐");
+            })
+            .exceptionally(throwable -> {
+                Logs.e("PlaybackViewModel", "加载音乐库时出错:", throwable);
+                loadingStatus.postValue("加载音乐库失败: " + throwable.getMessage());
+                return null;
+            })
+            .whenComplete((result, throwable) -> {
+                isLoadingFromDatabase.postValue(false);
+                isScanning.postValue(false);
+            });
+    }
+
+    /**
+     * 刷新音乐库 - 重新扫描设备并更新数据库
+     */
+    public void refreshMusicLibrary(Context context) {
+        isScanning.postValue(true);
+        loadingStatus.postValue("正在刷新音乐库...");
+        
+        musicRepository.refreshMusicLibraryAsync(context)
+            .thenAccept(refreshedMusic -> {
+                playlist.postValue(refreshedMusic);
+                loadingStatus.postValue("音乐库刷新完成");
+                Logs.d("PlaybackViewModel", "刷新了 " + refreshedMusic.size() + " 首音乐");
+            })
+            .exceptionally(throwable -> {
+                Logs.e("PlaybackViewModel", "刷新音乐库时出错", throwable);
+                loadingStatus.postValue("刷新音乐库失败: " + throwable.getMessage());
+                return null;
+            })
+            .whenComplete((result, throwable) -> {
+                isScanning.postValue(false);
+            });
     }
 
     // 排序方法
@@ -184,19 +277,22 @@ public class PlaybackViewModel extends AndroidViewModel {
         }
 
         isSorting.postValue(true);
+        loadingStatus.postValue("正在排序音乐...");
 
-        // 在后台线程执行排序
-        new Thread(() -> {
-            List<MediaItem> currentList = playlist.getValue();
-            List<MediaItem> sortedList = LocalMusicScanner.sortMusicList(currentList, rule);
-
-            // 更新排序后的列表
-            if (sortedList != null) {
+        musicRepository.sortMusicAsync(rule)
+            .thenAccept(sortedList -> {
                 playlist.postValue(sortedList);
-            }
-
-            isSorting.postValue(false);
-        }).start();
+                loadingStatus.postValue("音乐排序完成");
+                Logs.d("PlaybackViewModel", "按 " + rule.getStrategy() + " 排序完成");
+            })
+            .exceptionally(throwable -> {
+                Logs.e("PlaybackViewModel", "排序音乐时出错", throwable);
+                loadingStatus.postValue("排序失败: " + throwable.getMessage());
+                return null;
+            })
+            .whenComplete((result, throwable) -> {
+                isSorting.postValue(false);
+            });
     }
 
     private void updatePlaylist() {
@@ -523,7 +619,42 @@ public class PlaybackViewModel extends AndroidViewModel {
     public LiveData<Boolean> getShowLyricsTranslate() {
         return showLyricsTranslate;
     }
+    
+    // 新增Getter方法
+    public LiveData<Boolean> getIsLoadingFromDatabase() {
+        return isLoadingFromDatabase;
+    }
+    
+    public LiveData<String> getLoadingStatus() {
+        return loadingStatus;
+    }
 
+    /**
+     * 搜索音乐
+     */
+    public void searchMusic(String query, androidx.lifecycle.Observer<List<MediaItem>> observer) {
+        if (query == null || query.trim().isEmpty()) {
+            // 如果查询为空，返回完整列表
+            if (observer != null) {
+                observer.onChanged(playlist.getValue());
+            }
+            return;
+        }
+        
+        musicRepository.searchMusicAsync(query.trim())
+            .thenAccept(searchResults -> {
+                // 在主线程中回调结果
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    if (observer != null) {
+                        observer.onChanged(searchResults);
+                    }
+                });
+            })
+            .exceptionally(throwable -> {
+                Logs.e("PlaybackViewModel", "搜索音乐时出错", throwable);
+                return null;
+            });
+    }
 
     @Override
     protected void onCleared() {

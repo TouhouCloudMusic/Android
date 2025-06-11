@@ -7,6 +7,7 @@ import android.provider.MediaStore;
 
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.MediaMetadata;
+import androidx.media3.common.util.UnstableApi;
 
 import net.hearnsoft.tcm.domain.model.song.SongSortingRule;
 
@@ -16,6 +17,7 @@ import java.util.List;
 /**
  * 本地歌曲扫描工具类
  */
+@UnstableApi
 public class LocalMusicScanner {
 
     /**
@@ -77,12 +79,14 @@ public class LocalMusicScanner {
 
                     // 创建MediaItem
                     MediaItem mediaItem = new MediaItem.Builder()
+                        .setMediaId(String.valueOf(id)) // 使用数据库ID作为唯一的mediaId
                         .setUri(contentUri)
                         .setMediaMetadata(new MediaMetadata.Builder()
                             .setTitle(title)
                             .setArtist(artist)
                             .setAlbumTitle(album)
                             .setArtworkUri(albumArtUri)
+                            .setDurationMs(duration) // 添加duration到metadata
                             .build())
                         .build();
 

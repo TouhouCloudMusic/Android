@@ -46,7 +46,7 @@ public class MusicListFragment extends Fragment implements OnMusicItemClickListe
         registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
             if (isGranted) {
                 Logs.d("MusicListFragment", "存储权限已授予，开始加载音乐");
-                loadMusicWithPermission();
+                loadMusic();
             } else {
                 Logs.w("MusicListFragment", "存储权限被拒绝");
                 showNoPermissionUI();
@@ -76,12 +76,12 @@ public class MusicListFragment extends Fragment implements OnMusicItemClickListe
         // 创建LinearTopSmoothScroller
         scroller = new LinearTopSmoothScroller(requireContext(), true);
 
-        //设置排序chips
-        setSortingChips();
-
         // 获取ViewModel
         viewModel = new ViewModelProvider(requireActivity()).get(PlaybackViewModel.class);
 
+        //设置排序chips
+        setSortingChips();
+        //设置ViewModel观察者
         setViewModelObserver();
 
         binding.musicLocationButton.setOnClickListener(v -> {
@@ -100,6 +100,29 @@ public class MusicListFragment extends Fragment implements OnMusicItemClickListe
     }
 
     private void setViewModelObserver() {
+        // 观察播放列表变化
+        viewModel.getPlaylist().observe(getViewLifecycleOwner(), playlist -> {
+            if (playlist != null && !playlist.isEmpty()) {
+                musicList = playlist;
+                updateMusicListUI();
+
+                if (binding.noElementsLinearLayout.getVisibility() == View.VISIBLE) {
+                    binding.noElementsLinearLayout.setVisibility(View.GONE);
+                    binding.recyclerView.setVisibility(View.VISIBLE);
+                }
+
+                // 当播放列表加载完成时，隐藏进度条
+                binding.linearProgressIndicator.setVisibility(View.GONE);
+            } else {
+                showEmptyUI();
+            }
+        });
+
+        // 观察扫描进度
+        viewModel.getIsScanning().observe(getViewLifecycleOwner(), isScanning -> {
+            binding.linearProgressIndicator.setVisibility(isScanning ? View.VISIBLE : View.GONE);
+        });
+
         // 观察数据库加载状态
         viewModel.getIsLoadingFromDatabase().observe(getViewLifecycleOwner(), isLoadingFromDb -> {
             if (isLoadingFromDb) {
@@ -111,47 +134,23 @@ public class MusicListFragment extends Fragment implements OnMusicItemClickListe
         viewModel.getLoadingStatus().observe(getViewLifecycleOwner(), status -> {
             if (status != null && !status.isEmpty()) {
                 Logs.d("MusicListFragment", "加载状态: " + status);
-                // 这里可以显示加载状态给用户，比如在进度条下面显示文本
+
+                // 只有在确实需要加载时才显示加载UI
+                Boolean isLoading = viewModel.getIsLoadingFromDatabase().getValue();
+                Boolean isScanning = viewModel.getIsScanning().getValue();
+                Boolean isSorting = viewModel.getIsSorting().getValue();
+
+                if ((isLoading != null && isLoading) ||
+                    (isScanning != null && isScanning) ||
+                    (isSorting != null && isSorting)) {
+                    showLoadingUI(status);
+                }
             }
         });
 
         // 观察排序进度
         viewModel.getIsSorting().observe(getViewLifecycleOwner(), isSorting -> {
             binding.linearProgressIndicator.setVisibility(isSorting ? View.VISIBLE : View.GONE);
-        });
-
-        // 观察扫描进度
-        viewModel.getIsScanning().observe(getViewLifecycleOwner(), isScanning -> {
-            binding.linearProgressIndicator.setVisibility(isScanning ? View.VISIBLE : View.GONE);
-
-            if (!isScanning) {
-                List<MediaItem> scannedMusic = viewModel.getPlaylist().getValue();
-                if (scannedMusic != null && !scannedMusic.isEmpty()) {
-                    musicList = scannedMusic;
-                    updateMusicListUI();
-                }
-            }
-        });
-
-        // 观察播放列表变化
-        viewModel.getPlaylist().observe(getViewLifecycleOwner(), playlist -> {
-            if (playlist != null && !playlist.isEmpty()) {
-                musicList = playlist;
-                adapter.setData(musicList);
-                adapter.notifyDataSetChanged();
-
-                if (binding.noElementsLinearLayout.getVisibility() == View.VISIBLE) {
-                    binding.noElementsLinearLayout.setVisibility(View.GONE);
-                    binding.recyclerView.setVisibility(View.VISIBLE);
-                }
-                
-                // 当播放列表加载完成时，隐藏进度条
-                binding.linearProgressIndicator.setVisibility(View.GONE);
-            } else {
-                binding.noElementsLinearLayout.setVisibility(View.VISIBLE);
-                binding.recyclerView.setVisibility(View.GONE);
-                binding.linearProgressIndicator.setVisibility(View.GONE);
-            }
         });
 
         // 观察当前排序规则
@@ -188,7 +187,10 @@ public class MusicListFragment extends Fragment implements OnMusicItemClickListe
                 PackageManager.PERMISSION_GRANTED) {
                 // 已有权限，直接加载
                 Logs.d("MusicListFragment", "READ_MEDIA_AUDIO权限已授予");
-                loadMusicWithPermission();
+                if (viewModel.getPlaylist().getValue() == null
+                    || viewModel.getPlaylist().getValue().isEmpty()) {
+                    loadMusic();
+                }
             } else {
                 // 请求权限
                 Logs.d("MusicListFragment", "请求READ_MEDIA_AUDIO权限");
@@ -201,7 +203,10 @@ public class MusicListFragment extends Fragment implements OnMusicItemClickListe
                 PackageManager.PERMISSION_GRANTED) {
                 // 已有权限，直接加载
                 Logs.d("MusicListFragment", "READ_EXTERNAL_STORAGE权限已授予");
-                loadMusicWithPermission();
+                if (viewModel.getPlaylist().getValue() == null
+                    || viewModel.getPlaylist().getValue().isEmpty()) {
+                    loadMusic();
+                }
             } else {
                 // 请求权限
                 Logs.d("MusicListFragment", "请求READ_EXTERNAL_STORAGE权限");
@@ -211,14 +216,6 @@ public class MusicListFragment extends Fragment implements OnMusicItemClickListe
     }
 
     private void loadMusic() {
-        // 这个方法保持向后兼容，但建议使用 loadMusicWithPermission
-        loadMusicWithPermission();
-    }
-
-    /**
-     * 在权限已授予的情况下加载音乐
-     */
-    private void loadMusicWithPermission() {
         // 双重检查权限
         if (!viewModel.hasStoragePermission(requireContext())) {
             Logs.w("MusicListFragment", "加载音乐时发现权限不足");
@@ -255,9 +252,6 @@ public class MusicListFragment extends Fragment implements OnMusicItemClickListe
                 binding.noElementsLinearLayout.setVisibility(View.GONE);
                 binding.recyclerView.setVisibility(View.VISIBLE);
 
-                // 应用默认排序
-                viewModel.sortMusic(new SongSortingRule(SongSortingStrategy.Title, false));
-
                 // 更新适配器数据
                 adapter.setData(musicList);
                 adapter.notifyDataSetChanged();
@@ -271,6 +265,24 @@ public class MusicListFragment extends Fragment implements OnMusicItemClickListe
         binding.recyclerView.setVisibility(View.GONE);
         binding.noElementsTextView.setText("需要存储权限来访问音乐文件。请在设置中授予权限后重试。");
         Logs.w("MusicListFragment", "显示无权限UI");
+    }
+
+    private void showLoadingUI(String message) {
+        binding.linearProgressIndicator.setVisibility(View.VISIBLE);
+
+        // 只有在列表为空时才显示加载文本
+        if (musicList.isEmpty()) {
+            binding.noElementsLinearLayout.setVisibility(View.VISIBLE);
+            binding.recyclerView.setVisibility(View.GONE);
+            binding.noElementsTextView.setText(message);
+        }
+    }
+
+    private void showEmptyUI() {
+        binding.noElementsLinearLayout.setVisibility(View.VISIBLE);
+        binding.recyclerView.setVisibility(View.GONE);
+        binding.linearProgressIndicator.setVisibility(View.GONE);
+        Logs.w("MusicListFragment", "显示空UI");
     }
 
     @Override

@@ -26,7 +26,6 @@ import net.hearnsoft.tcm.domain.model.song.SongSortingStrategy;
 import net.hearnsoft.tcm.ui.adapter.MusicItemAdapter;
 import net.hearnsoft.tcm.ui.interfaces.OnMusicItemClickListener;
 import net.hearnsoft.tcm.ui.model.PlaybackViewModel;
-import net.hearnsoft.tcm.ui.utils.LinearTopSmoothScroller;
 import net.hearnsoft.tcm.utils.Logs;
 
 import java.util.ArrayList;
@@ -40,7 +39,6 @@ public class MusicListFragment extends Fragment implements OnMusicItemClickListe
     private MusicItemAdapter adapter;
     private List<MediaItem> musicList = new ArrayList<>();
     private PlaybackViewModel viewModel;
-    private LinearTopSmoothScroller scroller;
 
     private final ActivityResultLauncher<String> requestPermissionLauncher =
         registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
@@ -73,8 +71,6 @@ public class MusicListFragment extends Fragment implements OnMusicItemClickListe
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         adapter = new MusicItemAdapter(this);
         binding.recyclerView.setAdapter(adapter);
-        // 创建LinearTopSmoothScroller
-        scroller = new LinearTopSmoothScroller(requireContext(), true);
 
         // 获取ViewModel
         viewModel = new ViewModelProvider(requireActivity()).get(PlaybackViewModel.class);
@@ -86,12 +82,14 @@ public class MusicListFragment extends Fragment implements OnMusicItemClickListe
 
         binding.musicLocationButton.setOnClickListener(v -> {
             if (!musicList.isEmpty()) {
-                binding.recyclerView.post(() -> {
-                    int currentIndex = viewModel.getCurrentIndex().getValue() != null
-                            ? viewModel.getCurrentIndex().getValue() : 0;
-                    scroller.setTargetPosition(currentIndex);
-                    binding.recyclerView.getLayoutManager().startSmoothScroll(scroller);
-                });
+                int currentIndex = viewModel.getCurrentIndex().getValue() != null
+                    ? viewModel.getCurrentIndex().getValue() : 0;
+                LinearLayoutManager layoutManager =
+                    (LinearLayoutManager) binding.recyclerView.getLayoutManager();
+                if (layoutManager != null) {
+                    layoutManager.scrollToPositionWithOffset(currentIndex, 0);
+                    layoutManager.setStackFromEnd(false);
+                }
             }
         });
 
@@ -156,6 +154,14 @@ public class MusicListFragment extends Fragment implements OnMusicItemClickListe
         // 观察当前排序规则
         viewModel.getCurrentSortRule().observe(getViewLifecycleOwner(), rule -> {
             binding.musicSortingChip.setSortingRule(rule);
+        });
+
+        viewModel.getCurrentIndex().observe(getViewLifecycleOwner(), index -> {
+            if (index != null && index >= 0 && index < musicList.size()) {
+                // 更新适配器的当前播放索引
+                adapter.setCurrentPlayingIndex(index);
+                adapter.notifyDataSetChanged();
+            }
         });
     }
 

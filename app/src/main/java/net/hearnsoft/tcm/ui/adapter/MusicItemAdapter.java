@@ -1,5 +1,6 @@
 package net.hearnsoft.tcm.ui.adapter;
 
+import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -13,9 +14,16 @@ import net.hearnsoft.tcm.R;
 import net.hearnsoft.tcm.databinding.ItemMusicItemListBinding;
 import net.hearnsoft.tcm.ui.interfaces.OnMusicItemClickListener;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class MusicItemAdapter extends BaseAdapter<MediaItem, MusicItemAdapter.MusicItemHolder> {
 
     private OnMusicItemClickListener listener;
+
+    @Getter
+    @Setter
+    private int currentPlayingIndex = -1;
 
     public MusicItemAdapter(OnMusicItemClickListener listener) {
         this.listener = listener;
@@ -62,6 +70,26 @@ public class MusicItemAdapter extends BaseAdapter<MediaItem, MusicItemAdapter.Mu
                 binding.itemContainer.setOnClickListener(v -> {
                     listener.onItemClick(song, position);
                 });
+            }
+
+            // 设置当前播放的 item 样式
+            if (position == currentPlayingIndex) {
+                binding.headlineTextView.setTypeface(null, Typeface.BOLD);
+                binding.headlineTextView.setTextColor(
+                    binding.getRoot().getContext().getColor(R.color.primary)
+                );
+                binding.supportingTextView.setTextColor(
+                    binding.getRoot().getContext().getColor(R.color.primary)
+                );
+            } else {
+                // 非当前播放的 item 样式
+                binding.headlineTextView.setTypeface(null, Typeface.NORMAL);
+                binding.headlineTextView.setTextColor(
+                    binding.getRoot().getContext().getColor(R.color.text_primary)
+                );
+                binding.supportingTextView.setTextColor(
+                    binding.getRoot().getContext().getColor(R.color.text_primary)
+                );
             }
         }
     }

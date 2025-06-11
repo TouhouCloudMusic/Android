@@ -38,15 +38,6 @@ interface LocalMusicDao {
     @Query("SELECT * FROM local_music ORDER BY dateAdded DESC")
     suspend fun getMusicOrderByDateAdded(): List<MusicEntity>
 
-    @Query("SELECT * FROM local_music ORDER BY artist ASC")
-    suspend fun getMusicOrderByArtist(): List<MusicEntity>
-
-    @Query("SELECT * FROM local_music ORDER BY album ASC")
-    suspend fun getMusicOrderByAlbum(): List<MusicEntity>
-
-    @Query("SELECT * FROM local_music ORDER BY title ASC")
-    suspend fun getMusicOrderByTitle(): List<MusicEntity>
-
     @Query("SELECT * FROM local_music ORDER BY duration DESC")
     suspend fun getMusicOrderByDuration(): List<MusicEntity>
 }

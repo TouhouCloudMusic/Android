@@ -54,23 +54,6 @@ class MusicRepository @Inject constructor(
         return localMusicDao.getMusicCount()
     }
 
-    suspend fun sortMusic(rule: SongSortingRule): List<MediaItem> {
-        val entities = when (rule.strategy) {
-            SongSortingStrategy.Title -> localMusicDao.getMusicOrderByTitle()
-            SongSortingStrategy.ArtistName -> localMusicDao.getMusicOrderByArtist()
-            SongSortingStrategy.CreatedAt -> localMusicDao.getMusicOrderByDateAdded()
-            SongSortingStrategy.UpdatedAt -> localMusicDao.getMusicOrderByDateAdded()
-            SongSortingStrategy.PlayCount -> {
-                // PlayCount暂时使用duration作为替代排序，后续可以添加播放次数字段
-                localMusicDao.getMusicOrderByDuration()
-            }
-            null -> localMusicDao.getMusicOrderByTitle() // 默认按标题排序
-        }
-
-        val sortedEntities = if (rule.reverse) entities.reversed() else entities
-        return sortedEntities.map { it.toMediaItem() }
-    }
-
     suspend fun searchMusic(query: String): List<MediaItem> {
         return localMusicDao.searchMusic(query).map { it.toMediaItem() }
     }
@@ -95,12 +78,6 @@ class MusicRepository @Inject constructor(
     fun getMusicCountAsync(): CompletableFuture<Int> {
         return CoroutineScope(Dispatchers.IO).future {
             getMusicCount()
-        }
-    }
-
-    fun sortMusicAsync(rule: SongSortingRule): CompletableFuture<List<MediaItem>> {
-        return CoroutineScope(Dispatchers.IO).future {
-            sortMusic(rule)
         }
     }
 

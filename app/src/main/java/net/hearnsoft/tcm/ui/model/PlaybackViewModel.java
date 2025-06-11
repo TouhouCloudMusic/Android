@@ -23,6 +23,7 @@ import net.hearnsoft.tcm.domain.repository.MusicRepository;
 import net.hearnsoft.tcm.domain.model.song.SongSortingRule;
 import net.hearnsoft.tcm.domain.model.song.SongSortingStrategy;
 import net.hearnsoft.tcm.services.MusicPlaybackService;
+import net.hearnsoft.tcm.utils.LocalMusicScanner;
 import net.hearnsoft.tcm.utils.Logs;
 import net.hearnsoft.tcm.utils.MusicPlayerController;
 
@@ -277,22 +278,19 @@ public class PlaybackViewModel extends AndroidViewModel {
         }
 
         isSorting.postValue(true);
-        loadingStatus.postValue("正在排序音乐...");
 
-        musicRepository.sortMusicAsync(rule)
-            .thenAccept(sortedList -> {
+        // 在后台线程执行排序
+        new Thread(() -> {
+            List<MediaItem> currentList = playlist.getValue();
+            List<MediaItem> sortedList = LocalMusicScanner.sortMusicList(currentList, rule);
+
+            // 更新排序后的列表
+            if (sortedList != null) {
                 playlist.postValue(sortedList);
-                loadingStatus.postValue("音乐排序完成");
-                Logs.d("PlaybackViewModel", "按 " + rule.getStrategy() + " 排序完成");
-            })
-            .exceptionally(throwable -> {
-                Logs.e("PlaybackViewModel", "排序音乐时出错", throwable);
-                loadingStatus.postValue("排序失败: " + throwable.getMessage());
-                return null;
-            })
-            .whenComplete((result, throwable) -> {
-                isSorting.postValue(false);
-            });
+            }
+
+            isSorting.postValue(false);
+        }).start();
     }
 
     private void updatePlaylist() {

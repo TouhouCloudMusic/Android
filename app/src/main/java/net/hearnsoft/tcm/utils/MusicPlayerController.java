@@ -13,7 +13,7 @@ import androidx.media3.session.SessionToken;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 
-import net.hearnsoft.tcm.services.MusicPlaybackService;
+import net.hearnsoft.tcm.application.MusicPlaybackService;
 
 import java.util.List;
 

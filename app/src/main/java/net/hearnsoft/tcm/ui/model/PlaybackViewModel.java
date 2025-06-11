@@ -22,7 +22,7 @@ import net.hearnsoft.tcm.infrastructure.db.LocalMusicDatabase;
 import net.hearnsoft.tcm.domain.repository.MusicRepository;
 import net.hearnsoft.tcm.domain.model.song.SongSortingRule;
 import net.hearnsoft.tcm.domain.model.song.SongSortingStrategy;
-import net.hearnsoft.tcm.services.MusicPlaybackService;
+import net.hearnsoft.tcm.application.MusicPlaybackService;
 import net.hearnsoft.tcm.utils.LocalMusicScanner;
 import net.hearnsoft.tcm.utils.Logs;
 import net.hearnsoft.tcm.utils.MusicPlayerController;

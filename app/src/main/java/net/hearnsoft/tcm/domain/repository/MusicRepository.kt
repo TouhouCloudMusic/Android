@@ -2,7 +2,6 @@ package net.hearnsoft.tcm.domain.repository
 
 import android.content.Context
 import android.net.Uri
-import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
@@ -15,9 +14,7 @@ import kotlinx.coroutines.future.future
 import java.util.concurrent.CompletableFuture
 import net.hearnsoft.tcm.domain.dao.LocalMusicDao
 import net.hearnsoft.tcm.domain.model.music.MusicEntity
-import net.hearnsoft.tcm.domain.model.song.SongSortingRule
-import net.hearnsoft.tcm.domain.model.song.SongSortingStrategy
-import net.hearnsoft.tcm.utils.LocalMusicScanner
+import net.hearnsoft.tcm.infrastructure.repository.music.LocalMusicScanner
 import javax.inject.Inject
 import javax.inject.Singleton
 

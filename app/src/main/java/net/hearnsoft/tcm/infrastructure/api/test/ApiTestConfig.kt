@@ -1,11 +1,6 @@
-package net.hearnsoft.tcm.beans;
+package net.hearnsoft.tcm.infrastructure.api.test
 
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter
-@Setter
-public class ApiTestConfig {
-    private String apiName;
-    private String testFragment;
-}
+data class ApiTestConfig (
+     var apiName: String? = null,
+     var testFragment: String? = null
+)

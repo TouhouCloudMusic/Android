@@ -11,8 +11,8 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import net.hearnsoft.tcm.R;
-import net.hearnsoft.tcm.beans.ApiTestConfig;
-import net.hearnsoft.tcm.beans.ApiTestEntry;
+import net.hearnsoft.tcm.infrastructure.api.test.ApiTestConfig;
+import net.hearnsoft.tcm.infrastructure.api.test.ApiTestEntry;
 import net.hearnsoft.tcm.databinding.FragmentMainAdminBinding;
 import net.hearnsoft.tcm.infrastructure.adapter.http.Constants;
 import net.hearnsoft.tcm.ui.adapter.ApiTestItemAdapter;

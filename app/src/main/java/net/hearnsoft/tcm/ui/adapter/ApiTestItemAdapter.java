@@ -6,7 +6,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import net.hearnsoft.tcm.beans.ApiTestConfig;
+import net.hearnsoft.tcm.infrastructure.api.test.ApiTestConfig;
 import net.hearnsoft.tcm.databinding.ItemApiTestBinding;
 import net.hearnsoft.tcm.ui.fragments.apitest.ApiTestInterface;
 

@@ -1,14 +1,3 @@
-package net.hearnsoft.tcm.beans;
+package net.hearnsoft.tcm.infrastructure.api.test
 
-import java.util.List;
-
-import lombok.Getter;
-
-@Getter
-public class ApiTestEntry {
-    private List<ApiTestConfig> apiTestConfigs;
-
-    public ApiTestEntry(List<ApiTestConfig> apiTestConfigs) {
-        this.apiTestConfigs = apiTestConfigs;
-    }
-}
+data class ApiTestEntry (val apiTestConfigs: List<ApiTestConfig>)

@@ -1,7 +1,7 @@
 package net.hearnsoft.tcm.utils;
 
-import net.hearnsoft.tcm.beans.ApiTestConfig;
-import net.hearnsoft.tcm.beans.ApiTestEntry;
+import net.hearnsoft.tcm.infrastructure.api.test.ApiTestConfig;
+import net.hearnsoft.tcm.infrastructure.api.test.ApiTestEntry;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;

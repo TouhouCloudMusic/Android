@@ -18,7 +18,7 @@ import androidx.media3.common.MediaMetadata;
 import androidx.media3.common.Player;
 import androidx.media3.common.util.UnstableApi;
 
-import net.hearnsoft.tcm.db.LocalMusicDatabase;
+import net.hearnsoft.tcm.infrastructure.db.LocalMusicDatabase;
 import net.hearnsoft.tcm.domain.repository.MusicRepository;
 import net.hearnsoft.tcm.domain.model.song.SongSortingRule;
 import net.hearnsoft.tcm.domain.model.song.SongSortingStrategy;

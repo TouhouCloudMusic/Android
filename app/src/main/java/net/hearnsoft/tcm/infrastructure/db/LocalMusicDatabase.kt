@@ -1,4 +1,4 @@
-package net.hearnsoft.tcm.db
+package net.hearnsoft.tcm.infrastructure.db
 
 import android.content.Context
 import androidx.room.Database

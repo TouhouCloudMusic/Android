@@ -22,7 +22,7 @@ import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 import net.hearnsoft.tcm.R
 import net.hearnsoft.tcm.ui.activity.MainActivity
-import net.hearnsoft.tcm.utils.Logs.d
+import net.hearnsoft.tcm.infrastructure.logger.Logger.debug
 import net.hearnsoft.tcm.utils.LyricsExtractor
 import net.hearnsoft.tcm.utils.LyricsExtractor.LyricsFormat
 import net.hearnsoft.tcm.utils.LyricsExtractor.LyricsOptions
@@ -54,7 +54,7 @@ class MusicPlaybackService : MediaLibraryService(), AnalyticsListener {
                 override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                     // Optional: log or handle transitions
                     if (mediaItem != null) {
-                        d("MusicPlaybackService", "Now playing: " + mediaItem.mediaMetadata.title)
+                        debug("MusicPlaybackService", "Now playing: " + mediaItem.mediaMetadata.title)
                     }
                 }
             })
@@ -105,7 +105,7 @@ class MusicPlaybackService : MediaLibraryService(), AnalyticsListener {
         /*AnalyticsListener.super.onTracksChanged(eventTime, tracks);*/
         val currentItem = player!!.currentMediaItem ?: return
 
-        d(
+        debug(
             "MusicPlaybackService",
             "Tracks changed, extracting lyrics for: " + currentItem.mediaMetadata.title
         )
@@ -133,7 +133,7 @@ class MusicPlaybackService : MediaLibraryService(), AnalyticsListener {
                         if (result != null) {
                             extractedLyrics = result.lyricsText
                             format = result.format
-                            d(
+                            debug(
                                 "MusicPlaybackService",
                                 "Lyrics extracted successfully, format: $format"
                             )
@@ -155,7 +155,7 @@ class MusicPlaybackService : MediaLibraryService(), AnalyticsListener {
                 }
             }
             if (extractedLyrics != null) {
-                d(
+                debug(
                     "MusicPlaybackService",
                     "Lyrics found: " +
                             extractedLyrics.substring(
@@ -164,7 +164,7 @@ class MusicPlaybackService : MediaLibraryService(), AnalyticsListener {
                             "..."
                 )
             } else {
-                d("MusicPlaybackService", "No lyrics found for current track")
+                debug("MusicPlaybackService", "No lyrics found for current track")
             }
         }
             .start()

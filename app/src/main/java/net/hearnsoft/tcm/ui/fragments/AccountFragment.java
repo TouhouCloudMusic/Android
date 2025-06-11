@@ -21,7 +21,7 @@ import net.hearnsoft.tcm.ui.activity.UserLoginActivity;
 import net.hearnsoft.tcm.ui.activity.UserProfileActivity;
 import net.hearnsoft.tcm.ui.model.UserViewModel;
 import net.hearnsoft.tcm.ui.widgets.UserCardView;
-import net.hearnsoft.tcm.utils.Logs;
+import net.hearnsoft.tcm.infrastructure.logger.Logger;
 import net.hearnsoft.tcm.utils.ViewModelUtils;
 
 public class AccountFragment extends Fragment {
@@ -72,7 +72,7 @@ public class AccountFragment extends Fragment {
                     })
                     // If we have an error, log it and set the user card for logged out state
                     .exceptionally(throwable -> {
-                        Logs.e(TAG, "loadCurrentUserProfile error: " + throwable.getMessage());
+                        Logger.err(TAG, "loadCurrentUserProfile error: " + throwable.getMessage());
                         setUserCardForLoggedOutState();
                         return null;
                     });
@@ -132,7 +132,7 @@ public class AccountFragment extends Fragment {
     }
 
     private void handleError(String errorMessage) {
-        Logs.e(TAG, "refreshUserProfile error: " + errorMessage);
+        Logger.err(TAG, "refreshUserProfile error: " + errorMessage);
         setUserCardForLoggedOutState();
     }
 

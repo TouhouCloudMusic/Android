@@ -10,6 +10,7 @@ import androidx.media3.common.MediaMetadata;
 import androidx.media3.common.util.UnstableApi;
 
 import net.hearnsoft.tcm.domain.model.song.SongSortingRule;
+import net.hearnsoft.tcm.infrastructure.logger.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -91,11 +92,11 @@ public class LocalMusicScanner {
                         .build();
 
                     musicItems.add(mediaItem);
-                    Logs.d("MusicScanner", "歌曲已添加: " + title);
+                    Logger.debug("MusicScanner", "歌曲已添加: " + title);
                 }
             }
         } catch (Exception e) {
-            Logs.e("MusicScanner", "扫描音乐时出错: " + e.getMessage());
+            Logger.err("MusicScanner", "扫描音乐时出错: " + e.getMessage());
         }
 
         return musicItems;

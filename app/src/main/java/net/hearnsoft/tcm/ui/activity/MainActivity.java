@@ -11,7 +11,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import net.hearnsoft.tcm.R;
 import net.hearnsoft.tcm.databinding.ActivityMainBinding;
 import net.hearnsoft.tcm.ui.interfaces.OnNowPlayingClickListener;
-import net.hearnsoft.tcm.utils.Logs;
+import net.hearnsoft.tcm.infrastructure.logger.Logger;
 
 public class MainActivity extends BaseActivity implements OnNowPlayingClickListener {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -57,7 +57,7 @@ public class MainActivity extends BaseActivity implements OnNowPlayingClickListe
                 navController.navigateUp();
             }
         } catch (Exception e) {
-            Logs.e(TAG, "Navigation up error: " + e.getMessage());
+            Logger.err(TAG, "Navigation up error: " + e.getMessage());
             // Fallback to default back behavior
             onBackPressed();
         }

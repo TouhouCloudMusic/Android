@@ -12,7 +12,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import net.hearnsoft.tcm.infrastructure.adapter.http.Constants;
 import net.hearnsoft.tcm.ui.activity.UserLoginActivity;
 import net.hearnsoft.tcm.ui.model.AuthStateViewModel;
-import net.hearnsoft.tcm.utils.Logs;
+import net.hearnsoft.tcm.infrastructure.logger.Logger;
 import net.hearnsoft.tcm.utils.ViewModelUtils;
 
 
@@ -43,7 +43,7 @@ public class TcmApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        Logs.d(TAG, "onApplicationInit:");
+        Logger.debug(TAG, "onApplicationInit:");
         if (unauthorizedReceiver != null) {
             LocalBroadcastManager.getInstance(this).registerReceiver(unauthorizedReceiver,
                 new IntentFilter(Constants.ACTION_UNAUTHORIZED));

@@ -24,7 +24,7 @@ import net.hearnsoft.tcm.domain.model.song.SongSortingRule;
 import net.hearnsoft.tcm.domain.model.song.SongSortingStrategy;
 import net.hearnsoft.tcm.application.MusicPlaybackService;
 import net.hearnsoft.tcm.utils.LocalMusicScanner;
-import net.hearnsoft.tcm.utils.Logs;
+import net.hearnsoft.tcm.infrastructure.logger.Logger;
 import net.hearnsoft.tcm.utils.MusicPlayerController;
 
 import java.util.ArrayList;
@@ -79,7 +79,7 @@ public class PlaybackViewModel extends AndroidViewModel {
         musicRepository = new MusicRepository(database.musicDao());
         MusicPlaybackService.setLyricsUpdateListener((lyrics, format) -> {
             currentLyrics.postValue(lyrics);
-            Logs.d("PlaybackViewModel", "Lyrics updated: " + lyrics);
+            Logger.debug("PlaybackViewModel", "Lyrics updated: " + lyrics);
         });
 
         connectToService();
@@ -202,7 +202,7 @@ public class PlaybackViewModel extends AndroidViewModel {
         if (hasStoragePermission(context)) {
             loadMusicLibrary(context);
         } else {
-            Logs.w("PlaybackViewModel", "存储权限未授予，无法加载音乐库");
+            Logger.warn("PlaybackViewModel", "存储权限未授予，无法加载音乐库");
             loadingStatus.postValue("需要存储权限才能加载音乐");
         }
     }
@@ -231,10 +231,10 @@ public class PlaybackViewModel extends AndroidViewModel {
             .thenAccept(musicList -> {
                 playlist.postValue(musicList);
                 loadingStatus.postValue("音乐库加载完成");
-                Logs.d("PlaybackViewModel", "加载了 " + musicList.size() + " 首音乐");
+                Logger.debug("PlaybackViewModel", "加载了 " + musicList.size() + " 首音乐");
             })
             .exceptionally(throwable -> {
-                Logs.e("PlaybackViewModel", "加载音乐库时出错:", throwable);
+                Logger.err("PlaybackViewModel", "加载音乐库时出错:", throwable);
                 loadingStatus.postValue("加载音乐库失败: " + throwable.getMessage());
                 return null;
             })
@@ -255,10 +255,10 @@ public class PlaybackViewModel extends AndroidViewModel {
             .thenAccept(refreshedMusic -> {
                 playlist.postValue(refreshedMusic);
                 loadingStatus.postValue("音乐库刷新完成");
-                Logs.d("PlaybackViewModel", "刷新了 " + refreshedMusic.size() + " 首音乐");
+                Logger.debug("PlaybackViewModel", "刷新了 " + refreshedMusic.size() + " 首音乐");
             })
             .exceptionally(throwable -> {
-                Logs.e("PlaybackViewModel", "刷新音乐库时出错", throwable);
+                Logger.err("PlaybackViewModel", "刷新音乐库时出错", throwable);
                 loadingStatus.postValue("刷新音乐库失败: " + throwable.getMessage());
                 return null;
             })
@@ -649,7 +649,7 @@ public class PlaybackViewModel extends AndroidViewModel {
                 });
             })
             .exceptionally(throwable -> {
-                Logs.e("PlaybackViewModel", "搜索音乐时出错", throwable);
+                Logger.err("PlaybackViewModel", "搜索音乐时出错", throwable);
                 return null;
             });
     }

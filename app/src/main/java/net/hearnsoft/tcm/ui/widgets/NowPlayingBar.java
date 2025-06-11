@@ -24,7 +24,7 @@ import com.google.android.material.progressindicator.CircularProgressIndicator;
 
 import net.hearnsoft.tcm.R;
 import net.hearnsoft.tcm.misc.ViewKt;
-import net.hearnsoft.tcm.utils.Logs;
+import net.hearnsoft.tcm.infrastructure.logger.Logger;
 
 public class NowPlayingBar extends FrameLayout {
 
@@ -64,7 +64,7 @@ public class NowPlayingBar extends FrameLayout {
                 );
                 array.recycle();
             } catch (Exception e) {
-                Logs.e("NowPlayingBar", "get TypedArray error, " + e.getMessage());
+                Logger.err("NowPlayingBar", "get TypedArray error, " + e.getMessage());
             }
         }
 

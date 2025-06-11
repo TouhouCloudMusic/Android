@@ -36,7 +36,7 @@ import net.hearnsoft.tcm.ui.widgets.userprofile.BannerComponent;
 import net.hearnsoft.tcm.ui.widgets.userprofile.LogoutComponent;
 import net.hearnsoft.tcm.ui.widgets.userprofile.ProfileComponentManager;
 import net.hearnsoft.tcm.ui.widgets.userprofile.UserInfoComponent;
-import net.hearnsoft.tcm.utils.Logs;
+import net.hearnsoft.tcm.infrastructure.logger.Logger;
 import net.hearnsoft.tcm.utils.ViewModelUtils;
 import net.hearnsoft.uiwidgets.dialog.MDialog;
 import net.hearnsoft.uiwidgets.menu.MPopupMenu;
@@ -136,7 +136,7 @@ public class UserProfileActivity extends BaseActivity implements
                         ).show());
                     }
                 } else {
-                    Logs.d(TAG, "No media selected");
+                    Logger.debug(TAG, "No media selected");
                 }
             }
         );
@@ -166,7 +166,7 @@ public class UserProfileActivity extends BaseActivity implements
                         ).show());
                     }
                 } else {
-                    Logs.d(TAG, "No media selected");
+                    Logger.debug(TAG, "No media selected");
                 }
             }
         );
@@ -230,7 +230,7 @@ public class UserProfileActivity extends BaseActivity implements
 
     private void uploadAvatar(Uri uri) {
         if (uri != null) {
-            Logs.d(TAG, "Selected URI: " + uri);
+            Logger.debug(TAG, "Selected URI: " + uri);
 
             try {
                 userViewModel.uploadAvatar(uri, getContentResolver())
@@ -244,7 +244,7 @@ public class UserProfileActivity extends BaseActivity implements
                             // 上传完成后刷新用户信息
                             userViewModel.loadCurrentUserProfile();
                         } else {
-                            Logs.e(TAG, result.getError());
+                            Logger.err(TAG, result.getError());
                             Toast.makeText(
                                 UserProfileActivity.this,
                                 getString(R.string.toast_profile_upload_avatar_err) + "\n" + result.getError(),
@@ -254,7 +254,7 @@ public class UserProfileActivity extends BaseActivity implements
                         return result;
                     });
             } catch (Exception e) {
-                Logs.e(TAG, "Error creating file from Uri: " + e.getMessage());
+                Logger.err(TAG, "Error creating file from Uri: " + e.getMessage());
                 Toast.makeText(
                     UserProfileActivity.this,
                     R.string.toast_profile_upload_avatar_err,
@@ -266,7 +266,7 @@ public class UserProfileActivity extends BaseActivity implements
 
     private void uploadBanner(Uri uri) {
         if (uri != null) {
-            Logs.d(TAG, "Selected URI: " + uri);
+            Logger.debug(TAG, "Selected URI: " + uri);
 
             try {
                 userViewModel.uploadProfileBanner(uri, getContentResolver())
@@ -280,7 +280,7 @@ public class UserProfileActivity extends BaseActivity implements
                             // 上传完成后刷新用户信息
                             userViewModel.loadCurrentUserProfile();
                         } else {
-                            Logs.e(TAG, result.getError());
+                            Logger.err(TAG, result.getError());
                             Toast.makeText(
                                 UserProfileActivity.this,
                                 getString(R.string.toast_profile_upload_banner_err) + "\n" + result.getError(),
@@ -289,7 +289,7 @@ public class UserProfileActivity extends BaseActivity implements
                         }
                     });
             } catch (Exception e) {
-                Logs.e(TAG, "Error creating file from Uri: " + e.getMessage());
+                Logger.err(TAG, "Error creating file from Uri: " + e.getMessage());
                 Toast.makeText(
                     UserProfileActivity.this,
                     R.string.toast_profile_upload_banner_err,
@@ -363,7 +363,7 @@ public class UserProfileActivity extends BaseActivity implements
                     ).show();
                     finish();
                 } else {
-                    Logs.e(TAG, "failed to logout, msg: " + result.getError());
+                    Logger.err(TAG, "failed to logout, msg: " + result.getError());
                     Toast.makeText(
                         UserProfileActivity.this,
                         R.string.toast_profile_logout_err,

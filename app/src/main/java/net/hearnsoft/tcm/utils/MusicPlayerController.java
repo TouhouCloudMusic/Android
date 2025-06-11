@@ -14,6 +14,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 
 import net.hearnsoft.tcm.application.MusicPlaybackService;
+import net.hearnsoft.tcm.infrastructure.logger.Logger;
 
 import java.util.List;
 
@@ -74,7 +75,7 @@ public class MusicPlayerController {
                     ((ConnectionCallback) listener).onConnected(mediaController);
                 }
             } catch (Exception e) {
-                Logs.e("MusicPlayerController", "Error connecting to service: " + e.getMessage());
+                Logger.err("MusicPlayerController", "Error connecting to service: " + e.getMessage());
             }
         }, MoreExecutors.directExecutor());
     }

@@ -17,7 +17,7 @@ import net.hearnsoft.tcm.ui.adapter.MusicPlaylistItemAdapter;
 import net.hearnsoft.tcm.ui.interfaces.OnMusicPlaylistItemClickListener;
 import net.hearnsoft.tcm.ui.model.PlaybackViewModel;
 import net.hearnsoft.tcm.ui.utils.LinearTopSmoothScroller;
-import net.hearnsoft.tcm.utils.Logs;
+import net.hearnsoft.tcm.infrastructure.logger.Logger;
 import net.hearnsoft.uiwidgets.dialog.MDialog;
 
 @UnstableApi
@@ -91,7 +91,7 @@ public class CurrentPlaylistBottomSheetDialog extends BaseSheetDialog implements
         viewModel.getCurrentPlaylist().observe(getViewLifecycleOwner(), mediaItems -> {
             if (mediaItems != null) {
                 adapter.setData(mediaItems);
-                Logs.d("CurrentPlaylistBottomSheetDialog", "adapter.setData: " + mediaItems.size());
+                Logger.debug("CurrentPlaylistBottomSheetDialog", "adapter.setData: " + mediaItems.size());
 
                 // 更新播放列表计数器
                 int currentIndex = viewModel.getCurrentIndex().getValue() != null ?

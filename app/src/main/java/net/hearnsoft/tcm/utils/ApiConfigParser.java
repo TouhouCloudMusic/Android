@@ -2,6 +2,7 @@ package net.hearnsoft.tcm.utils;
 
 import net.hearnsoft.tcm.infrastructure.api.test.ApiTestConfig;
 import net.hearnsoft.tcm.infrastructure.api.test.ApiTestEntry;
+import net.hearnsoft.tcm.infrastructure.logger.Logger;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -24,7 +25,7 @@ public class ApiConfigParser {
             handler = new ApiConfigHandler();
             parser.parse(inputStream, handler);
         } catch (Exception e) {
-            Logs.e("ApiConfigParser", e.getMessage());
+            Logger.err("ApiConfigParser", e.getMessage());
             return null;
         }
         return new ApiTestEntry(handler.getApiTestEntry());

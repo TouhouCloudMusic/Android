@@ -18,7 +18,7 @@ import net.hearnsoft.tcm.infrastructure.adapter.http.Constants;
 import net.hearnsoft.tcm.ui.adapter.ApiTestItemAdapter;
 import net.hearnsoft.tcm.ui.utils.HorizontalSpaceItemDecoration;
 import net.hearnsoft.tcm.utils.ApiConfigParser;
-import net.hearnsoft.tcm.utils.Logs;
+import net.hearnsoft.tcm.infrastructure.logger.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -67,7 +67,7 @@ public class MainAdminFragment extends Fragment {
             adapter.setOnItemClickListener(this::handleApiTestItemClicked);
             adapter.setData(apiTestEntry.getApiTestConfigs());
         } catch (IOException e) {
-            Logs.e("MainAdminFragment", e.getMessage());
+            Logger.err("MainAdminFragment", e.getMessage());
         }
     }
 

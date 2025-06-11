@@ -17,7 +17,7 @@ import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.imageview.ShapeableImageView;
 
 import net.hearnsoft.tcm.R;
-import net.hearnsoft.tcm.utils.Logs;
+import net.hearnsoft.tcm.infrastructure.logger.Logger;
 
 import java.util.Objects;
 
@@ -107,7 +107,7 @@ public class UserCardView extends LinearLayout {
     public void setUserAvatarFromRes(int avatarResId) {
         if (Objects.isNull(avatarResId)) {
             userAvatar.setImageResource(R.drawable.default_avatar);
-            Logs.e(TAG, "avatarRes is null!");
+            Logger.err(TAG, "avatarRes is null!");
             return;
         }
         userAvatar.setImageResource(avatarResId);
@@ -120,7 +120,7 @@ public class UserCardView extends LinearLayout {
     public void setUserAvatarFromUrl(String avatarResUrl) {
         if (TextUtils.isEmpty(avatarResUrl)) {
             userAvatar.setImageResource(R.drawable.default_avatar);
-            Logs.e(TAG, "avatarResUrl is empty!");
+            Logger.err(TAG, "avatarResUrl is empty!");
             return;
         }
         Glide.with(this)
@@ -137,7 +137,7 @@ public class UserCardView extends LinearLayout {
     public void setUserCardBackgroundFromRes(int backgroundResId) {
         if (Objects.isNull(backgroundResId)) {
             setBlurCardFromRes(R.drawable.test_res2);
-            Logs.e(TAG, "backgroundRes is null!");
+            Logger.err(TAG, "backgroundRes is null!");
             return;
         }
         setBlurCardFromRes(backgroundResId);
@@ -150,7 +150,7 @@ public class UserCardView extends LinearLayout {
     public void setUserCardBackgroundFromUrl(String backgroundUrl) {
         if (TextUtils.isEmpty(backgroundUrl)) {
             setBlurCardFromRes(R.drawable.test_res2);
-            Logs.e(TAG, "backgroundUrl is empty!");
+            Logger.err(TAG, "backgroundUrl is empty!");
             return;
         }
         setBlurCardFromUrl(backgroundUrl);

@@ -3,6 +3,7 @@ package net.hearnsoft.tcm.utils;
 import androidx.media3.common.MediaItem;
 
 import net.hearnsoft.tcm.domain.model.song.SongSortingRule;
+import net.hearnsoft.tcm.infrastructure.logger.Logger;
 import net.sourceforge.pinyin4j.PinyinHelper;
 import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
 import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
@@ -79,7 +80,7 @@ public class LocalMusicSorter {
                 };
                 break;
             case PlayCount:
-                Logs.d(TAG, "Play count sorting not implemented yet");
+                Logger.debug(TAG, "Play count sorting not implemented yet");
                 return null;
             default:
                 // Default to sorting by title
@@ -127,7 +128,7 @@ public class LocalMusicSorter {
 
             return result;
         } catch (Exception e) {
-            Logs.e("MusicListFragment", "Error comparing Chinese strings: " + e.getMessage());
+            Logger.err("MusicListFragment", "Error comparing Chinese strings: " + e.getMessage());
             // 如果出现异常，返回原始比较结果
             return str1.compareToIgnoreCase(str2);
         }

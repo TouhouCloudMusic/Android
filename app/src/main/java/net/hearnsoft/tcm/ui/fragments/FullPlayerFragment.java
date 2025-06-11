@@ -2,8 +2,6 @@ package net.hearnsoft.tcm.ui.fragments;
 
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,7 +36,7 @@ import net.hearnsoft.tcm.ui.fragments.fullplayer.FullPlayerMusicFragment;
 import net.hearnsoft.tcm.ui.fragments.fullplayer.FullPlayerLyricsFragment;
 import net.hearnsoft.tcm.ui.model.PlaybackViewModel;
 import net.hearnsoft.tcm.ui.widgets.CurrentPlaylistBottomSheetDialog;
-import net.hearnsoft.tcm.utils.Logs;
+import net.hearnsoft.tcm.infrastructure.logger.Logger;
 import net.hearnsoft.tcm.utils.SystemMediaDialogUtils;
 
 import java.util.Locale;
@@ -113,7 +111,7 @@ public class FullPlayerFragment extends Fragment {
                     navController.navigateUp();
                 }
             } catch (Exception e) {
-                Logs.e("FullPlayerFragment", "Navigation error: " + e.getMessage());
+                Logger.err("FullPlayerFragment", "Navigation error: " + e.getMessage());
                 // Fallback to standard back press
                 requireActivity().onBackPressed();
             }
@@ -214,7 +212,7 @@ public class FullPlayerFragment extends Fragment {
         // 绑定Toolbar中的cast按钮
         binding.fullPlayerToolbarMedia.setOnClickListener(v -> {
             // 这里可以添加投屏逻辑
-            Logs.d("FullPlayerFragment", "Cast button clicked");
+            Logger.debug("FullPlayerFragment", "Cast button clicked");
             SystemMediaDialogUtils.getInstance(requireActivity())
                     .showSystemMediaDialog();
         });
@@ -298,7 +296,7 @@ public class FullPlayerFragment extends Fragment {
         
         boolean shuffle = isShuffleMode != null && isShuffleMode;
         
-        Logs.d("FullPlayerFragment", "Play mode changed - Repeat: " + repeatMode + ", Shuffle: " + shuffle);
+        Logger.debug("FullPlayerFragment", "Play mode changed - Repeat: " + repeatMode + ", Shuffle: " + shuffle);
         
         if (shuffle) {
             // 随机播放模式
@@ -354,7 +352,7 @@ public class FullPlayerFragment extends Fragment {
     private void updatePlaybackPosition(long position) {
         // 检查position是否小于0
         if (position < 0) {
-            Logs.e("FullPlayerFragment", "Invalid negative position: " + position);
+            Logger.err("FullPlayerFragment", "Invalid negative position: " + position);
             position = 0;
         }
 
@@ -378,7 +376,7 @@ public class FullPlayerFragment extends Fragment {
                     // 将当前位置设置在有效范围内
                     timelineSlider.setValue(Math.min(positionValue, durationValue));
                 } catch (Exception e) {
-                    Logs.e("FullPlayerFragment", "Error updating slider: " + e.getMessage());
+                    Logger.err("FullPlayerFragment", "Error updating slider: " + e.getMessage());
                 }
             }
         }

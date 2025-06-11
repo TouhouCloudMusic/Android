@@ -20,7 +20,7 @@ import net.hearnsoft.tcm.databinding.FragmentUserLoginBinding;
 import net.hearnsoft.tcm.domain.model.user.UserAuthenticationType;
 import net.hearnsoft.tcm.ui.activity.UserLoginActivity;
 import net.hearnsoft.tcm.ui.model.UserViewModel;
-import net.hearnsoft.tcm.utils.Logs;
+import net.hearnsoft.tcm.infrastructure.logger.Logger;
 import net.hearnsoft.tcm.utils.UserLoginPortal;
 import net.hearnsoft.tcm.utils.ViewModelUtils;
 
@@ -50,7 +50,7 @@ public class UserLoginFragment extends Fragment {
         try {
             portal = (UserLoginPortal) requireActivity();
         } catch (ClassCastException e) {
-            Logs.e(TAG, e.getMessage());
+            Logger.err(TAG, e.getMessage());
         }
     }
 
@@ -154,7 +154,7 @@ public class UserLoginFragment extends Fragment {
         if (isAdded() && !isRemoving()) {
             requireActivity().runOnUiThread(() -> {
                 Snackbar.make(binding.getRoot(), msg, Snackbar.LENGTH_SHORT).show();
-                Logs.e(TAG, msg);
+                Logger.err(TAG, msg);
                 binding.userLogin.setEnabled(true);
             });
         }

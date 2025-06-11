@@ -20,7 +20,7 @@ import net.hearnsoft.tcm.domain.model.user.UserProfileModel;
 import net.hearnsoft.tcm.domain.model.user.UserRole;
 import net.hearnsoft.tcm.infrastructure.adapter.http.Constants;
 import net.hearnsoft.tcm.ui.model.UserViewModel;
-import net.hearnsoft.tcm.utils.Logs;
+import net.hearnsoft.tcm.infrastructure.logger.Logger;
 import net.hearnsoft.tcm.utils.ViewModelUtils;
 
 import java.util.List;
@@ -67,7 +67,7 @@ public class UserHomePageActivity extends BaseActivity {
     private void loadUserProfile() {
         // 从Intent获取用户名
         String username = getIntent().getStringExtra(EXTRA_USERNAME);
-        Logs.d(TAG, "Loading user profile for username: " + username);
+        Logger.debug(TAG, "Loading user profile for username: " + username);
 
         if (TextUtils.isEmpty(username)) {
             // 如果没有传入用户名，加载当前登录用户的资料
@@ -91,7 +91,7 @@ public class UserHomePageActivity extends BaseActivity {
 
     private void updateUserProfileUI(UserProfileModel profile) {
         if (profile == null) {
-            Logs.e(TAG, "Received null user profile");
+            Logger.err(TAG, "Received null user profile");
             Toast.makeText(this, getString(R.string.profile_dialog_err_msg),
                 Toast.LENGTH_LONG).show();
             finish();

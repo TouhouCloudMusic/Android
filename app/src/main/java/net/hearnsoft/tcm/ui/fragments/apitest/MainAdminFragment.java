@@ -17,7 +17,7 @@ import net.hearnsoft.tcm.databinding.FragmentMainAdminBinding;
 import net.hearnsoft.tcm.infrastructure.adapter.http.Constants;
 import net.hearnsoft.tcm.ui.adapter.ApiTestItemAdapter;
 import net.hearnsoft.tcm.ui.utils.HorizontalSpaceItemDecoration;
-import net.hearnsoft.tcm.utils.ApiConfigParser;
+import net.hearnsoft.tcm.infrastructure.api.ApiConfigParser;
 import net.hearnsoft.tcm.infrastructure.logger.Logger;
 
 import java.io.IOException;
@@ -51,7 +51,7 @@ public class MainAdminFragment extends Fragment {
         binding.adminModeServerHost.setText("API Docs:" + Constants.API_DOCS);
         try (InputStream is = getResources().openRawResource(R.raw.api_test_config)) {
             ApiConfigParser parser = new ApiConfigParser();
-            apiTestEntry = parser.parseApiConfigs(is);
+            apiTestEntry = parser.parseStream(is);
 
             ApiTestItemAdapter adapter = new ApiTestItemAdapter();
             LinearLayoutManager layoutManager = new LinearLayoutManager(

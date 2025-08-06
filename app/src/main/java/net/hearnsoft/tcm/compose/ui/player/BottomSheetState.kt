@@ -39,51 +39,35 @@ class BottomSheetState(
     private val animatable: Animatable<Dp, AnimationVector1D>,
     private val onAnchorChanged: (Int) -> Unit,
     val collapsedBound: Dp,
+    val expandedBound: Dp,
 ) : DraggableState by draggableState {
-    val dismissedBound: Dp
-        get() = animatable.lowerBound!!
-
-    val expandedBound: Dp
-        get() = animatable.upperBound!!
 
     val value by animatable.asState()
-
-    val isDismissed by derivedStateOf {
-        value == animatable.lowerBound!!
-    }
 
     val isCollapsed by derivedStateOf {
         value == collapsedBound
     }
 
     val isExpanded by derivedStateOf {
-        value == animatable.upperBound
+        value == expandedBound
     }
 
     val progress by derivedStateOf {
-        1f - (animatable.upperBound!! - animatable.value) / (animatable.upperBound!! - collapsedBound)
+        (value - collapsedBound) / (expandedBound - collapsedBound)
     }
 
-    fun collapse(animationSpec: AnimationSpec<Dp>) {
+    fun collapse(animationSpec: AnimationSpec<Dp> = SpringSpec()) {
         onAnchorChanged(COLLAPSED_ANCHOR)
         coroutineScope.launch {
             animatable.animateTo(collapsedBound, animationSpec)
         }
     }
 
-    fun expand(animationSpec: AnimationSpec<Dp>) {
+    fun expand(animationSpec: AnimationSpec<Dp> = SpringSpec()) {
         onAnchorChanged(EXPANDED_ANCHOR)
         coroutineScope.launch {
-            animatable.animateTo(animatable.upperBound!!, animationSpec)
+            animatable.animateTo(expandedBound, animationSpec)
         }
-    }
-
-    private fun collapse() {
-        collapse(SpringSpec())
-    }
-
-    private fun expand() {
-        expand(SpringSpec())
     }
 
     fun collapseSoft() {
@@ -94,133 +78,99 @@ class BottomSheetState(
         expand(spring(stiffness = Spring.StiffnessMediumLow))
     }
 
-    fun dismiss() {
-        onAnchorChanged(DISMISSED_ANCHOR)
-        coroutineScope.launch {
-            animatable.animateTo(animatable.lowerBound!!)
-        }
-    }
-
     fun snapTo(value: Dp) {
         coroutineScope.launch {
             animatable.snapTo(value)
         }
     }
 
-    fun performFling(
-        velocity: Float,
-        onDismiss: (() -> Unit)?,
-    ) {
+    fun performFling(velocity: Float) {
         if (velocity > 250) {
             expand()
         } else if (velocity < -250) {
-            if (value < collapsedBound && onDismiss != null) {
-                dismiss()
-                onDismiss.invoke()
+            collapse()
+        } else {
+            val midPoint = (expandedBound + collapsedBound) / 2
+            if (value > midPoint) {
+                expand()
             } else {
                 collapse()
-            }
-        } else {
-            val l0 = dismissedBound
-            val l1 = (collapsedBound - dismissedBound) / 2
-            val l2 = (expandedBound - collapsedBound) / 2
-            val l3 = expandedBound
-
-            when (value) {
-                in l0..l1 -> {
-                    if (onDismiss != null) {
-                        dismiss()
-                        onDismiss.invoke()
-                    } else {
-                        collapse()
-                    }
-                }
-
-                in l1..l2 -> collapse()
-                in l2..l3 -> expand()
-                else -> Unit
             }
         }
     }
 
     val preUpPostDownNestedScrollConnection
-        get() =
-            object : NestedScrollConnection {
-                var isTopReached = false
+        get() = object : NestedScrollConnection {
+            var isTopReached = false
 
-                override fun onPreScroll(
-                    available: Offset,
-                    source: NestedScrollSource,
-                ): Offset {
-                    if (isExpanded && available.y < 0) {
-                        isTopReached = false
-                    }
-
-                    return if (isTopReached && available.y < 0 && source == NestedScrollSource.Drag) {
-                        dispatchRawDelta(available.y)
-                        available
-                    } else {
-                        Offset.Zero
-                    }
-                }
-
-                override fun onPostScroll(
-                    consumed: Offset,
-                    available: Offset,
-                    source: NestedScrollSource,
-                ): Offset {
-                    if (!isTopReached) {
-                        isTopReached = consumed.y == 0f && available.y > 0
-                    }
-
-                    return if (isTopReached && source == NestedScrollSource.Drag) {
-                        dispatchRawDelta(available.y)
-                        available
-                    } else {
-                        Offset.Zero
-                    }
-                }
-
-                override suspend fun onPreFling(available: Velocity): Velocity =
-                    if (isTopReached) {
-                        val velocity = -available.y
-                        performFling(velocity, null)
-
-                        available
-                    } else {
-                        Velocity.Zero
-                    }
-
-                override suspend fun onPostFling(
-                    consumed: Velocity,
-                    available: Velocity,
-                ): Velocity {
+            override fun onPreScroll(
+                available: Offset,
+                source: NestedScrollSource,
+            ): Offset {
+                if (isExpanded && available.y < 0) {
                     isTopReached = false
-                    return Velocity.Zero
+                }
+
+                return if (isTopReached && available.y < 0 && source == NestedScrollSource.Drag) {
+                    dispatchRawDelta(available.y)
+                    available
+                } else {
+                    Offset.Zero
                 }
             }
+
+            override fun onPostScroll(
+                consumed: Offset,
+                available: Offset,
+                source: NestedScrollSource,
+            ): Offset {
+                if (!isTopReached) {
+                    isTopReached = consumed.y == 0f && available.y > 0
+                }
+
+                return if (isTopReached && source == NestedScrollSource.Drag) {
+                    dispatchRawDelta(available.y)
+                    available
+                } else {
+                    Offset.Zero
+                }
+            }
+
+            override suspend fun onPreFling(available: Velocity): Velocity =
+                if (isTopReached) {
+                    val velocity = -available.y
+                    performFling(velocity)
+                    available
+                } else {
+                    Velocity.Zero
+                }
+
+            override suspend fun onPostFling(
+                consumed: Velocity,
+                available: Velocity,
+            ): Velocity {
+                isTopReached = false
+                return Velocity.Zero
+            }
+        }
 }
 
 /** 展开状态锚点 */
-const val EXPANDED_ANCHOR = 2
+const val EXPANDED_ANCHOR = 1
 /** 折叠状态锚点 */
-const val COLLAPSED_ANCHOR = 1
-/** 隐藏状态锚点 */
-const val DISMISSED_ANCHOR = 0
+const val COLLAPSED_ANCHOR = 0
 
 /**
  * 创建BottomSheet状态
- * @param dismissedBound 隐藏状态边界
  * @param expandedBound 展开状态边界
  * @param collapsedBound 折叠状态边界
  * @param initialAnchor 初始状态锚点
  */
 @Composable
 fun rememberBottomSheetState(
-    dismissedBound: Dp,
+    collapsedBound: Dp,
     expandedBound: Dp,
-    collapsedBound: Dp = dismissedBound,
-    initialAnchor: Int = DISMISSED_ANCHOR,
+    initialAnchor: Int = COLLAPSED_ANCHOR,
 ): BottomSheetState {
     val density = LocalDensity.current
     val coroutineScope = rememberCoroutineScope()
@@ -228,36 +178,34 @@ fun rememberBottomSheetState(
     var previousAnchor by rememberSaveable {
         mutableIntStateOf(initialAnchor)
     }
-    val animatable =
-        remember {
-            Animatable(0.dp, Dp.VectorConverter)
+
+    val animatable = remember {
+        Animatable(0.dp, Dp.VectorConverter)
+    }
+
+    return remember(collapsedBound, expandedBound, coroutineScope) {
+        val initialValue = when (previousAnchor) {
+            EXPANDED_ANCHOR -> expandedBound
+            COLLAPSED_ANCHOR -> collapsedBound
+            else -> collapsedBound
         }
 
-    return remember(dismissedBound, expandedBound, collapsedBound, coroutineScope) {
-        val initialValue =
-            when (previousAnchor) {
-                EXPANDED_ANCHOR -> expandedBound
-                COLLAPSED_ANCHOR -> collapsedBound
-                DISMISSED_ANCHOR -> dismissedBound
-                else -> error("Unknown BottomSheet anchor")
-            }
-
-        animatable.updateBounds(dismissedBound.coerceAtMost(expandedBound), expandedBound)
+        animatable.updateBounds(collapsedBound, expandedBound)
         coroutineScope.launch {
             animatable.animateTo(initialValue, NavigationBarAnimationSpec)
         }
 
         BottomSheetState(
-            draggableState =
-                DraggableState { delta ->
-                    coroutineScope.launch {
-                        animatable.snapTo(animatable.value - with(density) { delta.toDp() })
-                    }
-                },
+            draggableState = DraggableState { delta ->
+                coroutineScope.launch {
+                    animatable.snapTo(animatable.value - with(density) { delta.toDp() })
+                }
+            },
             onAnchorChanged = { previousAnchor = it },
             coroutineScope = coroutineScope,
             animatable = animatable,
             collapsedBound = collapsedBound,
+            expandedBound = expandedBound,
         )
     }
 }

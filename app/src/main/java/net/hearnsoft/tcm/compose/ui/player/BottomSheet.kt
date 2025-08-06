@@ -35,7 +35,6 @@ import com.moriafly.salt.ui.SaltTheme
 fun BottomSheet(
     state: BottomSheetState,
     modifier: Modifier = Modifier,
-    onDismiss: (() -> Unit)? = null,
     collapsedContent: @Composable BoxScope.() -> Unit,
     content: @Composable BoxScope.() -> Unit,
 ) {
@@ -76,13 +75,13 @@ fun BottomSheet(
                         // 重置速度跟踪器
                         velocityTracker.resetTracking()
                         // 根据速度执行惯性滑动效果
-                        state.performFling(velocity, onDismiss)
+                        state.performFling(velocity)
                     },
                 )
             }.background(SaltTheme.colors.background) // 设置背景色
     ) {
         // 当面板未完全折叠且未被关闭时，启用返回按钮处理
-        if (!state.isCollapsed && !state.isDismissed) {
+        if (!state.isCollapsed && state.progress > 0.1f) {
             BackHandler(onBack = state::collapseSoft)
         }
 
@@ -101,7 +100,7 @@ fun BottomSheet(
         }
 
         // 折叠状态下的内容显示（当面板未完全展开且允许显示时）
-        if (!state.isExpanded && (onDismiss == null || !state.isDismissed)) {
+        if (!state.isExpanded) {
             Box(
                 modifier =
                     Modifier

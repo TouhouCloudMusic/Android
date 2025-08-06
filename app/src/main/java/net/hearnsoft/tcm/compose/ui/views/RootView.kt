@@ -51,7 +51,6 @@ import net.hearnsoft.tcm.compose.constants.NavigationBarAnimationSpec
 import net.hearnsoft.tcm.compose.constants.NavigationBarHeight
 import net.hearnsoft.tcm.compose.ui.player.BottomSheetPlayer
 import net.hearnsoft.tcm.compose.ui.player.COLLAPSED_ANCHOR
-import net.hearnsoft.tcm.compose.ui.player.DISMISSED_ANCHOR
 import net.hearnsoft.tcm.compose.ui.player.rememberBottomSheetState
 import net.hearnsoft.tcm.compose.ui.screens.ScreenRoute
 import net.hearnsoft.tcm.compose.ui.screens.navigationBuilder
@@ -70,9 +69,6 @@ fun AppRootView(
             .background(SaltTheme.colors.background)
             .fillMaxSize()
     ) {
-        // 预览界面
-        val isPreviewMode = true
-
         val navController = rememberNavController()
         val navBackStackEntry by navController.currentBackStackEntryAsState()
 
@@ -107,10 +103,9 @@ fun AppRootView(
 
         val playerBottomSheetState =
             rememberBottomSheetState(
-                dismissedBound = 0.dp,
                 collapsedBound = bottomInset + (if (shouldShowNavigationBar) NavigationBarHeight else 0.dp) + MiniPlayerHeight,
                 expandedBound = maxHeight,
-                initialAnchor = if (isPreviewMode) COLLAPSED_ANCHOR else DISMISSED_ANCHOR
+                initialAnchor = COLLAPSED_ANCHOR
             )
 
         // 获取当前路由

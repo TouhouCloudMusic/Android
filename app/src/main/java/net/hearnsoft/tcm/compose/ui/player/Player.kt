@@ -81,9 +81,6 @@ fun BottomSheetPlayer(
     BottomSheet(
         state = state,
         modifier = modifier,
-        onDismiss = {
-            // 暂时什么都不做
-        },
         collapsedContent = {
             MiniPlayer(modifier = modifier)
         }

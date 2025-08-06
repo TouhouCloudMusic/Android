@@ -1,5 +1,11 @@
 package net.hearnsoft.tcm.compose.ui.player
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.graphics.res.animatedVectorResource
+import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
+import androidx.compose.animation.graphics.vector.AnimatedImageVector
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -10,14 +16,18 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material3.ChipColors
 import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.runtime.Composable
@@ -32,8 +42,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
@@ -47,7 +59,10 @@ import com.moriafly.salt.ui.UnstableSaltUiApi
 import com.moriafly.salt.ui.ext.safeMainPadding
 import me.saket.squiggles.SquigglySlider
 import net.hearnsoft.tcm.compose.R
+import net.hearnsoft.tcm.compose.constants.PlayerHorizontalPadding
 import net.hearnsoft.tcm.compose.ui.theme.Theme
+import net.hearnsoft.tcm.compose.ui.uiwidgets.ResizableIconButton
+import net.hearnsoft.tcm.compose.utils.formatTimeString
 
 
 @Composable
@@ -62,7 +77,11 @@ fun BottomSheetPlayer(
     val context = LocalContext.current
 
     var position by remember {
-        mutableLongStateOf(0)
+        mutableLongStateOf(1000)
+    }
+
+    var duration by remember {
+        mutableLongStateOf(2000000)
     }
 
     var sliderPosition by remember {
@@ -265,15 +284,123 @@ fun BottomSheetPlayer(
                             )
                         )
 
+                        // 时间显示
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = PlayerHorizontalPadding + 4.dp),
+                        ) {
+                            Text(
+                                text = formatTimeString(sliderPosition ?: position),
+                                style = SaltTheme.textStyles.sub,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+
+                            Text(
+                                text = formatTimeString(duration),
+                                style = SaltTheme.textStyles.sub,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+
                         // 播放控制按钮
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp, vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             // 循环模式切换
+                            Box(modifier = Modifier.weight(1f)) {
+                                ResizableIconButton(
+                                    icon = R.drawable.ic_play_cycle, // 后续实现切换
+                                    color = SaltTheme.colors.text,
+                                    modifier = Modifier
+                                        .size(32.dp)
+                                        .padding(4.dp)
+                                        .align(Alignment.Center),
+                                    onClick = {}
+                                )
+                            }
+                            // 上一首按钮
+                            Box(modifier = Modifier.weight(1f)) {
+                                ResizableIconButton(
+                                    icon = R.drawable.ic_music_prev,
+                                    color = SaltTheme.colors.text,
+                                    modifier = Modifier
+                                        .size(32.dp)
+                                        .padding(4.dp)
+                                        .align(Alignment.Center),
+                                    onClick = {}
+                                )
+                            }
+
+                            Spacer(Modifier.width(8.dp))
+                            // 播放/暂停按钮
+                            Box(modifier = Modifier.weight(1f)) {
+                                var isPlaying by remember { mutableStateOf(false) }
+
+                                val icon = if (isPlaying) {
+                                    AnimatedImageVector.animatedVectorResource(R.drawable.avd_play_to_pause)
+                                } else {
+                                    AnimatedImageVector.animatedVectorResource(R.drawable.avd_pause_to_play)
+                                }
+
+                                val animatedCornerRadius by animateFloatAsState(
+                                    targetValue = if (!isPlaying) 16f else 50f,
+                                    animationSpec = tween(500),
+                                    label = "corner_radius"
+                                )
+
+                                FloatingActionButton(
+                                    onClick = {
+                                        isPlaying = !isPlaying
+                                    },
+                                    shape = RoundedCornerShape(animatedCornerRadius.dp),
+                                    containerColor = SaltTheme.colors.highlight,
+                                ) {
+                                    Icon(
+                                        painter = rememberAnimatedVectorPainter(
+                                            icon, isPlaying
+                                        ),
+                                        contentDescription = if (isPlaying) "Pause" else "Play",
+                                        modifier = Modifier.size(24.dp),
+                                        tint = SaltTheme.colors.onHighlight
+                                    )
+                                }
+                            }
+                            Spacer(Modifier.width(8.dp))
+
+                            // 下一首按钮
+                            Box(modifier = Modifier.weight(1f)) {
+                                ResizableIconButton(
+                                    icon = R.drawable.ic_music_next,
+                                    color = SaltTheme.colors.text,
+                                    modifier = Modifier
+                                        .size(32.dp)
+                                        .padding(4.dp)
+                                        .align(Alignment.Center),
+                                    onClick = {}
+                                )
+                            }
+
+                            // 播放列表按钮
+                            Box(modifier = Modifier.weight(1f)) {
+                                ResizableIconButton(
+                                    icon = R.drawable.ic_music_list,
+                                    color = SaltTheme.colors.text,
+                                    modifier = Modifier
+                                        .size(32.dp)
+                                        .padding(4.dp)
+                                        .align(Alignment.Center),
+                                    onClick = {}
+                                )
+                            }
 
                         }
 
@@ -293,6 +420,16 @@ fun HashTag(
 ) {
     ElevatedAssistChip(
         modifier = Modifier.padding(end = 4.dp),
+        colors = ChipColors(
+            containerColor = SaltTheme.colors.subBackground,
+            leadingIconContentColor = SaltTheme.colors.text,
+            labelColor = SaltTheme.colors.text,
+            trailingIconContentColor = Color.Unspecified,
+            disabledContainerColor = Color.Unspecified,
+            disabledLabelColor = Color.Unspecified,
+            disabledLeadingIconContentColor = Color.Unspecified,
+            disabledTrailingIconContentColor = Color.Unspecified,
+        ),
         label = {
             Text(
                 text = label,

@@ -24,7 +24,8 @@ import com.moriafly.salt.ui.SaltTheme
 
 /**
  * 底部弹出面板组件
- * 
+ * 从 [InnerTube](https://github.com/Malopieds/InnerTune)
+ *
  * @param state 控制底部面板状态的状态对象，包含展开/折叠/关闭等状态信息
  * @param modifier 修饰符，用于自定义样式
  * @param onDismiss 可选的关闭回调，当面板被完全关闭时触发

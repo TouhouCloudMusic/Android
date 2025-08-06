@@ -1,4 +1,4 @@
-package net.hearnsoft.tcm.compose.ui.uiwidgets
+package net.hearnsoft.tcm.compose.ui.uicomponent
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image

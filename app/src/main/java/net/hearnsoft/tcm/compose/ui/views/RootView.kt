@@ -1,7 +1,9 @@
 package net.hearnsoft.tcm.compose.ui.views
 
 import android.annotation.SuppressLint
+import androidx.annotation.OptIn
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
@@ -38,17 +40,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastAny
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.moriafly.salt.ui.BottomBar
 import com.moriafly.salt.ui.BottomBarItem
-import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.Icon
+import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.Text
 import com.moriafly.salt.ui.UnstableSaltUiApi
 import com.moriafly.salt.ui.ext.safeMainPadding
+import dagger.hilt.android.UnstableApi
 import net.hearnsoft.tcm.compose.R
 import net.hearnsoft.tcm.compose.constants.AppBarHeight
 import net.hearnsoft.tcm.compose.constants.MiniPlayerHeight
@@ -61,15 +65,22 @@ import net.hearnsoft.tcm.compose.ui.screens.ScreenRoute
 import net.hearnsoft.tcm.compose.ui.screens.navigationBuilder
 import net.hearnsoft.tcm.compose.ui.utils.LocalPlayerAwareWindowInsets
 import net.hearnsoft.tcm.compose.ui.utils.appBarScrollBehavior
+import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
 
+@OptIn(androidx.media3.common.util.UnstableApi::class)
 @SuppressLint("UnusedBoxWithConstraintsScope")
+@ExperimentalFoundationApi
 @Composable
+@UnstableApi
 @UnstableSaltUiApi
 @ExperimentalMaterial3Api
 fun AppRootView(
     modifier: Modifier = Modifier
 ) {
 
+    // 使用 Hilt 注入的 ViewModel
+    val playerViewModel: PlayerViewModel = hiltViewModel()
+    
     BoxWithConstraints(
         modifier = modifier
             .background(SaltTheme.colors.background)
@@ -181,12 +192,17 @@ fun AppRootView(
                     // 为NavHost添加智能边距
                     .windowInsetsPadding(playerAwareWindowInsets)
             ) {
-                navigationBuilder(navController, topAppBarScrollBehavior, )
+                navigationBuilder(
+                    navController,
+                    topAppBarScrollBehavior,
+                    playerViewModel
+                )
             }
 
             BottomSheetPlayer(
                 state = playerBottomSheetState,
                 navController = navController,
+                playerViewModel = playerViewModel,
             )
 
             MainBottomBar(
@@ -301,6 +317,8 @@ fun MainBottomBar(
     }
 }
 
+@OptIn(UnstableApi::class)
+@ExperimentalFoundationApi
 @Composable
 @UnstableSaltUiApi
 @ExperimentalMaterial3Api

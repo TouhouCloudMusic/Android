@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt.android)
 }
 
 android {
@@ -16,6 +18,10 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     buildTypes {
@@ -75,7 +81,25 @@ dependencies {
     implementation(libs.coil.network.okhttp)
     // Squiggly Slider
     implementation(libs.squigglyslider)
+    // Pinyin4j
+    implementation(libs.pinyin4j)
+    // Room database
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
 
+    // Room annotation processor
+    annotationProcessor(libs.androidx.room.compiler)
+    // kapt room annotation processor
+    ksp(libs.androidx.room.compiler)
+    // javax inject
+    implementation(libs.javax.inject)
+
+    // Dagger - Hilt
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+
+    // Hilt Navigation Compose
+    implementation (libs.androidx.hilt.navigation.compose)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

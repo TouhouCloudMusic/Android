@@ -1,0 +1,181 @@
+package net.hearnsoft.tcm.compose.data.repository
+
+import android.content.Context
+import android.net.Uri
+import androidx.media3.common.MediaItem
+import androidx.media3.common.util.UnstableApi
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.Flow
+import net.hearnsoft.tcm.compose.data.database.MusicDatabase
+import net.hearnsoft.tcm.compose.data.database.entities.AlbumEntity
+import net.hearnsoft.tcm.compose.data.database.entities.ArtistEntity
+import net.hearnsoft.tcm.compose.data.database.entities.SongEntity
+import net.hearnsoft.tcm.compose.utils.LocalMusicScanner
+import net.hearnsoft.tcm.compose.utils.Logger
+import javax.inject.Inject
+import javax.inject.Singleton
+
+@Singleton
+@UnstableApi
+class LocalMusicRepository @Inject constructor(
+    private val database: MusicDatabase,
+    @ApplicationContext private val context: Context
+) : MusicRepository() {
+
+    private val songDao = database.songDao()
+    private val albumDao = database.albumDao()
+    private val artistDao = database.artistDao()
+
+    // === 歌曲相关操作 ===
+    override fun getAllSongs(): Flow<List<SongEntity>> = songDao.getAllSongs()
+    override suspend fun getSongById(songId: Long): SongEntity? = songDao.getSongById(songId)
+    override suspend fun getSongByMediaStoreId(mediaStoreId: Long): SongEntity? = songDao.getSongByMediaStoreId(mediaStoreId)
+    override fun getSongsByAlbum(albumId: Long): Flow<List<SongEntity>> = songDao.getSongsByAlbum(albumId)
+    override fun getSongsByArtist(artistId: Long): Flow<List<SongEntity>> = songDao.getSongsByArtist(artistId)
+    override fun getFavoriteSongs(): Flow<List<SongEntity>> = songDao.getFavoriteSongs()
+    override fun getMostPlayedSongs(limit: Int): Flow<List<SongEntity>> = songDao.getMostPlayedSongs(limit)
+    override fun getRecentlyPlayedSongs(limit: Int): Flow<List<SongEntity>> = songDao.getRecentlyPlayedSongs(limit)
+
+    override suspend fun insertSong(song: SongEntity): Long = songDao.insertSong(song)
+    override suspend fun insertSongs(songs: List<SongEntity>): List<Long> = songDao.insertSongs(songs)
+    override suspend fun updateSong(song: SongEntity) = songDao.updateSong(song)
+    override suspend fun deleteSong(song: SongEntity) = songDao.deleteSong(song)
+    override suspend fun deleteAllSongs() = songDao.deleteAllSongs()
+    override suspend fun getSongCount(): Int = songDao.getSongCount()
+
+    override suspend fun incrementPlayCount(songId: Long, timestamp: Long) = songDao.incrementPlayCount(songId, timestamp)
+    override suspend fun updateFavoriteStatus(songId: Long, isFavorite: Boolean) = songDao.updateFavoriteStatus(songId, isFavorite)
+
+    // === 专辑相关操作 ===
+    override fun getAllAlbums(): Flow<List<AlbumEntity>> = albumDao.getAllAlbums()
+    override suspend fun getAlbumById(albumId: Long): AlbumEntity? = albumDao.getAlbumById(albumId)
+    override suspend fun getAlbumByMediaStoreId(mediaStoreAlbumId: Long): AlbumEntity? = albumDao.getAlbumByMediaStoreId(mediaStoreAlbumId)
+    override suspend fun getAlbumsByArtist(artistName: String): Flow<List<AlbumEntity>> = albumDao.getAlbumsByArtist(artistName)
+
+    override suspend fun insertAlbum(album: AlbumEntity): Long = albumDao.insertAlbum(album)
+    override suspend fun insertAlbums(albums: List<AlbumEntity>): List<Long> = albumDao.insertAlbums(albums)
+    override suspend fun updateAlbum(album: AlbumEntity) = albumDao.updateAlbum(album)
+    override suspend fun deleteAlbum(album: AlbumEntity) = albumDao.deleteAlbum(album)
+    override suspend fun deleteAllAlbums() = albumDao.deleteAllAlbums()
+
+    // === 艺术家相关操作 ===
+    override fun getAllArtists(): Flow<List<ArtistEntity>> = artistDao.getAllArtists()
+    override suspend fun getArtistById(artistId: Long): ArtistEntity? = artistDao.getArtistById(artistId)
+    override suspend fun getArtistByName(artistName: String): ArtistEntity? = artistDao.getArtistByName(artistName)
+
+    override suspend fun insertArtist(artist: ArtistEntity): Long = artistDao.insertArtist(artist)
+    override suspend fun insertArtists(artists: List<ArtistEntity>): List<Long> = artistDao.insertArtists(artists)
+    override suspend fun updateArtist(artist: ArtistEntity) = artistDao.updateArtist(artist)
+    override suspend fun deleteArtist(artist: ArtistEntity) = artistDao.deleteArtist(artist)
+    override suspend fun deleteAllArtists() = artistDao.deleteAllArtists()
+
+    // === 数据同步操作 ===
+    override suspend fun scanAndUpdateLibrary() {
+        try {
+            val scannedItems = LocalMusicScanner.scanDeviceMusic(context)
+            Logger.debug("LocalMusicRepository", "扫描到 ${scannedItems.size} 首歌曲")
+
+            for (mediaItem in scannedItems) {
+                val (songEntity, albumEntity, artistEntity) = convertMediaItemToEntities(mediaItem)
+
+                // 先处理艺术家（如果不存在则插入）
+                val existingArtist = getArtistByName(artistEntity.artistName)
+                val artistId = if (existingArtist != null) {
+                    // 更新艺术家的歌曲数量
+                    artistDao.incrementSongCount(existingArtist.artistId)
+                    existingArtist.artistId
+                } else {
+                    // 插入新艺术家，初始歌曲数量为1
+                    insertArtist(artistEntity.copy(songCount = 1))
+                }
+
+                // 再处理专辑（如果不存在则插入）
+                val existingAlbum = getAlbumByMediaStoreId(albumEntity.mediaStoreAlbumId)
+                val albumId = if (existingAlbum != null) {
+                    // 更新专辑的歌曲数量和总时长
+                    albumDao.incrementAlbumStats(existingAlbum.albumId, songEntity.duration)
+                    existingAlbum.albumId
+                } else {
+                    // 插入新专辑，初始数据
+                    insertAlbum(albumEntity.copy(
+                        songCount = 1,
+                        totalDuration = songEntity.duration
+                    ))
+                }
+
+                // 最后插入歌曲，包含完整的关联信息
+                val finalSongEntity = songEntity.copy(
+                    artistId = artistId,
+                    albumId = albumId,
+                    artistName = artistEntity.artistName,
+                    albumName = albumEntity.albumName
+                )
+
+                // 检查歌曲是否已存在（通过 mediaStoreId）
+                val existingSong = getSongByMediaStoreId(songEntity.mediaStoreId)
+                if (existingSong == null) {
+                    insertSong(finalSongEntity)
+                    Logger.debug("LocalMusicRepository", "插入新歌曲: ${finalSongEntity.title}")
+                } else {
+                    // 更新现有歌曲信息
+                    updateSong(finalSongEntity.copy(songId = existingSong.songId))
+                    Logger.debug("LocalMusicRepository", "更新歌曲: ${finalSongEntity.title}")
+                }
+            }
+
+            Logger.debug("LocalMusicRepository", "音乐库更新完成")
+        } catch (e: Exception) {
+            Logger.err("LocalMusicRepository", "更新音乐库时出错: ${e.message}")
+        }
+    }
+
+    override suspend fun convertMediaItemToEntities(mediaItem: MediaItem): Triple<SongEntity, AlbumEntity, ArtistEntity> {
+        val metadata = mediaItem.mediaMetadata
+        val mediaStoreId = mediaItem.mediaId.toLongOrNull() ?: 0L
+
+        val artistName = metadata.artist?.toString() ?: "Unknown Artist"
+        val albumName = metadata.albumTitle?.toString() ?: "Unknown Album"
+        val title = metadata.title?.toString() ?: "Unknown Title"
+
+        // 从 MediaItem 的 URI 中提取专辑ID（如果可能）
+        val albumId = try {
+            // 假设 LocalMusicScanner 在扫描时已经设置了正确的专辑信息
+            metadata.extras?.getLong("album_id") ?: 0L
+        } catch (e: Exception) {
+            0L
+        }
+
+        // 创建艺术家实体
+        val artistEntity = ArtistEntity(
+            artistName = artistName,
+            songCount = 0, // 在插入时会正确设置
+            albumCount = 0
+        )
+
+        // 创建专辑实体
+        val albumEntity = AlbumEntity(
+            mediaStoreAlbumId = albumId,
+            albumName = albumName,
+            artistName = artistName,
+            artworkUri = metadata.artworkUri,
+            songCount = 0, // 在插入时会正确设置
+            totalDuration = 0L
+        )
+
+        // 创建歌曲实体
+        val songEntity = SongEntity(
+            mediaStoreId = mediaStoreId,
+            title = title,
+            artistId = 0L, // 稍后会更新
+            albumId = 0L, // 稍后会更新
+            artistName = artistName, // 添加艺术家名称
+            artworkUri = metadata.artworkUri,
+            albumName = albumName,   // 添加专辑名称
+            duration = metadata.durationMs ?: 0L,
+            filePath = mediaItem.localConfiguration?.uri?.path ?: "",
+            contentUri = mediaItem.localConfiguration?.uri ?: Uri.EMPTY
+        )
+
+        return Triple(songEntity, albumEntity, artistEntity)
+    }
+}

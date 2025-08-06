@@ -5,9 +5,9 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.graphics.res.animatedVectorResource
 import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
 import androidx.compose.animation.graphics.vector.AnimatedImageVector
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,14 +16,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.ChipColors
 import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,6 +29,8 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -42,11 +42,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
@@ -60,29 +60,41 @@ import com.moriafly.salt.ui.ext.safeMainPadding
 import me.saket.squiggles.SquigglySlider
 import net.hearnsoft.tcm.compose.R
 import net.hearnsoft.tcm.compose.constants.PlayerHorizontalPadding
-import net.hearnsoft.tcm.compose.ui.theme.Theme
-import net.hearnsoft.tcm.compose.ui.uiwidgets.ResizableIconButton
+import net.hearnsoft.tcm.compose.ui.uicomponent.ResizableIconButton
+import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
+import net.hearnsoft.tcm.compose.utils.Logger
 import net.hearnsoft.tcm.compose.utils.formatTimeString
 
 
 @Composable
 @ExperimentalMaterial3Api
+@ExperimentalFoundationApi
 @UnstableSaltUiApi
+@UnstableApi
 fun BottomSheetPlayer(
     state: BottomSheetState,
     navController: NavController,
+    playerViewModel: PlayerViewModel,
     modifier: Modifier = Modifier
 ) {
 
     val context = LocalContext.current
 
-    var position by remember {
-        mutableLongStateOf(1000)
-    }
+    // 当前播放
+    val currentPlaying = playerViewModel.currentMediaItem.collectAsState().value
+    // 封面
+    val artworkUri = currentPlaying?.mediaMetadata?.artworkUri
+    // 标题
+    val title = currentPlaying?.mediaMetadata?.title ?: "未知歌曲"
+    // 艺术家
+    val artist = currentPlaying?.mediaMetadata?.artist ?: "未知艺术家"
 
-    var duration by remember {
-        mutableLongStateOf(2000000)
-    }
+    // 进度
+    val currentPosition = playerViewModel.currentPosition.collectAsState().value
+    val duration = playerViewModel.duration.collectAsState().value
+
+    // 播放状态
+    val isPlaying = playerViewModel.isPlaying.collectAsState().value
 
     var sliderPosition by remember {
         mutableStateOf<Long?>(null)
@@ -101,7 +113,10 @@ fun BottomSheetPlayer(
         state = state,
         modifier = modifier,
         collapsedContent = {
-            MiniPlayer(modifier = modifier)
+            MiniPlayer(
+                modifier = modifier,
+                playerViewModel = playerViewModel,
+            )
         }
     ) {
         Surface(
@@ -162,7 +177,7 @@ fun BottomSheetPlayer(
                         // 封面图片
                         AsyncImage(
                             model = ImageRequest.Builder(LocalContext.current)
-                                .data("https://example.com/cover.jpg") // 替换为实际的封面图片URL
+                                .data(artworkUri)
                                 .crossfade(true)
                                 .crossfade(1000)
                                 .build(),
@@ -187,12 +202,12 @@ fun BottomSheetPlayer(
                                     .align(Alignment.CenterVertically)
                             ) {
                                 Text(
-                                    text = "Sample Song Title",
+                                    text = title.toString(),
                                     style = SaltTheme.textStyles.main,
                                     modifier = Modifier.padding(4.dp)
                                 )
                                 Text(
-                                    text = "Artist",
+                                    text = artist.toString(),
                                     style = SaltTheme.textStyles.sub,
                                     modifier = Modifier.padding(4.dp)
                                 )
@@ -265,15 +280,21 @@ fun BottomSheetPlayer(
 
                         // 进度条
                         SquigglySlider(
-                            value = (sliderPosition ?: position).toFloat(),
-                            valueRange = 0f..100f, // 假设进度范围为0到100
+                            value = (sliderPosition ?: currentPosition).toFloat(),
+                            valueRange = 0f..(if (duration > 0) duration.toFloat() else 1f),
                             onValueChange = { value ->
                                 sliderPosition = value.toLong()
+                            },
+                            onValueChangeFinished = {
+                                sliderPosition?.let {
+                                    playerViewModel.seekTo(it)
+                                }
+                                sliderPosition = null
                             },
                             modifier = Modifier.padding(horizontal = 12.dp),
                             squigglesSpec =
                                 SquigglySlider.SquigglesSpec(
-                                    amplitude = /*if (isPlaying) (2.dp).coerceAtLeast(2.dp) else*/ (2.dp).coerceAtLeast(2.dp),
+                                    amplitude = if (isPlaying) (2.dp).coerceAtLeast(2.dp) else 0.dp,
                                     strokeWidth = 3.dp,
                                     wavelength = (24.dp).coerceAtLeast(16.dp),
                                 ),
@@ -294,7 +315,7 @@ fun BottomSheetPlayer(
                                     .padding(horizontal = PlayerHorizontalPadding + 4.dp),
                         ) {
                             Text(
-                                text = formatTimeString(sliderPosition ?: position),
+                                text = formatTimeString(sliderPosition ?: currentPosition),
                                 style = SaltTheme.textStyles.sub,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
@@ -340,36 +361,61 @@ fun BottomSheetPlayer(
                                 )
                             }
 
-                            Spacer(Modifier.width(8.dp))
+                            Spacer(Modifier.width(24.dp))
                             // 播放/暂停按钮
                             Box(modifier = Modifier.weight(1f)) {
-                                var isPlaying by remember { mutableStateOf(false) }
+                                var isPressed by remember { mutableStateOf(false) }
 
-                                val icon = if (isPlaying) {
-                                    AnimatedImageVector.animatedVectorResource(R.drawable.avd_play_to_pause)
-                                } else {
-                                    AnimatedImageVector.animatedVectorResource(R.drawable.avd_pause_to_play)
-                                }
+                                val scale by animateFloatAsState(
+                                    targetValue = if (isPressed) 0.9f else 1f,
+                                    animationSpec = tween(100),
+                                    label = "fab_scale"
+                                )
 
                                 val animatedCornerRadius by animateFloatAsState(
-                                    targetValue = if (!isPlaying) 16f else 50f,
+                                    targetValue = if (isPlaying) 16f else 50f,
                                     animationSpec = tween(500),
                                     label = "corner_radius"
                                 )
 
                                 FloatingActionButton(
                                     onClick = {
-                                        isPlaying = !isPlaying
+                                        playerViewModel.togglePlayPause()
                                     },
                                     shape = RoundedCornerShape(animatedCornerRadius.dp),
                                     containerColor = SaltTheme.colors.highlight,
+                                    modifier = Modifier.scale(scale),
+                                    interactionSource = remember { MutableInteractionSource() }
+                                        .also { interactionSource ->
+                                            LaunchedEffect(interactionSource) {
+                                                interactionSource.interactions.collect { interaction ->
+                                                    when (interaction) {
+                                                        is PressInteraction.Press -> isPressed = true
+                                                        is PressInteraction.Release -> isPressed = false
+                                                        is PressInteraction.Cancel -> isPressed = false
+                                                    }
+                                                }
+                                            }
+                                        }
                                 ) {
+                                    val stateScale by animateFloatAsState(
+                                        targetValue = if (isPlaying) 1.1f else 1f,
+                                        animationSpec = tween(300),
+                                        label = "icon_state_scale"
+                                    )
+
                                     Icon(
-                                        painter = rememberAnimatedVectorPainter(
-                                            icon, isPlaying
+                                        painter = painterResource(
+                                            if (isPlaying) {
+                                                R.drawable.pause
+                                            } else {
+                                                R.drawable.play
+                                            }
                                         ),
                                         contentDescription = if (isPlaying) "Pause" else "Play",
-                                        modifier = Modifier.size(24.dp),
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .scale(stateScale),
                                         tint = SaltTheme.colors.onHighlight
                                     )
                                 }

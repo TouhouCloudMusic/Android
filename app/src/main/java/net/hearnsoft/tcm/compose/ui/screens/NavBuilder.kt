@@ -21,7 +21,7 @@ fun NavGraphBuilder.navigationBuilder(
 
     }
     composable(ScreenRoute.Music.route) {
-
+        MusicScreen(navController = navController)
     }
     composable(ScreenRoute.Account.route) {
 

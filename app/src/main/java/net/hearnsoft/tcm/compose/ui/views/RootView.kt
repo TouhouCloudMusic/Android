@@ -6,13 +6,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -46,6 +50,7 @@ import com.moriafly.salt.ui.Text
 import com.moriafly.salt.ui.UnstableSaltUiApi
 import com.moriafly.salt.ui.ext.safeMainPadding
 import net.hearnsoft.tcm.compose.R
+import net.hearnsoft.tcm.compose.constants.AppBarHeight
 import net.hearnsoft.tcm.compose.constants.MiniPlayerHeight
 import net.hearnsoft.tcm.compose.constants.NavigationBarAnimationSpec
 import net.hearnsoft.tcm.compose.constants.NavigationBarHeight
@@ -54,6 +59,7 @@ import net.hearnsoft.tcm.compose.ui.player.COLLAPSED_ANCHOR
 import net.hearnsoft.tcm.compose.ui.player.rememberBottomSheetState
 import net.hearnsoft.tcm.compose.ui.screens.ScreenRoute
 import net.hearnsoft.tcm.compose.ui.screens.navigationBuilder
+import net.hearnsoft.tcm.compose.ui.utils.LocalPlayerAwareWindowInsets
 import net.hearnsoft.tcm.compose.ui.utils.appBarScrollBehavior
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
@@ -108,6 +114,15 @@ fun AppRootView(
                 initialAnchor = COLLAPSED_ANCHOR
             )
 
+        // 智能的WindowInsets计算
+        val playerAwareWindowInsets = remember(bottomInset, shouldShowNavigationBar) {
+            var bottom = bottomInset + MiniPlayerHeight
+            if (shouldShowNavigationBar) bottom += NavigationBarHeight
+            windowsInsets
+                .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
+                .add(WindowInsets(top = AppBarHeight, bottom = bottom))
+        }
+
         // 获取当前路由
         val currentRoute = navBackStackEntry?.destination?.route
 
@@ -152,7 +167,10 @@ fun AppRootView(
                 )
             }
         }
-        CompositionLocalProvider() {
+        CompositionLocalProvider(
+            // 提供智能WindowInsets给所有子Screen
+            LocalPlayerAwareWindowInsets provides playerAwareWindowInsets
+        ) {
             NavHost(
                 navController = navController,
                 startDestination = ScreenRoute.Explore.route,
@@ -160,6 +178,8 @@ fun AppRootView(
                     .nestedScroll(
                         topAppBarScrollBehavior.nestedScrollConnection
                     )
+                    // 为NavHost添加智能边距
+                    .windowInsetsPadding(playerAwareWindowInsets)
             ) {
                 navigationBuilder(navController, topAppBarScrollBehavior, )
             }

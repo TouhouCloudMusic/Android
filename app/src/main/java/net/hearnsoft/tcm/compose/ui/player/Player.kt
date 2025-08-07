@@ -362,11 +362,13 @@ fun BottomSheetPlayer(
                                         .size(32.dp)
                                         .padding(4.dp)
                                         .align(Alignment.Center),
-                                    onClick = {}
+                                    onClick = {
+                                        playerViewModel.skipToPrevious()
+                                    }
                                 )
                             }
 
-                            Spacer(Modifier.width(24.dp))
+                            /*Spacer(Modifier.width(16.dp))*/
                             // 播放/暂停按钮
                             Box(modifier = Modifier.weight(1f)) {
                                 var isPressed by remember { mutableStateOf(false) }
@@ -389,7 +391,9 @@ fun BottomSheetPlayer(
                                     },
                                     shape = RoundedCornerShape(animatedCornerRadius.dp),
                                     containerColor = SaltTheme.colors.highlight,
-                                    modifier = Modifier.scale(scale),
+                                    modifier = Modifier
+                                        .scale(scale)
+                                        .align(Alignment.Center),
                                     interactionSource = remember { MutableInteractionSource() }
                                         .also { interactionSource ->
                                             LaunchedEffect(interactionSource) {
@@ -425,7 +429,7 @@ fun BottomSheetPlayer(
                                     )
                                 }
                             }
-                            Spacer(Modifier.width(8.dp))
+                            /*Spacer(Modifier.width(16.dp))*/
 
                             // 下一首按钮
                             Box(modifier = Modifier.weight(1f)) {
@@ -436,7 +440,9 @@ fun BottomSheetPlayer(
                                         .size(32.dp)
                                         .padding(4.dp)
                                         .align(Alignment.Center),
-                                    onClick = {}
+                                    onClick = {
+                                        playerViewModel.skipToNext()
+                                    }
                                 )
                             }
 

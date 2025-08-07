@@ -2,6 +2,7 @@ package net.hearnsoft.tcm.compose.ui.uicomponent
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,10 +10,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,70 +48,68 @@ fun MusicListItem(
 ) {
     val context = LocalContext.current
 
-    Card(
+    Row(
         modifier = Modifier
-            .fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp),
-        onClick = {
-            onClick()
-        }
-    ) {
-        Row(
-            modifier = Modifier.background(SaltTheme.colors.subBackground)
-        ) {
-            val artworkUri = songEntity.artworkUri ?: R.drawable.ic_nav_music.toDrawable()
-
-            AsyncImage(
-                model = ImageRequest.Builder(context)
-                    .data(artworkUri)
-                    .crossfade(true)
-                    .crossfade(1000)
-                    .placeholder(R.drawable.ic_nav_music)
-                    .build(),
-                modifier = Modifier
-                    .padding(8.dp)
-                    .size(50.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .align(Alignment.CenterVertically),
-                contentDescription = "Album Art",
-                contentScale = ContentScale.Crop
+            .background(SaltTheme.colors.subBackground)
+            .clip(RoundedCornerShape(8.dp))
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = ripple(),
+                onClick = onClick
             )
-            Column(
-                modifier = Modifier
-                    .padding(horizontal = 4.dp, vertical = 2.dp)
-                    .weight(1f)
-                    .align(Alignment.CenterVertically)
-            ) {
-                Text(
-                    text = songEntity.title.toString() ?: "Unknown Title",
-                    style = SaltTheme.textStyles.main,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+    ) {
+        val artworkUri = songEntity.artworkUri ?: R.drawable.ic_nav_music.toDrawable()
 
-                val artist = songEntity.artistName.toString() ?: "Unknown Artist"
-                val album = songEntity.albumName.toString() ?: "Unknown Album"
+        AsyncImage(
+            model = ImageRequest.Builder(context)
+                .data(artworkUri)
+                .crossfade(true)
+                .crossfade(1000)
+                .placeholder(R.drawable.ic_nav_music)
+                .build(),
+            modifier = Modifier
+                .padding(8.dp)
+                .size(50.dp)
+                .clip(RoundedCornerShape(4.dp))
+                .align(Alignment.CenterVertically),
+            contentDescription = "Album Art",
+            contentScale = ContentScale.Crop
+        )
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 4.dp, vertical = 2.dp)
+                .weight(1f)
+                .align(Alignment.CenterVertically)
+        ) {
+            Text(
+                text = songEntity.title.toString() ?: "Unknown Title",
+                style = SaltTheme.textStyles.main,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
 
-                val subTitle = "$artist - $album"
-                Text(
-                    text = subTitle,
-                    style = SaltTheme.textStyles.sub,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
+            val artist = songEntity.artistName.toString() ?: "Unknown Artist"
+            val album = songEntity.albumName.toString() ?: "Unknown Album"
 
-            IconButton(
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .padding(8.dp),
-                onClick = { /* TODO: Handle play action */ }
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_more_vert_24px),
-                    contentDescription = "More Options",
-                )
-            }
+            val subTitle = "$artist - $album"
+            Text(
+                text = subTitle,
+                style = SaltTheme.textStyles.sub,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+
+        IconButton(
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .padding(8.dp),
+            onClick = { /* TODO: Handle play action */ }
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_more_vert_24px),
+                contentDescription = "More Options",
+            )
         }
     }
 }

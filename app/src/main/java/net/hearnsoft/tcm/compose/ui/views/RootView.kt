@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -146,7 +147,7 @@ fun AppRootView(
             ScreenRoute.Statistics.route -> "统计"
             ScreenRoute.Music.route -> "音乐"
             ScreenRoute.Account.route -> "个人"
-            else -> "Touhou Cloud Music"
+            else -> stringResource(R.string.app_name)
         }
 
         Row(
@@ -320,6 +321,7 @@ fun MainBottomBar(
     }
 }
 
+/*
 @OptIn(UnstableApi::class)
 @ExperimentalFoundationApi
 @Composable
@@ -333,4 +335,4 @@ fun AppRootViewPreview() {
             .safeMainPadding(),
         context = Activity() // 使用一个空的Activity实例进行预览
     )
-}
+}*/

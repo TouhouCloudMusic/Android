@@ -53,7 +53,7 @@ fun MusicListItem(
         }
     ) {
         Row(
-            modifier = Modifier.background(SaltTheme.colors.background)
+            modifier = Modifier.background(SaltTheme.colors.subBackground)
         ) {
             val artworkUri = songEntity.artworkUri ?: R.drawable.ic_nav_music.toDrawable()
 

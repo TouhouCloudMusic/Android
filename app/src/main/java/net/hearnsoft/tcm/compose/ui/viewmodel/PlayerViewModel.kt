@@ -9,14 +9,17 @@ import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
 import com.moriafly.salt.ui.UnstableSaltUiApi
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.hearnsoft.tcm.compose.data.database.entities.SongEntity
 import net.hearnsoft.tcm.compose.data.repository.MusicRepository
 import net.hearnsoft.tcm.compose.domain.model.song.SongSortingRule
@@ -117,34 +120,43 @@ class PlayerViewModel @Inject constructor(
         sortingRule: SongSortingRule,
         query: String
     ) {
-        try {
-            // 先过滤
-            val filtered = if (query.isBlank()) {
-                songs
-            } else {
-                songs.filter { song ->
-                    song.title.contains(query, ignoreCase = true) ||
-                            song.artistName.contains(query, ignoreCase = true) ||
-                            song.albumName.contains(query, ignoreCase = true)
+        viewModelScope.launch {
+            try {
+                _isLoading.value = true
+                // 将CPU密集型任务切换到后台线程
+                val (filteredSongs, sortedMediaItems) = withContext(Dispatchers.Default) {
+                    // 先过滤
+                    val filtered = if (query.isBlank()) {
+                        songs
+                    } else {
+                        songs.filter { song ->
+                            song.title.contains(query, ignoreCase = true) ||
+                                    song.artistName.contains(query, ignoreCase = true) ||
+                                    song.albumName.contains(query, ignoreCase = true)
+                        }
+                    }
+
+                    // 转换为 MediaItem 进行排序
+                    val mediaItems = filtered.map { songEntity ->
+                        convertSongEntityToMediaItem(songEntity)
+                    }
+
+                    // 应用排序
+                    val sorted = LocalMusicScanner.sortMusicList(mediaItems, sortingRule)
+                    Pair(filtered, sorted)
                 }
+
+                // 更新状态
+                _filteredSongs.value = filteredSongs
+                _currentPlaylist.value = sortedMediaItems
+
+                Logger.debug(TAG, "应用过滤和排序: ${filteredSongs.size} 首歌曲")
+            } catch (e: Exception) {
+                Logger.err(TAG, "应用过滤和排序时出错: ${e.message}")
+                _errorMessage.value = "排序失败: ${e.message}"
+            } finally {
+                _isLoading.value = false // 结束时关闭加载状态
             }
-
-            // 转换为 MediaItem 进行排序
-            val mediaItems = filtered.map { songEntity ->
-                convertSongEntityToMediaItem(songEntity)
-            }
-
-            // 应用排序
-            val sortedMediaItems = LocalMusicScanner.sortMusicList(mediaItems, sortingRule)
-
-            // 更新状态
-            _filteredSongs.value = filtered
-            _currentPlaylist.value = sortedMediaItems
-
-            Logger.debug(TAG, "应用过滤和排序: ${filtered.size} 首歌曲")
-        } catch (e: Exception) {
-            Logger.err(TAG, "应用过滤和排序时出错: ${e.message}")
-            _errorMessage.value = "排序失败: ${e.message}"
         }
     }
 
@@ -167,18 +179,22 @@ class PlayerViewModel @Inject constructor(
      */
     fun loadAllSongs() {
         viewModelScope.launch {
-            try {
-                _isLoading.value = true
-                musicRepository.getAllSongs().collectLatest { songs ->
+            _isLoading.value = true
+            musicRepository.getAllSongs()
+                .catch { e ->
+                    Logger.err(TAG, "加载歌曲失败: ${e.message}")
+                    _errorMessage.value = "加载歌曲失败: ${e.message}"
+                    _isLoading.value = false // 确保在出错时也更新状态
+                }
+                .collectLatest { songs ->
                     _allSongs.value = songs
                     Logger.debug(TAG, "加载了 ${songs.size} 首歌曲")
+
+                    // 收到第一次数据后，就认为加载完成
+                    if (_isLoading.value) {
+                        _isLoading.value = false
+                    }
                 }
-            } catch (e: Exception) {
-                Logger.err(TAG, "加载歌曲失败: ${e.message}")
-                _errorMessage.value = "加载歌曲失败: ${e.message}"
-            } finally {
-                _isLoading.value = false
-            }
         }
     }
 
@@ -299,6 +315,15 @@ class PlayerViewModel @Inject constructor(
      */
     fun clearSearch() {
         _searchQuery.value = ""
+    }
+
+    /**
+     * 重新加载所有歌曲
+     */
+    fun reloadAllSongs() {
+        viewModelScope.launch {
+            loadAllSongs()
+        }
     }
 
     // === 播放统计方法 ===

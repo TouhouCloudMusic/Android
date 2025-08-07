@@ -73,14 +73,6 @@ fun MiniPlayer(
     // 播放状态
     val isPlaying = playerViewModel.isPlaying.collectAsState().value
 
-    LaunchedEffect(Unit) {
-        Logger.info("MiniPlayer", "artworkUri: $artworkUri")
-    }
-
-    LaunchedEffect(isPlaying) {
-        Logger.info("MiniPlayer", "isPlaying: $isPlaying")
-    }
-
     Row(
         modifier = modifier
             .background(color = SaltTheme.colors.background)

@@ -62,7 +62,6 @@ import net.hearnsoft.tcm.compose.R
 import net.hearnsoft.tcm.compose.constants.PlayerHorizontalPadding
 import net.hearnsoft.tcm.compose.ui.uicomponent.ResizableIconButton
 import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
-import net.hearnsoft.tcm.compose.utils.Logger
 import net.hearnsoft.tcm.compose.utils.formatTimeString
 
 
@@ -186,7 +185,7 @@ fun BottomSheetPlayer(
                                 .aspectRatio(1f)
                                 .padding(16.dp)
                                 .scale(1f)
-                                .clip(RoundedCornerShape(8.dp)),
+                                .clip(RoundedCornerShape(16.dp)),
                             contentDescription = "Cover Art",
                         )
                         // 歌曲信息

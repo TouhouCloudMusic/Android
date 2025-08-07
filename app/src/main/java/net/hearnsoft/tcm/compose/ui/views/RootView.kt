@@ -83,7 +83,7 @@ fun AppRootView(
     
     BoxWithConstraints(
         modifier = modifier
-            .background(SaltTheme.colors.background)
+            .background(SaltTheme.colors.subBackground)
             .fillMaxSize()
     ) {
         val navController = rememberNavController()

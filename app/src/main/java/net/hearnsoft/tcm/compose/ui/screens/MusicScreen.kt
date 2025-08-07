@@ -90,7 +90,7 @@ fun MusicScreen(
                     .fillMaxSize()
                     .padding(horizontal = 4.dp)
             ) {
-                /*// 操作按钮行
+                // 操作按钮行
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -113,7 +113,7 @@ fun MusicScreen(
                             enabled = !isLoading && currentPlaylist.isNotEmpty()
                         )
                     }
-                }*/
+                }
 
                 // 歌曲数量显示
                 if (allSongs.isNotEmpty()) {

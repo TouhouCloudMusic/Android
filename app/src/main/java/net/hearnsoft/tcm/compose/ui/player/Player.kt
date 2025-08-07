@@ -1,5 +1,7 @@
 package net.hearnsoft.tcm.compose.ui.player
 
+import android.app.Activity
+import android.content.Context
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.graphics.res.animatedVectorResource
@@ -62,6 +64,7 @@ import net.hearnsoft.tcm.compose.R
 import net.hearnsoft.tcm.compose.constants.PlayerHorizontalPadding
 import net.hearnsoft.tcm.compose.ui.uicomponent.ResizableIconButton
 import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
+import net.hearnsoft.tcm.compose.utils.SystemMediaDialogUtils
 import net.hearnsoft.tcm.compose.utils.formatTimeString
 
 
@@ -74,10 +77,9 @@ fun BottomSheetPlayer(
     state: BottomSheetState,
     navController: NavController,
     playerViewModel: PlayerViewModel,
+    context: Activity,
     modifier: Modifier = Modifier
 ) {
-
-    val context = LocalContext.current
 
     // 当前播放
     val currentPlaying = playerViewModel.currentMediaItem.collectAsState().value
@@ -151,7 +153,9 @@ fun BottomSheetPlayer(
                         Row {
                             // 投送按钮
                             IconButton(
-                                onClick = {},
+                                onClick = {
+                                    SystemMediaDialogUtils.getInstance(context).showSystemMediaDialog()
+                                },
                                 modifier = modifier.padding(4.dp)
                             ) {
                                 Icon(
@@ -203,12 +207,14 @@ fun BottomSheetPlayer(
                                 Text(
                                     text = title.toString(),
                                     style = SaltTheme.textStyles.main,
-                                    modifier = Modifier.padding(4.dp)
+                                    modifier = Modifier.padding(4.dp),
+                                    maxLines = 2,
                                 )
                                 Text(
                                     text = artist.toString(),
                                     style = SaltTheme.textStyles.sub,
-                                    modifier = Modifier.padding(4.dp)
+                                    modifier = Modifier.padding(4.dp),
+                                    maxLines = 1,
                                 )
                             }
                             // 部分控制按钮

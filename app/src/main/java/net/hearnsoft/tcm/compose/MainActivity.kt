@@ -1,5 +1,6 @@
 package net.hearnsoft.tcm.compose
 
+import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -12,6 +13,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.moriafly.salt.ui.UnstableSaltUiApi
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.UnstableApi
+import net.hearnsoft.tcm.compose.MainActivity
 import net.hearnsoft.tcm.compose.ui.theme.TouhouCloudMusicTheme
 import net.hearnsoft.tcm.compose.ui.views.AppRootView
 
@@ -26,7 +28,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             TouhouCloudMusicTheme {
-                AppRootView()
+                AppRootView(
+                    context = this@MainActivity
+                )
             }
         }
     }
@@ -40,6 +44,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppPreview() {
     TouhouCloudMusicTheme {
-        AppRootView()
+        AppRootView(context = Activity())
     }
 }

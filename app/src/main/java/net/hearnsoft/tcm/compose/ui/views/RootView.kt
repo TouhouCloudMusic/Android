@@ -1,6 +1,7 @@
 package net.hearnsoft.tcm.compose.ui.views
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import androidx.annotation.OptIn
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -75,6 +76,7 @@ import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
 @UnstableSaltUiApi
 @ExperimentalMaterial3Api
 fun AppRootView(
+    context : Activity,
     modifier: Modifier = Modifier
 ) {
 
@@ -203,6 +205,7 @@ fun AppRootView(
                 state = playerBottomSheetState,
                 navController = navController,
                 playerViewModel = playerViewModel,
+                context = context
             )
 
             MainBottomBar(
@@ -328,5 +331,6 @@ fun AppRootViewPreview() {
         modifier = Modifier
             .fillMaxSize()
             .safeMainPadding(),
+        context = Activity() // 使用一个空的Activity实例进行预览
     )
 }

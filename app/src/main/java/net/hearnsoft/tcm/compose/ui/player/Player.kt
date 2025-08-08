@@ -1,17 +1,15 @@
 package net.hearnsoft.tcm.compose.ui.player
 
+import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.Context
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.graphics.res.animatedVectorResource
-import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
-import androidx.compose.animation.graphics.vector.AnimatedImageVector
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,10 +18,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
 import androidx.compose.material3.ChipColors
 import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,7 +34,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -44,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -63,12 +62,14 @@ import com.moriafly.salt.ui.ext.safeMainPadding
 import me.saket.squiggles.SquigglySlider
 import net.hearnsoft.tcm.compose.R
 import net.hearnsoft.tcm.compose.constants.PlayerHorizontalPadding
+import net.hearnsoft.tcm.compose.constants.PlayerVerticalPadding
 import net.hearnsoft.tcm.compose.ui.uicomponent.ResizableIconButton
 import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
 import net.hearnsoft.tcm.compose.utils.SystemMediaDialogUtils
 import net.hearnsoft.tcm.compose.utils.formatTimeString
 
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 @ExperimentalMaterial3Api
 @ExperimentalFoundationApi
@@ -180,28 +181,46 @@ fun BottomSheetPlayer(
                             }
                         }
                     }
-                    // 这里是播放器内容
-                    Column {
-                        // 封面图片
-                        AsyncImage(
-                            model = ImageRequest.Builder(LocalContext.current)
-                                .data(artworkUri ?: R.drawable.ic_nav_music)
-                                .crossfade(true)
-                                .crossfade(1000)
-                                .build(),
+                    // 封面容器
+                    BoxWithConstraints(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .weight(1f)
+                            .padding(horizontal = PlayerHorizontalPadding, vertical = PlayerVerticalPadding)
+                            .sizeIn(maxHeight = 600.dp, maxWidth = 600.dp)
+                            .align(Alignment.CenterHorizontally)
+                    ) {
+                        Card(
                             modifier = Modifier
-                                .fillMaxWidth()
+                                .align(Alignment.Center)
                                 .aspectRatio(1f)
-                                .padding(16.dp)
-                                .scale(1f)
-                                .clip(RoundedCornerShape(16.dp)),
-                            contentDescription = "Cover Art",
-                        )
+                                .scale(1f),
+                            shape = RoundedCornerShape(16.dp),
+                        ) {
+                            // 封面图片
+                            AsyncImage(
+                                model = ImageRequest.Builder(LocalContext.current)
+                                    .data(artworkUri ?: R.drawable.ic_nav_music)
+                                    .crossfade(true)
+                                    .crossfade(1000)
+                                    .build(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .aspectRatio(1f)
+                                    .scale(1f),
+                                contentDescription = "Cover Art",
+                                contentScale = ContentScale.Crop
+                            )
+                        }
+                    }
+
+                    // 控制器和信息区域
+                    Column {
                         // 歌曲信息
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(start = 16.dp, end = 4.dp),
+                                .padding(PlayerVerticalPadding),
                         ) {
                             // 歌曲标题和艺术家
                             Column(
@@ -484,7 +503,6 @@ fun BottomSheetPlayer(
                             }
 
                         }
-
                     }
 
                 }

@@ -59,13 +59,6 @@ fun MiniPlayer(
     val title = currentMediaItem?.mediaMetadata?.title ?: "未知歌曲"
     val artist = currentMediaItem?.mediaMetadata?.artist ?: "未知艺术家"
 
-    // 进度
-    val currentPosition = playerViewModel.currentPosition.collectAsState().value
-    val duration = playerViewModel.duration.collectAsState().value
-
-    // 播放状态
-    val isPlaying = playerViewModel.isPlaying.collectAsState().value
-
     Row(
         modifier = modifier
             .background(color = SaltTheme.colors.background)
@@ -115,17 +108,45 @@ fun MiniPlayer(
                 style = SaltTheme.textStyles.main,
                 maxLines = 1
             )
-            CompositionLocalProvider(LocalContentColor provides SaltTheme.colors.subText) {
-                Text(
-                    text = artist.toString(), style = SaltTheme.textStyles.sub
-                )
-            }
+            Text(
+                text = artist.toString(),
+                style = SaltTheme.textStyles.sub,
+                maxLines = 1
+            )
         }
+
+        // 将播放控制相关组件封装起来
+        PlayerControls(
+            modifier = Modifier.align(Alignment.CenterVertically),
+            playerViewModel = playerViewModel
+        )
+    }
+}
+
+/**
+ * 播放控制组件，将频繁更新的状态读取限制在此范围内
+ */
+@UnstableSaltUiApi
+@ExperimentalMaterial3Api
+@UnstableApi
+@ExperimentalFoundationApi
+@Composable
+private fun PlayerControls(
+    modifier: Modifier = Modifier,
+    playerViewModel: PlayerViewModel
+) {
+    // 进度
+    val currentPosition by playerViewModel.currentPosition.collectAsState()
+    val duration by playerViewModel.duration.collectAsState()
+
+    // 播放状态
+    val isPlaying by playerViewModel.isPlaying.collectAsState()
+
+    Row(modifier = modifier) {
         // 播放按钮
         Box(
             modifier = Modifier
                 .size(48.dp, 48.dp)
-                .align(Alignment.CenterVertically)
         ) {
             PlayPauseButton(
                 modifier = Modifier.align(Alignment.Center),
@@ -154,7 +175,6 @@ fun MiniPlayer(
         Box(
             modifier = Modifier
                 .size(48.dp, 48.dp)
-                .align(Alignment.CenterVertically)
         ) {
             IconButton(
                 modifier = Modifier.align(Alignment.Center),

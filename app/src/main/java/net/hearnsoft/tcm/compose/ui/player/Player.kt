@@ -61,6 +61,7 @@ import com.moriafly.salt.ui.UnstableSaltUiApi
 import com.moriafly.salt.ui.ext.safeMainPadding
 import me.saket.squiggles.SquigglySlider
 import net.hearnsoft.tcm.compose.R
+import net.hearnsoft.tcm.compose.constants.PlayerCoverVerticalPadding
 import net.hearnsoft.tcm.compose.constants.PlayerHorizontalPadding
 import net.hearnsoft.tcm.compose.constants.PlayerVerticalPadding
 import net.hearnsoft.tcm.compose.ui.uicomponent.ResizableIconButton
@@ -186,7 +187,7 @@ fun BottomSheetPlayer(
                         modifier = Modifier
                             .fillMaxSize()
                             .weight(1f)
-                            .padding(horizontal = PlayerHorizontalPadding, vertical = PlayerVerticalPadding)
+                            .padding(horizontal = PlayerHorizontalPadding, vertical = PlayerCoverVerticalPadding)
                             .sizeIn(maxHeight = 600.dp, maxWidth = 600.dp)
                             .align(Alignment.CenterHorizontally)
                     ) {
@@ -217,13 +218,13 @@ fun BottomSheetPlayer(
                     // 控制器和信息区域
                     Column(
                         modifier = Modifier
-                            .padding(vertical = PlayerVerticalPadding)
+                            .padding(horizontal = PlayerHorizontalPadding, vertical = 16.dp)
                     ) {
                         // 歌曲信息
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(PlayerVerticalPadding),
+                                .padding(vertical = 8.dp),
                         ) {
                             // 歌曲标题和艺术家
                             Column(
@@ -300,7 +301,7 @@ fun BottomSheetPlayer(
                         LazyRow(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                                .padding(vertical = 8.dp),
                         ) {
                             // 测试10个标签
                             items(10) { index ->
@@ -323,7 +324,7 @@ fun BottomSheetPlayer(
                                 }
                                 sliderPosition = null
                             },
-                            modifier = Modifier.padding(horizontal = 12.dp),
+                            modifier = Modifier,
                             squigglesSpec =
                                 SquigglySlider.SquigglesSpec(
                                     amplitude = if (isPlaying) (2.dp).coerceAtLeast(2.dp) else 0.dp,
@@ -343,8 +344,7 @@ fun BottomSheetPlayer(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier =
                                 Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = PlayerHorizontalPadding + 4.dp),
+                                    .fillMaxWidth(),
                         ) {
                             Text(
                                 text = formatTimeString(sliderPosition ?: currentPosition),
@@ -365,7 +365,7 @@ fun BottomSheetPlayer(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                                .padding(vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             // 循环模式切换

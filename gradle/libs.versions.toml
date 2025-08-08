@@ -23,6 +23,7 @@ squigglyslider = "1.0.0"
 pinyin4j = "2.5.0"
 javaxInject = "1"
 hilt = "2.51.1"
+annotation = "1.8.2"
 
 [libraries]
 androidx-animation-graphics = { module = "androidx.compose.animation:animation-graphics", version.ref = "animationGraphics" }
@@ -65,6 +66,7 @@ arrow-fx-coroutines = { module = "io.arrow-kt:arrow-fx-coroutines", version.ref 
 squigglyslider = { module = "me.saket.squigglyslider:squigglyslider", version.ref = "squigglyslider" }
 pinyin4j = { module = "com.belerweb:pinyin4j", version.ref = "pinyin4j" }
 javax-inject = { group = "javax.inject", name = "javax.inject", version.ref = "javaxInject" }
+annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

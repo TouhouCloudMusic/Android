@@ -24,3 +24,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "TouhouCloudMusicCompose"
 include(":app")
+include(":material-color-utilities")

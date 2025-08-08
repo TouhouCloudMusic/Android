@@ -101,6 +101,9 @@ dependencies {
     // Hilt Navigation Compose
     implementation (libs.androidx.hilt.navigation.compose)
 
+    // Material Color Utilities
+    implementation(project(":material-color-utilities"))
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

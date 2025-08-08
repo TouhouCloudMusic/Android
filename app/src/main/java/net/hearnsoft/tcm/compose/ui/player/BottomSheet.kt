@@ -81,7 +81,7 @@ fun BottomSheet(
                         state.performFling(velocity)
                     },
                 )
-            }.background(brushBackgroundColor), // 设置背景色
+            }.background(SaltTheme.colors.subBackground) // 设置背景色,
     ) {
         // 当面板未完全折叠且未被关闭时，启用返回按钮处理
         if (!state.isCollapsed && state.progress > 0.1f) {
@@ -96,8 +96,8 @@ fun BottomSheet(
                     .graphicsLayer {
                         // 根据展开进度计算透明度，实现渐显效果
                         // 当进度超过0.25时开始显示，完全展开时透明度为1
-                        alpha = ((state.progress - 0.25f) * 4).coerceIn(0f, 1f)
-                    },
+                        alpha = ((state.progress - 0.1f) * 4).coerceIn(0f, 1f)
+                    }.background(brushBackgroundColor),
                 content = content
             )
         }

@@ -50,13 +50,9 @@ fun MusicListItem(
 
     Row(
         modifier = Modifier
-            .background(SaltTheme.colors.subBackground)
+            .background(SaltTheme.colors.background)
             .clip(RoundedCornerShape(8.dp))
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = ripple(),
-                onClick = onClick
-            )
+            .clickable(onClick = onClick)
     ) {
         val artworkUri = songEntity.artworkUri ?: R.drawable.ic_nav_music.toDrawable()
 

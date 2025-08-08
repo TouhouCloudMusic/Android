@@ -6,6 +6,7 @@ import android.graphics.drawable.BitmapDrawable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -76,7 +77,6 @@ import net.hearnsoft.tcm.compose.constants.PlayerHorizontalPadding
 import net.hearnsoft.tcm.compose.ui.theme.extractGradientColors
 import net.hearnsoft.tcm.compose.ui.uicomponent.ResizableIconButton
 import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
-import net.hearnsoft.tcm.compose.utils.Logger
 import net.hearnsoft.tcm.compose.utils.SystemMediaDialogUtils
 import net.hearnsoft.tcm.compose.utils.formatTimeString
 
@@ -116,8 +116,6 @@ fun BottomSheetPlayer(
     val shuffleModeEnabled = playerViewModel.shuffleModeEnabled.collectAsState().value
 
     val isSystemInDarkTheme = isSystemInDarkTheme()
-
-    val changeBound = state.expandedBound / 3
 
     // 渐变颜色状态管理
     var gradientColors by remember {
@@ -219,9 +217,7 @@ fun BottomSheetPlayer(
             )
         },
         brushBackgroundColor =
-            if (hasGradientColours &&
-                state.value > changeBound
-            ) {
+            if (hasGradientColours) {
                 Brush.verticalGradient(gradientColors)
             } else {
                 Brush.verticalGradient(
@@ -234,7 +230,8 @@ fun BottomSheetPlayer(
     ) {
         Surface(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxSize(),
+
         ) {
             // 视图根布局
             Box(

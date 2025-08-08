@@ -6,11 +6,13 @@ import androidx.annotation.OptIn
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.add
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -31,6 +33,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -53,7 +57,6 @@ import com.moriafly.salt.ui.Icon
 import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.Text
 import com.moriafly.salt.ui.UnstableSaltUiApi
-import com.moriafly.salt.ui.ext.safeMainPadding
 import dagger.hilt.android.UnstableApi
 import net.hearnsoft.tcm.compose.R
 import net.hearnsoft.tcm.compose.constants.AppBarHeight
@@ -61,6 +64,7 @@ import net.hearnsoft.tcm.compose.constants.MiniPlayerHeight
 import net.hearnsoft.tcm.compose.constants.NavigationBarAnimationSpec
 import net.hearnsoft.tcm.compose.constants.NavigationBarHeight
 import net.hearnsoft.tcm.compose.ui.player.BottomSheetPlayer
+import net.hearnsoft.tcm.compose.ui.player.BottomSheetState
 import net.hearnsoft.tcm.compose.ui.player.COLLAPSED_ANCHOR
 import net.hearnsoft.tcm.compose.ui.player.rememberBottomSheetState
 import net.hearnsoft.tcm.compose.ui.screens.ScreenRoute
@@ -86,7 +90,7 @@ fun AppRootView(
     
     BoxWithConstraints(
         modifier = modifier
-            .background(SaltTheme.colors.subBackground)
+            .background(SaltTheme.colors.background)
             .fillMaxSize()
     ) {
         val navController = rememberNavController()
@@ -250,7 +254,7 @@ fun MainBottomBar(
     val currentRoute = navBackStackEntry?.destination?.route
 
     BottomBar(
-        backgroundColor = SaltTheme.colors.background,
+        backgroundColor = Color.Transparent,
         modifier = modifier
     ) {
         BottomBarItem(

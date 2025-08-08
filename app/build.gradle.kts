@@ -104,6 +104,10 @@ dependencies {
     // Material Color Utilities
     implementation(project(":material-color-utilities"))
 
+    // Palettes
+    implementation(libs.palette)
+    implementation(libs.palette.ktx)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

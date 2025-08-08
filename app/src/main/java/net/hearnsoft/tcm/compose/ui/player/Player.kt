@@ -2,11 +2,13 @@ package net.hearnsoft.tcm.compose.ui.player
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.graphics.drawable.BitmapDrawable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -41,17 +43,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.ColorUtils
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
+import coil3.BitmapImage
+import coil3.ImageLoader
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
+import coil3.request.allowHardware
 import coil3.request.crossfade
 import com.moriafly.salt.ui.Icon
 import com.moriafly.salt.ui.SaltTheme
@@ -59,13 +67,16 @@ import com.moriafly.salt.ui.Surface
 import com.moriafly.salt.ui.Text
 import com.moriafly.salt.ui.UnstableSaltUiApi
 import com.moriafly.salt.ui.ext.safeMainPadding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import me.saket.squiggles.SquigglySlider
 import net.hearnsoft.tcm.compose.R
 import net.hearnsoft.tcm.compose.constants.PlayerCoverVerticalPadding
 import net.hearnsoft.tcm.compose.constants.PlayerHorizontalPadding
-import net.hearnsoft.tcm.compose.constants.PlayerVerticalPadding
+import net.hearnsoft.tcm.compose.ui.theme.extractGradientColors
 import net.hearnsoft.tcm.compose.ui.uicomponent.ResizableIconButton
 import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
+import net.hearnsoft.tcm.compose.utils.Logger
 import net.hearnsoft.tcm.compose.utils.SystemMediaDialogUtils
 import net.hearnsoft.tcm.compose.utils.formatTimeString
 
@@ -104,10 +115,65 @@ fun BottomSheetPlayer(
     val repeatMode = playerViewModel.repeatMode.collectAsState().value
     val shuffleModeEnabled = playerViewModel.shuffleModeEnabled.collectAsState().value
 
+    val isSystemInDarkTheme = isSystemInDarkTheme()
+
+    val changeBound = state.expandedBound / 3
+
+    // 渐变颜色状态管理
+    var gradientColors by remember {
+        mutableStateOf<List<Color>>(emptyList())
+    }
+
+    val hasGradientColours : Boolean = gradientColors.size >= 2
+    val whiteContrastThreshold = 2.0
+    val blackContrastThreshold = 2.0
+
+    val whiteGradientContrast : Double = when {
+        hasGradientColours -> {
+            ColorUtils.calculateContrast(
+                gradientColors.first().toArgb(),
+                Color.White.toArgb(),
+            )
+        }
+        else -> whiteContrastThreshold
+    }
+
+    val blackGradientContrast : Double = when {
+        hasGradientColours -> {
+            ColorUtils.calculateContrast(
+                gradientColors.last().toArgb(),
+                Color.Black.toArgb(),
+            )
+        }
+        else -> blackContrastThreshold
+    }
+
+    val onBackgroundColor =
+        when {
+            hasGradientColours -> {
+                // 计算渐变色的平均亮度
+                val averageLuminance = gradientColors.map { color ->
+                    ColorUtils.calculateLuminance(color.toArgb())
+                }.average()
+
+                // 亮度阈值：0.5
+                if (averageLuminance > 0.5) {
+                    Color.Black // 背景亮，用黑色文字
+                } else {
+                    Color.White // 背景暗，用白色文字
+                }
+            }
+            else -> {
+                SaltTheme.colors.text // 默认颜色
+            }
+        }
+
+    // 进度条位置
     var sliderPosition by remember {
         mutableStateOf<Long?>(null)
     }
 
+    // 收藏状态
     var favorite by remember {
         mutableStateOf(false)
     }
@@ -115,6 +181,32 @@ fun BottomSheetPlayer(
     // 评论数量小数字
     var commentCount by remember {
         mutableIntStateOf(9)
+    }
+
+    LaunchedEffect(currentPlaying, artworkUri) {
+        if (artworkUri != null) {
+            withContext(Dispatchers.IO) {
+                val result =
+                    (
+                            ImageLoader(context)
+                                .execute(
+                                    ImageRequest
+                                        .Builder(context)
+                                        .data(artworkUri)
+                                        .allowHardware(false)
+                                        .build(),
+                                ).image as? BitmapImage
+                            )?.bitmap?.extractGradientColors(
+                            darkTheme = isSystemInDarkTheme,
+                        )
+
+                result?.let {
+                    gradientColors = it
+                }
+            }
+        } else {
+            gradientColors = emptyList()
+        }
     }
 
     BottomSheet(
@@ -125,7 +217,20 @@ fun BottomSheetPlayer(
                 modifier = modifier,
                 playerViewModel = playerViewModel,
             )
-        }
+        },
+        brushBackgroundColor =
+            if (hasGradientColours &&
+                state.value > changeBound
+            ) {
+                Brush.verticalGradient(gradientColors)
+            } else {
+                Brush.verticalGradient(
+                    listOf(
+                        SaltTheme.colors.background,
+                        SaltTheme.colors.subBackground,
+                    ),
+                )
+            },
     ) {
         Surface(
             modifier = Modifier
@@ -237,12 +342,14 @@ fun BottomSheetPlayer(
                                     style = SaltTheme.textStyles.main,
                                     modifier = Modifier.padding(4.dp),
                                     maxLines = 2,
+                                    color = onBackgroundColor
                                 )
                                 Text(
                                     text = artist.toString(),
                                     style = SaltTheme.textStyles.sub,
                                     modifier = Modifier.padding(4.dp),
                                     maxLines = 1,
+                                    color = onBackgroundColor
                                 )
                             }
                             // 部分控制按钮
@@ -351,6 +458,7 @@ fun BottomSheetPlayer(
                                 style = SaltTheme.textStyles.sub,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
+                                color = onBackgroundColor
                             )
 
                             Text(
@@ -358,6 +466,7 @@ fun BottomSheetPlayer(
                                 style = SaltTheme.textStyles.sub,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
+                                color = onBackgroundColor
                             )
                         }
 

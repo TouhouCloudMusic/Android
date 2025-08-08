@@ -6,7 +6,12 @@ import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
+import androidx.palette.graphics.Palette
+import coil3.Bitmap
+import com.google.material.color.score.Score
 import com.moriafly.salt.ui.AlphaIndication
 import com.moriafly.salt.ui.SaltColors
 import com.moriafly.salt.ui.SaltDynamicColors
@@ -89,6 +94,41 @@ private fun ColorScheme.toSaltColors(): SaltColors = SaltColors(
     stroke = this.outline, // 描边颜色
     onHighlight = this.primary // 高亮色上的文字颜色
 )
+
+// from OuterTune
+fun Bitmap.extractGradientColors(darkTheme: Boolean): List<Color> {
+    val extractedColors =
+        Palette
+            .from(this)
+            .maximumColorCount(16)
+            .generate()
+            .swatches
+            .associate { it.rgb to it.population }
+
+    val orderedColors =
+        if (darkTheme) {
+            Score
+                .order(extractedColors)
+                .sortedBy { Color(it).luminance() }
+                .take(2)
+                .reversed()
+        } else {
+            Score
+                .order(extractedColors)
+                .sortedByDescending { Color(it).luminance() }
+                .take(2)
+        }
+
+    val res = mutableListOf<Color>()
+    return if (orderedColors.size >= 2) {
+        orderedColors.forEach {
+            res.add(Color(it))
+        }
+        res
+    } else {
+        emptyList()
+    }
+}
 
 // 定义主题颜色
 object Theme {

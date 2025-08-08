@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.util.VelocityTracker
@@ -36,6 +37,7 @@ import com.moriafly.salt.ui.SaltTheme
 fun BottomSheet(
     state: BottomSheetState,
     modifier: Modifier = Modifier,
+    brushBackgroundColor: Brush,
     collapsedContent: @Composable BoxScope.() -> Unit,
     content: @Composable BoxScope.() -> Unit,
 ) {
@@ -79,7 +81,7 @@ fun BottomSheet(
                         state.performFling(velocity)
                     },
                 )
-            }.background(SaltTheme.colors.background) // 设置背景色
+            }.background(brushBackgroundColor), // 设置背景色
     ) {
         // 当面板未完全折叠且未被关闭时，启用返回按钮处理
         if (!state.isCollapsed && state.progress > 0.1f) {

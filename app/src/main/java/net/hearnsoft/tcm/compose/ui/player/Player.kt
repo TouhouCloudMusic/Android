@@ -48,6 +48,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
@@ -96,6 +97,10 @@ fun BottomSheetPlayer(
 
     // 播放状态
     val isPlaying = playerViewModel.isPlaying.collectAsState().value
+
+    // 播放模式状态
+    val repeatMode = playerViewModel.repeatMode.collectAsState().value
+    val shuffleModeEnabled = playerViewModel.shuffleModeEnabled.collectAsState().value
 
     var sliderPosition by remember {
         mutableStateOf<Long?>(null)
@@ -343,14 +348,33 @@ fun BottomSheetPlayer(
                         ) {
                             // 循环模式切换
                             Box(modifier = Modifier.weight(1f)) {
+                                val iconRes = when {
+                                    shuffleModeEnabled -> R.drawable.ic_shuffle_one
+                                    repeatMode == Player.REPEAT_MODE_ONE -> R.drawable.ic_play_once
+                                    else -> R.drawable.ic_play_cycle
+                                }
                                 ResizableIconButton(
-                                    icon = R.drawable.ic_play_cycle, // 后续实现切换
+                                    icon = iconRes,
                                     color = SaltTheme.colors.text,
                                     modifier = Modifier
                                         .size(32.dp)
                                         .padding(4.dp)
                                         .align(Alignment.Center),
-                                    onClick = {}
+                                    onClick = {
+                                        // 切换播放模式的逻辑
+                                        if (shuffleModeEnabled) {
+                                            // 从随机切换到列表循环
+                                            playerViewModel.toggleShuffle() // 关闭随机
+                                            // PlayerController 中会自动将 repeatMode 设为 REPEAT_MODE_ALL
+                                        } else {
+                                            // 在列表循环和单曲循环间切换
+                                            playerViewModel.toggleRepeatMode()
+                                            // 如果是从单曲循环切换，则变为随机播放
+                                            if (repeatMode == Player.REPEAT_MODE_ONE) {
+                                                playerViewModel.toggleShuffle() // 开启随机
+                                            }
+                                        }
+                                    }
                                 )
                             }
                             // 上一首按钮

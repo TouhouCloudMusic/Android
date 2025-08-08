@@ -185,7 +185,7 @@ fun BottomSheetPlayer(
                         // 封面图片
                         AsyncImage(
                             model = ImageRequest.Builder(LocalContext.current)
-                                .data(artworkUri)
+                                .data(artworkUri ?: R.drawable.ic_nav_music)
                                 .crossfade(true)
                                 .crossfade(1000)
                                 .build(),

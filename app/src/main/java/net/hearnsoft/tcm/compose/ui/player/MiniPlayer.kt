@@ -1,13 +1,8 @@
 package net.hearnsoft.tcm.compose.ui.player
 
-import android.graphics.ColorFilter
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.graphics.res.animatedVectorResource
-import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
-import androidx.compose.animation.graphics.vector.AnimatedImageVector
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -23,7 +18,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -49,7 +43,6 @@ import com.moriafly.salt.ui.Text
 import com.moriafly.salt.ui.UnstableSaltUiApi
 import net.hearnsoft.tcm.compose.R
 import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
-import net.hearnsoft.tcm.compose.utils.Logger
 
 @UnstableSaltUiApi
 @ExperimentalMaterial3Api
@@ -232,17 +225,3 @@ fun PlayPauseButton(
         )
     }
 }
-
-/*
-@Composable
-@Preview
-fun MiniPlayerPreview() {
-    SaltTheme {
-        MiniPlayer(
-            modifier = Modifier
-                .padding(16.dp)
-                .background(SaltTheme.colors.background),
-            currentPlaying =
-        )
-    }
-}*/

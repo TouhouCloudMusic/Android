@@ -215,7 +215,10 @@ fun BottomSheetPlayer(
                     }
 
                     // 控制器和信息区域
-                    Column {
+                    Column(
+                        modifier = Modifier
+                            .padding(vertical = PlayerVerticalPadding)
+                    ) {
                         // 歌曲信息
                         Row(
                             modifier = Modifier

@@ -4,6 +4,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Box
@@ -73,7 +74,7 @@ fun MiniPlayer(
         // 封面图片容器和背景
         Card(
             modifier = Modifier
-                .size(50.dp, 50.dp)
+                .size(50.dp)
                 .padding(4.dp)
                 .align(Alignment.CenterVertically),
             shape = RoundedCornerShape(8.dp),
@@ -84,7 +85,7 @@ fun MiniPlayer(
                     .crossfade(true)
                     .crossfade(1000)
                     .build(),
-                modifier = Modifier.size(50.dp, 50.dp),
+                modifier = Modifier.size(50.dp),
                 contentDescription = "Cover art",
                 alignment = Alignment.Center,
                 contentScale = ContentScale.Crop
@@ -106,12 +107,14 @@ fun MiniPlayer(
             Text(
                 text = title.toString(),
                 style = SaltTheme.textStyles.main,
-                maxLines = 1
+                modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
+                maxLines = 1,
             )
             Text(
                 text = artist.toString(),
                 style = SaltTheme.textStyles.sub,
-                maxLines = 1
+                maxLines = 1,
+                color = SaltTheme.colors.subText
             )
         }
 

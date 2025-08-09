@@ -7,6 +7,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -222,7 +223,7 @@ fun BottomSheetPlayer(
             } else {
                 Brush.verticalGradient(
                     listOf(
-                        SaltTheme.colors.background,
+                        SaltTheme.colors.subBackground,
                         SaltTheme.colors.subBackground,
                     ),
                 )
@@ -231,7 +232,6 @@ fun BottomSheetPlayer(
         Surface(
             modifier = Modifier
                 .fillMaxSize(),
-
         ) {
             // 视图根布局
             Box(
@@ -337,14 +337,16 @@ fun BottomSheetPlayer(
                                 Text(
                                     text = title.toString(),
                                     style = SaltTheme.textStyles.main,
-                                    modifier = Modifier.padding(4.dp),
-                                    maxLines = 2,
+                                    modifier = Modifier
+                                        .padding(horizontal = 4.dp, vertical = 2.dp)
+                                        .basicMarquee(iterations = Int.MAX_VALUE),
+                                    maxLines = 1,
                                     color = onBackgroundColor
                                 )
                                 Text(
                                     text = artist.toString(),
                                     style = SaltTheme.textStyles.sub,
-                                    modifier = Modifier.padding(4.dp),
+                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
                                     maxLines = 1,
                                     color = onBackgroundColor
                                 )

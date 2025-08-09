@@ -2,11 +2,9 @@ package net.hearnsoft.tcm.compose.ui.player
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.graphics.drawable.BitmapDrawable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -25,6 +23,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.ChipColors
@@ -117,6 +117,12 @@ fun BottomSheetPlayer(
     val shuffleModeEnabled = playerViewModel.shuffleModeEnabled.collectAsState().value
 
     val isSystemInDarkTheme = isSystemInDarkTheme()
+
+    // Pager状态
+    val pagerState = rememberPagerState(
+        pageCount = { 3 },
+        initialPage = 1
+    )
 
     // 渐变颜色状态管理
     var gradientColors by remember {
@@ -284,38 +290,23 @@ fun BottomSheetPlayer(
                             }
                         }
                     }
-                    // 封面容器
-                    BoxWithConstraints(
+
+                    // 横向Pager
+                    HorizontalPager(
+                        state = pagerState,
                         modifier = Modifier
                             .fillMaxSize()
                             .weight(1f)
-                            .padding(horizontal = PlayerHorizontalPadding, vertical = PlayerCoverVerticalPadding)
                             .sizeIn(maxHeight = 600.dp, maxWidth = 600.dp)
                             .align(Alignment.CenterHorizontally)
-                    ) {
-                        Card(
-                            modifier = Modifier
-                                .align(Alignment.Center)
-                                .aspectRatio(1f)
-                                .scale(1f),
-                            shape = RoundedCornerShape(16.dp),
-                        ) {
-                            // 封面图片
-                            AsyncImage(
-                                model = ImageRequest.Builder(LocalContext.current)
-                                    .data(artworkUri ?: R.drawable.ic_nav_music)
-                                    .crossfade(true)
-                                    .crossfade(1000)
-                                    .build(),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .aspectRatio(1f)
-                                    .scale(1f),
-                                contentDescription = "Cover Art",
-                                contentScale = ContentScale.Crop
-                            )
+                    ) { page ->
+                        when (page) {
+                            0 -> Box(modifier = Modifier.fillMaxSize()) {  }
+                            1 -> CoverPager(artworkUri = artworkUri)
+                            2 -> Box(modifier = Modifier.fillMaxSize()) {  }
                         }
                     }
+
 
                     // 控制器和信息区域
                     Column(

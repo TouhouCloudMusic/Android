@@ -62,6 +62,9 @@ fun MusicScreen(
     val isLoading by playerViewModel.isLoading.collectAsState()
     val errorMessage by playerViewModel.errorMessage.collectAsState()
 
+    // 当前播放的媒体
+    val currentPlaying = playerViewModel.currentMediaItem.collectAsState().value
+
     // 处理错误消息
     LaunchedEffect(errorMessage) {
         errorMessage?.let { message ->
@@ -174,6 +177,7 @@ fun MusicScreen(
                             // 显示音乐列表项
                             MusicListItem(
                                 songEntity = songEntity,
+                                currentPlaying = currentPlaying,
                                 onClick = {
                                     playerViewModel.playSong(songEntity)
                                 }
@@ -192,27 +196,6 @@ fun MusicScreen(
                     .calculateBottomPadding()
             )
         )
-
-        // Snackbar
-        SnackbarHost(
-            hostState = snackbarHostState,
-            modifier = Modifier.align(Alignment.BottomCenter)
-        )
     }
 
-}
-
-@UnstableSaltUiApi
-@ExperimentalMaterial3Api
-@ExperimentalFoundationApi
-@UnstableApi
-@Preview
-@Composable
-fun MusicScreenPreview() {
-    TouhouCloudMusicTheme {
-        MusicScreen(
-            modifier = Modifier.fillMaxSize(),
-            navController = NavController(context = LocalContext.current),
-        )
-    }
 }

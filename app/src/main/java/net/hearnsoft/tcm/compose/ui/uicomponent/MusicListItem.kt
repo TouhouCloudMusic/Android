@@ -28,6 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.net.toUri
+import androidx.media3.common.MediaItem
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
@@ -38,15 +39,18 @@ import com.moriafly.salt.ui.Text
 import com.moriafly.salt.ui.UnstableSaltUiApi
 import net.hearnsoft.tcm.compose.R
 import net.hearnsoft.tcm.compose.data.database.entities.SongEntity
+import net.hearnsoft.tcm.compose.ui.theme.Theme
 
 @Composable
 @UnstableSaltUiApi
 fun MusicListItem(
     modifier: Modifier = Modifier,
     songEntity: SongEntity,
+    currentPlaying: MediaItem?,
     onClick: () -> Unit = {}
 ) {
     val context = LocalContext.current
+    val isCurrentPlaying = currentPlaying?.mediaId == songEntity.mediaStoreId.toString()
 
     Row(
         modifier = Modifier
@@ -81,7 +85,8 @@ fun MusicListItem(
                 text = songEntity.title.toString() ?: "Unknown Title",
                 style = SaltTheme.textStyles.main,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                color = if (isCurrentPlaying) Theme.colors.primary else SaltTheme.colors.text
             )
 
             val artist = songEntity.artistName.toString() ?: "Unknown Artist"
@@ -92,7 +97,8 @@ fun MusicListItem(
                 text = subTitle,
                 style = SaltTheme.textStyles.sub,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                color = if (isCurrentPlaying) Theme.colors.primary else SaltTheme.colors.subText
             )
         }
 
@@ -112,7 +118,7 @@ fun MusicListItem(
 
 @Composable
 @UnstableSaltUiApi
-@Preview
+@Preview(name = "isCurrent")
 fun MusicListItemPreview() {
     MusicListItem(
         modifier = Modifier.background(SaltTheme.colors.background),
@@ -128,6 +134,33 @@ fun MusicListItemPreview() {
             filePath = "/path/to/song.mp3",
             artworkUri = null, // 可以替换为实际的Uri
             contentUri = "content://media/external/audio/media/123456789".toUri()
-        )
+        ),
+        currentPlaying = MediaItem.Builder()
+            .setMediaId("123456789")
+            .build()
+    )
+}
+
+@Composable
+@UnstableSaltUiApi
+@Preview(name = "isNotCurrent")
+fun MusicListItemNotCurrentPreview() {
+    MusicListItem(
+        modifier = Modifier.background(SaltTheme.colors.background),
+        songEntity = SongEntity(
+            songId = 1,
+            mediaStoreId = 123456789L,
+            title = "Sample Song",
+            artistId = 1,
+            albumId = 1,
+            artistName = "Sample Artist",
+            albumName = "Sample Album",
+            duration = 240000L,
+            filePath = "/path/to/song.mp3",
+            artworkUri = null, // 可以替换为实际的Uri
+            contentUri = "content://media/external/audio/media/123456789".toUri()
+        ),
+        currentPlaying = MediaItem.Builder()
+            .build()
     )
 }

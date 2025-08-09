@@ -261,7 +261,8 @@ fun BottomSheetPlayer(
                         ) {
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_arrow_collapse),
-                                contentDescription = "收起抽屉"
+                                contentDescription = "收起抽屉",
+                                tint = onBackgroundColor
                             )
                         }
                         Spacer(modifier = Modifier.weight(1f))
@@ -275,7 +276,8 @@ fun BottomSheetPlayer(
                             ) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.ic_cast_24px),
-                                    contentDescription = "投送"
+                                    contentDescription = "投送",
+                                    tint = onBackgroundColor
                                 )
                             }
                             // 分享按钮
@@ -285,7 +287,8 @@ fun BottomSheetPlayer(
                             ) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.ic_share),
-                                    contentDescription = "分享"
+                                    contentDescription = "分享",
+                                    tint = onBackgroundColor
                                 )
                             }
                         }
@@ -373,7 +376,8 @@ fun BottomSheetPlayer(
                                     ) {
                                         Icon(
                                             painter = painterResource(id = R.drawable.ic_chat_bubble_count),
-                                            contentDescription = "评论"
+                                            contentDescription = "评论",
+                                            tint = onBackgroundColor
                                         )
                                     }
                                     if (commentCount > 0) {
@@ -386,7 +390,7 @@ fun BottomSheetPlayer(
                                             Text(
                                                 text = if (commentCount > 99) "99+" else commentCount.toString(),
                                                 style = SaltTheme.textStyles.sub,
-                                                color = SaltTheme.colors.text,
+                                                color = onBackgroundColor,
                                                 modifier = Modifier.padding(end = 4.dp, top = 4.dp)
                                             )
                                         }
@@ -431,7 +435,7 @@ fun BottomSheetPlayer(
                             colors = SliderDefaults.colors(
                                 thumbColor = SaltTheme.colors.highlight,
                                 activeTrackColor = SaltTheme.colors.highlight,
-                                inactiveTrackColor = SaltTheme.colors.subBackground,
+                                inactiveTrackColor = SaltTheme.colors.stroke,
                             )
                         )
 
@@ -476,7 +480,7 @@ fun BottomSheetPlayer(
                                 }
                                 ResizableIconButton(
                                     icon = iconRes,
-                                    color = SaltTheme.colors.text,
+                                    color = onBackgroundColor,
                                     modifier = Modifier
                                         .size(32.dp)
                                         .padding(4.dp)
@@ -502,7 +506,7 @@ fun BottomSheetPlayer(
                             Box(modifier = Modifier.weight(1f)) {
                                 ResizableIconButton(
                                     icon = R.drawable.ic_music_prev,
-                                    color = SaltTheme.colors.text,
+                                    color = onBackgroundColor,
                                     modifier = Modifier
                                         .size(32.dp)
                                         .padding(4.dp)
@@ -580,7 +584,7 @@ fun BottomSheetPlayer(
                             Box(modifier = Modifier.weight(1f)) {
                                 ResizableIconButton(
                                     icon = R.drawable.ic_music_next,
-                                    color = SaltTheme.colors.text,
+                                    color = onBackgroundColor,
                                     modifier = Modifier
                                         .size(32.dp)
                                         .padding(4.dp)
@@ -595,7 +599,7 @@ fun BottomSheetPlayer(
                             Box(modifier = Modifier.weight(1f)) {
                                 ResizableIconButton(
                                     icon = R.drawable.ic_music_list,
-                                    color = SaltTheme.colors.text,
+                                    color = onBackgroundColor,
                                     modifier = Modifier
                                         .size(32.dp)
                                         .padding(4.dp)

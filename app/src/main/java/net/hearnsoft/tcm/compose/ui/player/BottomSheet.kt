@@ -68,8 +68,13 @@ fun BottomSheet(
                     onDragCancel = {
                         // 重置速度跟踪器
                         velocityTracker.resetTracking()
-                        // 快速返回到折叠状态
-                        state.snapTo(state.collapsedBound)
+                        // 根据当前位置平滑动画到合适的状态
+                        val midPoint = (state.expandedBound + state.collapsedBound) / 2
+                        if (state.value > midPoint) {
+                            state.expand()
+                        } else {
+                            state.collapse()
+                        }
                     },
                     // 拖拽结束时的处理
                     onDragEnd = {

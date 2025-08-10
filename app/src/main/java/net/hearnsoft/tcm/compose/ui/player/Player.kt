@@ -68,7 +68,6 @@ import kotlinx.coroutines.withContext
 import me.saket.squiggles.SquigglySlider
 import net.hearnsoft.tcm.compose.R
 import net.hearnsoft.tcm.compose.constants.PlayerHorizontalPadding
-import net.hearnsoft.tcm.compose.ui.theme.Theme
 import net.hearnsoft.tcm.compose.ui.theme.extractGradientColors
 import net.hearnsoft.tcm.compose.ui.uicomponent.HashTag
 import net.hearnsoft.tcm.compose.ui.uicomponent.ResizableIconButton

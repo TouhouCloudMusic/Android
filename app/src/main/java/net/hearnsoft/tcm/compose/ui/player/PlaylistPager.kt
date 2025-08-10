@@ -36,6 +36,7 @@ import com.moriafly.salt.ui.UnstableSaltUiApi
 import net.hearnsoft.tcm.compose.constants.PlayerCoverVerticalPadding
 import net.hearnsoft.tcm.compose.constants.PlayerHorizontalPadding
 import net.hearnsoft.tcm.compose.ui.uicomponent.PlaylistItem
+import net.hearnsoft.tcm.compose.ui.utils.LocalPlayerBackgroundColor
 import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
 
 @Composable
@@ -47,7 +48,6 @@ import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
 fun PlaylistPager(
     modifier: Modifier = Modifier,
     playerViewModel: PlayerViewModel,
-    backgroundColor: Color = SaltTheme.colors.background,
 ) {
     // 当前播放列表
     val playlist = playerViewModel.currentPlaylist.collectAsState().value
@@ -58,6 +58,9 @@ fun PlaylistPager(
     val targetIndex = remember(playlist) {
         playlist.indexOfFirst { it.mediaId == currentPlaying?.mediaId }
     }
+
+    // 由LocalPlayerBackgroundColor提供颜色
+    val backgroundColor = LocalPlayerBackgroundColor.current
 
     LaunchedEffect(targetIndex, listState) {
         if (targetIndex != -1) {

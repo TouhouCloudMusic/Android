@@ -30,6 +30,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -71,6 +72,7 @@ import net.hearnsoft.tcm.compose.constants.PlayerHorizontalPadding
 import net.hearnsoft.tcm.compose.ui.theme.extractGradientColors
 import net.hearnsoft.tcm.compose.ui.uicomponent.HashTag
 import net.hearnsoft.tcm.compose.ui.uicomponent.ResizableIconButton
+import net.hearnsoft.tcm.compose.ui.utils.LocalPlayerBackgroundColor
 import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
 import net.hearnsoft.tcm.compose.utils.SystemMediaDialogUtils
 import net.hearnsoft.tcm.compose.utils.formatTimeString
@@ -256,374 +258,378 @@ fun BottomSheetPlayer(
                 )
             },
     ) {
-        Surface(
-            modifier = Modifier
-                .fillMaxSize(),
+        CompositionLocalProvider(
+            LocalPlayerBackgroundColor provides onBackgroundColor
         ) {
-            // 视图根布局
-            Box(
-                modifier = modifier.safeMainPadding()
+            Surface(
+                modifier = Modifier
+                    .fillMaxSize(),
             ) {
-                // 这里是主要视图
-                Column {
-                    // 这里是顶栏
-                    Row(
-                        modifier = modifier
-                            .fillMaxWidth()
-                            .systemBarsPadding(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        // 折叠按钮
-                        IconButton(
-                            onClick = {
-                                state.collapseSoft()
-                            },
-                            modifier = modifier.padding(4.dp)
+                // 视图根布局
+                Box(
+                    modifier = modifier.safeMainPadding()
+                ) {
+                    // 这里是主要视图
+                    Column {
+                        // 这里是顶栏
+                        Row(
+                            modifier = modifier
+                                .fillMaxWidth()
+                                .systemBarsPadding(),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_arrow_collapse),
-                                contentDescription = "收起抽屉",
-                                tint = onBackgroundColor
-                            )
-                        }
-                        Spacer(modifier = Modifier.weight(1f))
-                        Row {
-                            // 投送按钮
+                            // 折叠按钮
                             IconButton(
                                 onClick = {
-                                    SystemMediaDialogUtils.getInstance(context).showSystemMediaDialog()
+                                    state.collapseSoft()
                                 },
                                 modifier = modifier.padding(4.dp)
                             ) {
                                 Icon(
-                                    painter = painterResource(id = R.drawable.ic_cast_24px),
-                                    contentDescription = "投送",
-                                    tint = onBackgroundColor
+                                    painter = painterResource(id = R.drawable.ic_arrow_collapse),
+                                    contentDescription = "收起抽屉",
+                                    tint = LocalPlayerBackgroundColor.current
                                 )
                             }
-                            IconButton(
-                                onClick = {},
-                                modifier = modifier.padding(4.dp)
-                            ) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_share),
-                                    contentDescription = "分享",
-                                    tint = onBackgroundColor
-                                )
-                            }
-                        }
-                    }
-
-                    // 横向Pager
-                    HorizontalPager(
-                        state = pagerState,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .weight(1f)
-                            .sizeIn(maxHeight = 600.dp, maxWidth = 600.dp)
-                            .align(Alignment.CenterHorizontally)
-                    ) { page ->
-                        when (page) {
-                            0 -> Box(modifier = Modifier.fillMaxSize()) {  }
-                            1 -> CoverPager(artworkUri = artworkUri)
-                            2 -> PlaylistPager(playerViewModel = playerViewModel, backgroundColor = onBackgroundColor)
-                        }
-                    }
-
-
-                    // 控制器和信息区域
-                    Column(
-                        modifier = Modifier
-                            .padding(horizontal = PlayerHorizontalPadding, vertical = 16.dp)
-                    ) {
-                        // 歌曲信息
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp),
-                        ) {
-                            // 歌曲标题和艺术家
-                            Column(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .align(Alignment.CenterVertically)
-                            ) {
-                                Text(
-                                    text = title.toString(),
-                                    style = SaltTheme.textStyles.main,
-                                    modifier = Modifier
-                                        .padding(horizontal = 4.dp, vertical = 2.dp)
-                                        .basicMarquee(iterations = Int.MAX_VALUE),
-                                    maxLines = 1,
-                                    color = onBackgroundColor
-                                )
-                                Text(
-                                    text = artist.toString(),
-                                    style = SaltTheme.textStyles.sub,
-                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
-                                    maxLines = 1,
-                                    color = onBackgroundColor
-                                )
-                            }
-                            // 部分控制按钮
-                            Row(
-                                modifier = Modifier
-                                    .align(Alignment.CenterVertically)
-                            ) {
-                                // 收藏按钮
+                            Spacer(modifier = Modifier.weight(1f))
+                            Row {
+                                // 投送按钮
                                 IconButton(
                                     onClick = {
-                                        // TODO: 添加收藏逻辑
-                                        favorite = !favorite
+                                        SystemMediaDialogUtils.getInstance(context).showSystemMediaDialog()
                                     },
-                                    modifier = Modifier.padding(4.dp)
+                                    modifier = modifier.padding(4.dp)
                                 ) {
                                     Icon(
-                                        painter = if (favorite) {
-                                            painterResource(id = R.drawable.ic_favorite)
-                                        } else {
-                                            painterResource(id = R.drawable.ic_favorite_border)
-                                        },
-                                        contentDescription = "收藏",
-                                        tint = Color.Unspecified // 使用默认颜色
+                                        painter = painterResource(id = R.drawable.ic_cast_24px),
+                                        contentDescription = "投送",
+                                        tint = LocalPlayerBackgroundColor.current
                                     )
                                 }
-                                // 评论按钮
-                                Box {
+                                IconButton(
+                                    onClick = {},
+                                    modifier = modifier.padding(4.dp)
+                                ) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_share),
+                                        contentDescription = "分享",
+                                        tint = LocalPlayerBackgroundColor.current
+                                    )
+                                }
+                            }
+                        }
+
+                        // 横向Pager
+                        HorizontalPager(
+                            state = pagerState,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .weight(1f)
+                                .sizeIn(maxHeight = 600.dp, maxWidth = 600.dp)
+                                .align(Alignment.CenterHorizontally)
+                        ) { page ->
+                            when (page) {
+                                0 -> Box(modifier = Modifier.fillMaxSize()) {  }
+                                1 -> CoverPager(artworkUri = artworkUri)
+                                2 -> PlaylistPager(playerViewModel = playerViewModel)
+                            }
+                        }
+
+
+                        // 控制器和信息区域
+                        Column(
+                            modifier = Modifier
+                                .padding(horizontal = PlayerHorizontalPadding, vertical = 16.dp)
+                        ) {
+                            // 歌曲信息
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp),
+                            ) {
+                                // 歌曲标题和艺术家
+                                Column(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .align(Alignment.CenterVertically)
+                                ) {
+                                    Text(
+                                        text = title.toString(),
+                                        style = SaltTheme.textStyles.main,
+                                        modifier = Modifier
+                                            .padding(horizontal = 4.dp, vertical = 2.dp)
+                                            .basicMarquee(iterations = Int.MAX_VALUE),
+                                        maxLines = 1,
+                                        color = LocalPlayerBackgroundColor.current
+                                    )
+                                    Text(
+                                        text = artist.toString(),
+                                        style = SaltTheme.textStyles.sub,
+                                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                                        maxLines = 1,
+                                        color = LocalPlayerBackgroundColor.current
+                                    )
+                                }
+                                // 部分控制按钮
+                                Row(
+                                    modifier = Modifier
+                                        .align(Alignment.CenterVertically)
+                                ) {
+                                    // 收藏按钮
                                     IconButton(
-                                        onClick = {},
+                                        onClick = {
+                                            // TODO: 添加收藏逻辑
+                                            favorite = !favorite
+                                        },
                                         modifier = Modifier.padding(4.dp)
                                     ) {
                                         Icon(
-                                            painter = painterResource(id = R.drawable.ic_chat_bubble_count),
-                                            contentDescription = "评论",
-                                            tint = onBackgroundColor
+                                            painter = if (favorite) {
+                                                painterResource(id = R.drawable.ic_favorite)
+                                            } else {
+                                                painterResource(id = R.drawable.ic_favorite_border)
+                                            },
+                                            contentDescription = "收藏",
+                                            tint = Color.Unspecified // 使用默认颜色
                                         )
                                     }
-                                    if (commentCount > 0) {
-                                        Text(
-                                            text = if (commentCount > 99) "99+" else commentCount.toString(),
-                                            style = SaltTheme.textStyles.sub,
-                                            color = onBackgroundColor,
-                                            modifier = Modifier
-                                                .padding(end = 4.dp, top = 4.dp)
-                                                .align(Alignment.TopEnd)
-                                        )
-                                    }
-                                }
-                            }
-                        }
-
-                        // Tags
-                        LazyRow(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp),
-                        ) {
-                            // 测试10个标签
-                            items(10) { index ->
-                                HashTag(
-                                    label = "Tag ${index + 1}"
-                                )
-                            }
-                        }
-
-                        // 进度条
-                        SquigglySlider(
-                            value = (sliderPosition ?: currentPosition).toFloat(),
-                            valueRange = 0f..(if (duration > 0) duration.toFloat() else 1f),
-                            onValueChange = { value ->
-                                sliderPosition = value.toLong()
-                            },
-                            onValueChangeFinished = {
-                                sliderPosition?.let {
-                                    playerViewModel.seekTo(it)
-                                }
-                                sliderPosition = null
-                            },
-                            modifier = Modifier,
-                            squigglesSpec =
-                                SquigglySlider.SquigglesSpec(
-                                    amplitude = if (isPlaying) (2.dp).coerceAtLeast(2.dp) else 0.dp,
-                                    strokeWidth = 3.dp,
-                                    wavelength = (24.dp).coerceAtLeast(16.dp),
-                                ),
-                            colors = SliderDefaults.colors(
-                                thumbColor = SaltTheme.colors.highlight,
-                                activeTrackColor = SaltTheme.colors.highlight,
-                                inactiveTrackColor = SaltTheme.colors.stroke,
-                            )
-                        )
-
-                        // 时间显示
-                        Row(
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth(),
-                        ) {
-                            Text(
-                                text = formatTimeString(sliderPosition ?: currentPosition),
-                                style = SaltTheme.textStyles.sub,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                color = onBackgroundColor
-                            )
-
-                            Text(
-                                text = formatTimeString(duration),
-                                style = SaltTheme.textStyles.sub,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                color = onBackgroundColor
-                            )
-                        }
-
-                        // 播放控制按钮
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            // 循环模式切换
-                            Box(modifier = Modifier.weight(1f)) {
-                                val iconRes = when {
-                                    shuffleModeEnabled -> R.drawable.ic_shuffle_one
-                                    repeatMode == Player.REPEAT_MODE_ONE -> R.drawable.ic_play_once
-                                    else -> R.drawable.ic_play_cycle
-                                }
-                                ResizableIconButton(
-                                    icon = iconRes,
-                                    color = onBackgroundColor,
-                                    modifier = Modifier
-                                        .size(32.dp)
-                                        .padding(4.dp)
-                                        .align(Alignment.Center),
-                                    onClick = {
-                                        // 切换播放模式的逻辑
-                                        if (shuffleModeEnabled) {
-                                            // 从随机切换到列表循环
-                                            playerViewModel.toggleShuffle() // 关闭随机
-                                            // PlayerController 中会自动将 repeatMode 设为 REPEAT_MODE_ALL
-                                        } else {
-                                            // 在列表循环和单曲循环间切换
-                                            playerViewModel.toggleRepeatMode()
-                                            // 如果是从单曲循环切换，则变为随机播放
-                                            if (repeatMode == Player.REPEAT_MODE_ONE) {
-                                                playerViewModel.toggleShuffle() // 开启随机
-                                            }
+                                    // 评论按钮
+                                    Box {
+                                        IconButton(
+                                            onClick = {},
+                                            modifier = Modifier.padding(4.dp)
+                                        ) {
+                                            Icon(
+                                                painter = painterResource(id = R.drawable.ic_chat_bubble_count),
+                                                contentDescription = "评论",
+                                                tint = LocalPlayerBackgroundColor.current
+                                            )
+                                        }
+                                        if (commentCount > 0) {
+                                            Text(
+                                                text = if (commentCount > 99) "99+" else commentCount.toString(),
+                                                style = SaltTheme.textStyles.sub,
+                                                color = LocalPlayerBackgroundColor.current,
+                                                modifier = Modifier
+                                                    .padding(end = 4.dp, top = 4.dp)
+                                                    .align(Alignment.TopEnd)
+                                            )
                                         }
                                     }
-                                )
+                                }
                             }
-                            // 上一首按钮
-                            Box(modifier = Modifier.weight(1f)) {
-                                ResizableIconButton(
-                                    icon = R.drawable.ic_music_prev,
-                                    color = onBackgroundColor,
-                                    modifier = Modifier
-                                        .size(32.dp)
-                                        .padding(4.dp)
-                                        .align(Alignment.Center),
-                                    onClick = {
-                                        playerViewModel.skipToPrevious()
+
+                            // Tags
+                            LazyRow(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp),
+                            ) {
+                                // 测试10个标签
+                                items(10) { index ->
+                                    HashTag(
+                                        label = "Tag ${index + 1}"
+                                    )
+                                }
+                            }
+
+                            // 进度条
+                            SquigglySlider(
+                                value = (sliderPosition ?: currentPosition).toFloat(),
+                                valueRange = 0f..(if (duration > 0) duration.toFloat() else 1f),
+                                onValueChange = { value ->
+                                    sliderPosition = value.toLong()
+                                },
+                                onValueChangeFinished = {
+                                    sliderPosition?.let {
+                                        playerViewModel.seekTo(it)
                                     }
+                                    sliderPosition = null
+                                },
+                                modifier = Modifier,
+                                squigglesSpec =
+                                    SquigglySlider.SquigglesSpec(
+                                        amplitude = if (isPlaying) (2.dp).coerceAtLeast(2.dp) else 0.dp,
+                                        strokeWidth = 3.dp,
+                                        wavelength = (24.dp).coerceAtLeast(16.dp),
+                                    ),
+                                colors = SliderDefaults.colors(
+                                    thumbColor = SaltTheme.colors.highlight,
+                                    activeTrackColor = SaltTheme.colors.highlight,
+                                    inactiveTrackColor = SaltTheme.colors.stroke,
+                                )
+                            )
+
+                            // 时间显示
+                            Row(
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth(),
+                            ) {
+                                Text(
+                                    text = formatTimeString(sliderPosition ?: currentPosition),
+                                    style = SaltTheme.textStyles.sub,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    color = LocalPlayerBackgroundColor.current
+                                )
+
+                                Text(
+                                    text = formatTimeString(duration),
+                                    style = SaltTheme.textStyles.sub,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    color = LocalPlayerBackgroundColor.current
                                 )
                             }
 
-                            // 播放/暂停按钮
-                            Box(modifier = Modifier.weight(1f)) {
-                                var isPressed by remember { mutableStateOf(false) }
-
-                                val scale by animateFloatAsState(
-                                    targetValue = if (isPressed) 0.9f else 1f,
-                                    animationSpec = tween(100),
-                                    label = "fab_scale"
-                                )
-
-                                val animatedCornerRadius by animateFloatAsState(
-                                    targetValue = if (isPlaying) 16f else 50f,
-                                    animationSpec = tween(500),
-                                    label = "corner_radius"
-                                )
-
-                                FloatingActionButton(
-                                    onClick = {
-                                        playerViewModel.togglePlayPause()
-                                    },
-                                    shape = RoundedCornerShape(animatedCornerRadius.dp),
-                                    containerColor = SaltTheme.colors.highlight,
-                                    modifier = Modifier
-                                        .scale(scale)
-                                        .align(Alignment.Center),
-                                    interactionSource = remember { MutableInteractionSource() }
-                                        .also { interactionSource ->
-                                            LaunchedEffect(interactionSource) {
-                                                interactionSource.interactions.collect { interaction ->
-                                                    when (interaction) {
-                                                        is PressInteraction.Press -> isPressed = true
-                                                        is PressInteraction.Release -> isPressed = false
-                                                        is PressInteraction.Cancel -> isPressed = false
-                                                    }
+                            // 播放控制按钮
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                // 循环模式切换
+                                Box(modifier = Modifier.weight(1f)) {
+                                    val iconRes = when {
+                                        shuffleModeEnabled -> R.drawable.ic_shuffle_one
+                                        repeatMode == Player.REPEAT_MODE_ONE -> R.drawable.ic_play_once
+                                        else -> R.drawable.ic_play_cycle
+                                    }
+                                    ResizableIconButton(
+                                        icon = iconRes,
+                                        color = LocalPlayerBackgroundColor.current,
+                                        modifier = Modifier
+                                            .size(32.dp)
+                                            .padding(4.dp)
+                                            .align(Alignment.Center),
+                                        onClick = {
+                                            // 切换播放模式的逻辑
+                                            if (shuffleModeEnabled) {
+                                                // 从随机切换到列表循环
+                                                playerViewModel.toggleShuffle() // 关闭随机
+                                                // PlayerController 中会自动将 repeatMode 设为 REPEAT_MODE_ALL
+                                            } else {
+                                                // 在列表循环和单曲循环间切换
+                                                playerViewModel.toggleRepeatMode()
+                                                // 如果是从单曲循环切换，则变为随机播放
+                                                if (repeatMode == Player.REPEAT_MODE_ONE) {
+                                                    playerViewModel.toggleShuffle() // 开启随机
                                                 }
                                             }
                                         }
-                                ) {
-                                    val stateScale by animateFloatAsState(
-                                        targetValue = if (isPlaying) 1.1f else 1f,
-                                        animationSpec = tween(300),
-                                        label = "icon_state_scale"
-                                    )
-
-                                    Icon(
-                                        painter = painterResource(
-                                            if (isPlaying) {
-                                                R.drawable.pause
-                                            } else {
-                                                R.drawable.play
-                                            }
-                                        ),
-                                        contentDescription = if (isPlaying) "Pause" else "Play",
-                                        modifier = Modifier
-                                            .size(24.dp)
-                                            .scale(stateScale),
-                                        tint = SaltTheme.colors.onHighlight
                                     )
                                 }
-                            }
-
-                            // 下一首按钮
-                            Box(modifier = Modifier.weight(1f)) {
-                                ResizableIconButton(
-                                    icon = R.drawable.ic_music_next,
-                                    color = onBackgroundColor,
-                                    modifier = Modifier
-                                        .size(32.dp)
-                                        .padding(4.dp)
-                                        .align(Alignment.Center),
-                                    onClick = {
-                                        playerViewModel.skipToNext()
-                                    }
-                                )
-                            }
-
-                            // 播放列表按钮
-                            Box(modifier = Modifier.weight(1f)) {
-                                ResizableIconButton(
-                                    icon = R.drawable.ic_music_list,
-                                    color = onBackgroundColor,
-                                    modifier = Modifier
-                                        .size(32.dp)
-                                        .padding(4.dp)
-                                        .align(Alignment.Center),
-                                    onClick = {
-                                        coroutineScope.launch {
-                                            pagerState.animateScrollToPage(2)
+                                // 上一首按钮
+                                Box(modifier = Modifier.weight(1f)) {
+                                    ResizableIconButton(
+                                        icon = R.drawable.ic_music_prev,
+                                        color = LocalPlayerBackgroundColor.current,
+                                        modifier = Modifier
+                                            .size(32.dp)
+                                            .padding(4.dp)
+                                            .align(Alignment.Center),
+                                        onClick = {
+                                            playerViewModel.skipToPrevious()
                                         }
+                                    )
+                                }
+
+                                // 播放/暂停按钮
+                                Box(modifier = Modifier.weight(1f)) {
+                                    var isPressed by remember { mutableStateOf(false) }
+
+                                    val scale by animateFloatAsState(
+                                        targetValue = if (isPressed) 0.9f else 1f,
+                                        animationSpec = tween(100),
+                                        label = "fab_scale"
+                                    )
+
+                                    val animatedCornerRadius by animateFloatAsState(
+                                        targetValue = if (isPlaying) 16f else 50f,
+                                        animationSpec = tween(500),
+                                        label = "corner_radius"
+                                    )
+
+                                    FloatingActionButton(
+                                        onClick = {
+                                            playerViewModel.togglePlayPause()
+                                        },
+                                        shape = RoundedCornerShape(animatedCornerRadius.dp),
+                                        containerColor = SaltTheme.colors.highlight,
+                                        modifier = Modifier
+                                            .scale(scale)
+                                            .align(Alignment.Center),
+                                        interactionSource = remember { MutableInteractionSource() }
+                                            .also { interactionSource ->
+                                                LaunchedEffect(interactionSource) {
+                                                    interactionSource.interactions.collect { interaction ->
+                                                        when (interaction) {
+                                                            is PressInteraction.Press -> isPressed = true
+                                                            is PressInteraction.Release -> isPressed = false
+                                                            is PressInteraction.Cancel -> isPressed = false
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                    ) {
+                                        val stateScale by animateFloatAsState(
+                                            targetValue = if (isPlaying) 1.1f else 1f,
+                                            animationSpec = tween(300),
+                                            label = "icon_state_scale"
+                                        )
+
+                                        Icon(
+                                            painter = painterResource(
+                                                if (isPlaying) {
+                                                    R.drawable.pause
+                                                } else {
+                                                    R.drawable.play
+                                                }
+                                            ),
+                                            contentDescription = if (isPlaying) "Pause" else "Play",
+                                            modifier = Modifier
+                                                .size(24.dp)
+                                                .scale(stateScale),
+                                            tint = SaltTheme.colors.onHighlight
+                                        )
                                     }
-                                )
+                                }
+
+                                // 下一首按钮
+                                Box(modifier = Modifier.weight(1f)) {
+                                    ResizableIconButton(
+                                        icon = R.drawable.ic_music_next,
+                                        color = LocalPlayerBackgroundColor.current,
+                                        modifier = Modifier
+                                            .size(32.dp)
+                                            .padding(4.dp)
+                                            .align(Alignment.Center),
+                                        onClick = {
+                                            playerViewModel.skipToNext()
+                                        }
+                                    )
+                                }
+
+                                // 播放列表按钮
+                                Box(modifier = Modifier.weight(1f)) {
+                                    ResizableIconButton(
+                                        icon = R.drawable.ic_music_list,
+                                        color = LocalPlayerBackgroundColor.current,
+                                        modifier = Modifier
+                                            .size(32.dp)
+                                            .padding(4.dp)
+                                            .align(Alignment.Center),
+                                        onClick = {
+                                            coroutineScope.launch {
+                                                pagerState.animateScrollToPage(2)
+                                            }
+                                        }
+                                    )
+                                }
                             }
                         }
                     }

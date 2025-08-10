@@ -251,6 +251,46 @@ class PlayerViewModel @Inject constructor(
     }
 
     /**
+     * 播放特定歌曲
+     */
+    fun playSong(mediaItem: MediaItem) {
+        val currentPlaylist = _currentPlaylist.value.toMutableList()
+
+        // 如果歌曲不在当前播放列表中，添加它
+        val existingIndex = currentPlaylist.indexOfFirst { it.mediaId == mediaItem.mediaId }
+        val playIndex = if (existingIndex >= 0) {
+            existingIndex
+        } else {
+            currentPlaylist.add(0, mediaItem)
+            _currentPlaylist.value = currentPlaylist
+            0
+        }
+
+        playerController.setPlaylist(currentPlaylist, playIndex)
+        playerController.play()
+    }
+
+    /**
+     * 从播放列表移除指定歌曲
+     */
+    fun removeFromPlaylist(mediaItem: MediaItem) {
+        val currentPlaylist = _currentPlaylist.value.toMutableList()
+        val indexToRemove = currentPlaylist.indexOfFirst { it.mediaId == mediaItem.mediaId }
+
+        if (indexToRemove >= 0) {
+            currentPlaylist.removeAt(indexToRemove)
+            _currentPlaylist.value = currentPlaylist
+
+            // 如果当前播放的歌曲被移除，尝试播放下一首
+            if (playerController.currentMediaItem.value?.mediaId == mediaItem.mediaId) {
+                playerController.skipToNext()
+            }
+        } else {
+            Logger.warn(TAG, "尝试移除不存在的歌曲: ${mediaItem.mediaId}")
+        }
+    }
+
+    /**
      * 播放/暂停切换
      */
     fun togglePlayPause() {

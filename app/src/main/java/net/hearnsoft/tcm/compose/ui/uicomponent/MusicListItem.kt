@@ -82,15 +82,15 @@ fun MusicListItem(
                 .align(Alignment.CenterVertically)
         ) {
             Text(
-                text = songEntity.title.toString() ?: "Unknown Title",
+                text = songEntity.title.toString() ?: "未知歌曲",
                 style = SaltTheme.textStyles.main,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 color = if (isCurrentPlaying) Theme.colors.primary else SaltTheme.colors.text
             )
 
-            val artist = songEntity.artistName.toString() ?: "Unknown Artist"
-            val album = songEntity.albumName.toString() ?: "Unknown Album"
+            val artist = songEntity.artistName.toString() ?: "未知艺术家"
+            val album = songEntity.albumName.toString() ?: "未知专辑"
 
             val subTitle = "$artist - $album"
             Text(

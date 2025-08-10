@@ -13,7 +13,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.palette.graphics.Palette
 import coil3.Bitmap
 import com.google.material.color.score.Score
-import com.moriafly.salt.ui.AlphaIndication
 import com.moriafly.salt.ui.SaltColors
 import com.moriafly.salt.ui.SaltDynamicColors
 import com.moriafly.salt.ui.SaltTheme
@@ -152,5 +151,7 @@ object Theme {
         val darkSurface = DarkSurface
         val darkSurfaceVariant = DarkSurfaceVariant
         val darkOutline = DarkOutline
+
+        val alphaStroke = AlphaStroke
     }
 }

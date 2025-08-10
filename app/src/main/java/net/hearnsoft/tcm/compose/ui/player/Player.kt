@@ -2,6 +2,7 @@ package net.hearnsoft.tcm.compose.ui.player
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.view.Window
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -11,11 +12,9 @@ import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -26,9 +25,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.ChipColors
-import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.IconButton
@@ -40,29 +36,26 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
+import androidx.core.view.WindowCompat
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
 import coil3.BitmapImage
 import coil3.ImageLoader
-import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
-import coil3.request.crossfade
 import com.moriafly.salt.ui.Icon
 import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.Surface
@@ -70,12 +63,14 @@ import com.moriafly.salt.ui.Text
 import com.moriafly.salt.ui.UnstableSaltUiApi
 import com.moriafly.salt.ui.ext.safeMainPadding
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.saket.squiggles.SquigglySlider
 import net.hearnsoft.tcm.compose.R
-import net.hearnsoft.tcm.compose.constants.PlayerCoverVerticalPadding
 import net.hearnsoft.tcm.compose.constants.PlayerHorizontalPadding
+import net.hearnsoft.tcm.compose.ui.theme.Theme
 import net.hearnsoft.tcm.compose.ui.theme.extractGradientColors
+import net.hearnsoft.tcm.compose.ui.uicomponent.HashTag
 import net.hearnsoft.tcm.compose.ui.uicomponent.ResizableIconButton
 import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
 import net.hearnsoft.tcm.compose.utils.SystemMediaDialogUtils
@@ -95,6 +90,9 @@ fun BottomSheetPlayer(
     context: Activity,
     modifier: Modifier = Modifier
 ) {
+
+    // 协程作用域
+    val coroutineScope = rememberCoroutineScope()
 
     // 当前播放
     val currentPlaying = playerViewModel.currentMediaItem.collectAsState().value
@@ -188,6 +186,7 @@ fun BottomSheetPlayer(
         mutableIntStateOf(9)
     }
 
+    // 渐变色背景响应事件
     LaunchedEffect(currentPlaying, artworkUri) {
         if (artworkUri != null) {
             withContext(Dispatchers.IO) {
@@ -214,6 +213,21 @@ fun BottomSheetPlayer(
         }
     }
 
+    // 状态栏颜色控制
+    LaunchedEffect(state.isExpanded, onBackgroundColor) {
+        val window: Window = context.window
+        val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+        if (state.isExpanded) {
+            withContext(Dispatchers.Main) {
+                insetsController.isAppearanceLightStatusBars = ColorUtils.calculateLuminance(onBackgroundColor.toArgb()) < 0.5
+            }
+        } else {
+            withContext(Dispatchers.Main) {
+                insetsController.isAppearanceLightStatusBars = !isSystemInDarkTheme
+            }
+        }
+    }
+
     BottomSheet(
         state = state,
         modifier = modifier,
@@ -221,6 +235,14 @@ fun BottomSheetPlayer(
             MiniPlayer(
                 modifier = modifier,
                 playerViewModel = playerViewModel,
+                onPlaylistClick = {
+                    // 先展开 BottomSheet
+                    state.expandSoft()
+                    // 然后跳转到播放列表页面（第2页，index为1）
+                    coroutineScope.launch {
+                        /*playerVerticalPagerState.animateScrollToPage(1)*/
+                    }
+                }
             )
         },
         brushBackgroundColor =
@@ -280,7 +302,6 @@ fun BottomSheetPlayer(
                                     tint = onBackgroundColor
                                 )
                             }
-                            // 分享按钮
                             IconButton(
                                 onClick = {},
                                 modifier = modifier.padding(4.dp)
@@ -381,24 +402,20 @@ fun BottomSheetPlayer(
                                         )
                                     }
                                     if (commentCount > 0) {
-                                        Surface(
+                                        Text(
+                                            text = if (commentCount > 99) "99+" else commentCount.toString(),
+                                            style = SaltTheme.textStyles.sub,
+                                            color = onBackgroundColor,
                                             modifier = Modifier
+                                                .padding(end = 4.dp, top = 4.dp)
                                                 .align(Alignment.TopEnd)
-                                                .padding(top = 2.dp, end = 2.dp)
-                                                .clip(RoundedCornerShape(24.dp))
-                                        ) {
-                                            Text(
-                                                text = if (commentCount > 99) "99+" else commentCount.toString(),
-                                                style = SaltTheme.textStyles.sub,
-                                                color = onBackgroundColor,
-                                                modifier = Modifier.padding(end = 4.dp, top = 4.dp)
-                                            )
-                                        }
+                                        )
                                     }
                                 }
                             }
                         }
-                        // TAG 区域
+
+                        // Tags
                         LazyRow(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -517,7 +534,6 @@ fun BottomSheetPlayer(
                                 )
                             }
 
-                            /*Spacer(Modifier.width(16.dp))*/
                             // 播放/暂停按钮
                             Box(modifier = Modifier.weight(1f)) {
                                 var isPressed by remember { mutableStateOf(false) }
@@ -578,7 +594,6 @@ fun BottomSheetPlayer(
                                     )
                                 }
                             }
-                            /*Spacer(Modifier.width(16.dp))*/
 
                             // 下一首按钮
                             Box(modifier = Modifier.weight(1f)) {
@@ -607,47 +622,10 @@ fun BottomSheetPlayer(
                                     onClick = {}
                                 )
                             }
-
                         }
                     }
-
                 }
-
-
             }
         }
     }
-}
-
-@Composable
-fun HashTag(
-    label: String,
-) {
-    ElevatedAssistChip(
-        modifier = Modifier.padding(end = 4.dp),
-        colors = ChipColors(
-            containerColor = SaltTheme.colors.subBackground,
-            leadingIconContentColor = SaltTheme.colors.text,
-            labelColor = SaltTheme.colors.text,
-            trailingIconContentColor = Color.Unspecified,
-            disabledContainerColor = Color.Unspecified,
-            disabledLabelColor = Color.Unspecified,
-            disabledLeadingIconContentColor = Color.Unspecified,
-            disabledTrailingIconContentColor = Color.Unspecified,
-        ),
-        label = {
-            Text(
-                text = label,
-                style = SaltTheme.textStyles.sub
-            )
-        },
-        leadingIcon = {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_tag_24px),
-                contentDescription = "Tag Icon",
-                modifier = Modifier.size(16.dp)
-            )
-        },
-        onClick = {}
-    )
 }

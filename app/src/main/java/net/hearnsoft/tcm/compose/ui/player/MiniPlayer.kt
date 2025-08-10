@@ -53,7 +53,8 @@ import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
 @Composable
 fun MiniPlayer(
     modifier: Modifier = Modifier,
-    playerViewModel: PlayerViewModel
+    playerViewModel: PlayerViewModel,
+    onPlaylistClick: () -> Unit = {},
 ) {
 
     val currentMediaItem = playerViewModel.currentMediaItem.collectAsState().value
@@ -121,7 +122,8 @@ fun MiniPlayer(
         // 将播放控制相关组件封装起来
         PlayerControls(
             modifier = Modifier.align(Alignment.CenterVertically),
-            playerViewModel = playerViewModel
+            playerViewModel = playerViewModel,
+            onPlaylistClick = onPlaylistClick
         )
     }
 }
@@ -136,7 +138,8 @@ fun MiniPlayer(
 @Composable
 private fun PlayerControls(
     modifier: Modifier = Modifier,
-    playerViewModel: PlayerViewModel
+    playerViewModel: PlayerViewModel,
+    onPlaylistClick: () -> Unit = {}
 ) {
     // 进度
     val currentPosition by playerViewModel.currentPosition.collectAsState()
@@ -181,7 +184,7 @@ private fun PlayerControls(
         ) {
             IconButton(
                 modifier = Modifier.align(Alignment.Center),
-                onClick = {}
+                onClick = onPlaylistClick
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_music_list),

@@ -69,6 +69,7 @@ import net.hearnsoft.tcm.compose.ui.player.COLLAPSED_ANCHOR
 import net.hearnsoft.tcm.compose.ui.player.rememberBottomSheetState
 import net.hearnsoft.tcm.compose.ui.screens.ScreenRoute
 import net.hearnsoft.tcm.compose.ui.screens.navigationBuilder
+import net.hearnsoft.tcm.compose.ui.uicomponent.TopAppBar
 import net.hearnsoft.tcm.compose.ui.utils.LocalPlayerAwareWindowInsets
 import net.hearnsoft.tcm.compose.ui.utils.appBarScrollBehavior
 import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
@@ -154,37 +155,10 @@ fun AppRootView(
             else -> stringResource(R.string.app_name)
         }
 
-        Row(
-            modifier = modifier.fillMaxWidth().systemBarsPadding(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(
-                onClick = {},
-                modifier = modifier.padding(4.dp)
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_menu_24px),
-                    contentDescription = "侧边栏抽屉"
-                )
-            }
-            Text(
-                text = title,
-                modifier = modifier.fillMaxWidth().weight(1f),
-                fontWeight = FontWeight.SemiBold,
-                textAlign = TextAlign.Center,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1
-            )
-            IconButton(
-                onClick = { /* TODO: 打开搜索界面 */ },
-                modifier = modifier.padding(4.dp)
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_search_24px),
-                    contentDescription = "搜索"
-                )
-            }
-        }
+        TopAppBar(
+            modifier = modifier.systemBarsPadding(),
+            title = title,
+        )
         CompositionLocalProvider(
             // 提供智能WindowInsets给所有子Screen
             LocalPlayerAwareWindowInsets provides playerAwareWindowInsets

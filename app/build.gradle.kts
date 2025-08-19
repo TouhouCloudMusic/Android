@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "net.hearnsoft.tcm.compose"
-        minSdk = 28
+        minSdk = 29
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -109,7 +109,7 @@ dependencies {
     implementation(libs.palette.ktx)
 
     // Accompanist Lyrics
-    implementation(libs.lyrics.ui)
+    implementation(project(":lyrics-ui"))
     implementation(libs.lyrics.core)
 
     testImplementation(libs.junit)

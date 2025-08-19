@@ -105,26 +105,33 @@ fun LyricsPager(
             )
     ) {
         parsedLyrics?.let { syncedLyrics ->
-            KaraokeLyricsView(
-                listState = listState,
-                lyrics = syncedLyrics,
-                currentPosition = animatedPosition,
-                onLineClicked = { line ->
-                    playerViewModel.seekTo(line.start.toLong())
-                },
-                onLinePressed = { line ->
-                    // 可以在这里添加长按功能，比如分享歌词等
-                    Logger.debug("LyricsPager", "长按歌词行: ${line.start}")
-                },
-                normalLineTextStyle = SaltTheme.textStyles.paragraph,
-                accompanimentLineTextStyle = SaltTheme.textStyles.main,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .graphicsLayer {
-                        compositingStrategy = CompositingStrategy.Offscreen
-                        blendMode = BlendMode.Overlay
-                    }
-            )
+            if (syncedLyrics.lines.isNotEmpty()) {
+                KaraokeLyricsView(
+                    listState = listState,
+                    lyrics = syncedLyrics,
+                    currentPosition = animatedPosition,
+                    onLineClicked = { line ->
+                        playerViewModel.seekTo(line.start.toLong())
+                    },
+                    onLinePressed = { line ->
+                        // 可以在这里添加长按功能，比如分享歌词等
+                        Logger.debug("LyricsPager", "长按歌词行: ${line.start}")
+                    },
+                    normalLineTextStyle = SaltTheme.textStyles.paragraph,
+                    accompanimentLineTextStyle = SaltTheme.textStyles.main,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .graphicsLayer {
+                            compositingStrategy = CompositingStrategy.Offscreen
+                            blendMode = BlendMode.Plus
+                        }
+                )
+            } else {
+                // 显示无歌词状态,这里是防止部分歌词只有一行的情况下解析失败的问题
+                NoLyricsPlaceholder(
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
         } ?: run {
             // 显示无歌词状态
             NoLyricsPlaceholder(

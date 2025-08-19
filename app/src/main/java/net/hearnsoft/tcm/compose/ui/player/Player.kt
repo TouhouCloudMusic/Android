@@ -329,7 +329,7 @@ fun BottomSheetPlayer(
                                 .align(Alignment.CenterHorizontally)
                         ) { page ->
                             when (page) {
-                                0 -> Box(modifier = Modifier.fillMaxSize()) {  }
+                                0 -> LyricsPager(playerViewModel = playerViewModel)
                                 1 -> CoverPager(artworkUri = artworkUri)
                                 2 -> PlaylistPager(playerViewModel = playerViewModel)
                             }

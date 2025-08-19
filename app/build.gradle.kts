@@ -108,6 +108,10 @@ dependencies {
     implementation(libs.palette)
     implementation(libs.palette.ktx)
 
+    // Accompanist Lyrics
+    implementation(libs.lyrics.ui)
+    implementation(libs.lyrics.core)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

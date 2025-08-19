@@ -71,6 +71,10 @@ class PlayerViewModel @Inject constructor(
     val repeatMode = playerController.repeatMode
     val shuffleModeEnabled = playerController.shuffleModeEnabled
 
+    // 歌词
+    val lyrics = playerController.lyrics
+    val lyricsFormat = playerController.lyricsFormat
+
     // === UI 状态 ===
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()

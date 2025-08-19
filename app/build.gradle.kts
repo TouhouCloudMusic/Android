@@ -109,7 +109,7 @@ dependencies {
     implementation(libs.palette.ktx)
 
     // Accompanist Lyrics
-    implementation(project(":lyrics-ui"))
+    implementation(libs.lyrics.ui)
     implementation(libs.lyrics.core)
 
     testImplementation(libs.junit)

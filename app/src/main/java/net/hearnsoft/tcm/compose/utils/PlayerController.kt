@@ -2,9 +2,6 @@ package net.hearnsoft.tcm.compose.utils
 
 import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
-import android.os.IBinder
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.media3.common.MediaItem
@@ -19,8 +16,29 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import net.hearnsoft.tcm.compose.service.MusicPlaybackService
+import net.hearnsoft.tcm.compose.utils.LyricsExtractor.LyricsFormat
 import javax.inject.Inject
 import javax.inject.Singleton
+
+// 全局桥接对象
+object PlayerLyricsBridge {
+    private val _lyrics = MutableStateFlow<String?>(null)
+    val lyrics: StateFlow<String?> = _lyrics.asStateFlow()
+
+    private val _lyricsFormat = MutableStateFlow(LyricsFormat.UNKNOWN)
+    val lyricsFormat: StateFlow<LyricsFormat> = _lyricsFormat.asStateFlow()
+
+    fun update(lyrics: String?, format: LyricsFormat) {
+        _lyrics.value = lyrics
+        _lyricsFormat.value = format
+    }
+
+    fun clear() {
+        _lyrics.value = null
+        _lyricsFormat.value = LyricsFormat.UNKNOWN
+    }
+}
+
 
 /**
  * 播放器控制器
@@ -61,6 +79,10 @@ class PlayerController @Inject constructor(
     private val _shuffleModeEnabled = MutableStateFlow(false)
     val shuffleModeEnabled: StateFlow<Boolean> = _shuffleModeEnabled.asStateFlow()
 
+    // === 歌词相关 ===
+    val lyrics: StateFlow<String?> = PlayerLyricsBridge.lyrics
+    val lyricsFormat: StateFlow<LyricsFormat> = PlayerLyricsBridge.lyricsFormat
+
     private val playerListener = object : Player.Listener {
         override fun onIsPlayingChanged(isPlaying: Boolean) {
             _isPlaying.value = isPlaying
@@ -68,6 +90,7 @@ class PlayerController @Inject constructor(
 
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
             _currentMediaItem.value = mediaItem
+            PlayerLyricsBridge.clear()
         }
 
         override fun onRepeatModeChanged(repeatMode: Int) {

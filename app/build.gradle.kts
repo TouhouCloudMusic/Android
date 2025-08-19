@@ -8,12 +8,12 @@ plugins {
 
 android {
     namespace = "net.hearnsoft.tcm.compose"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "net.hearnsoft.tcm.compose"
         minSdk = 28
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 

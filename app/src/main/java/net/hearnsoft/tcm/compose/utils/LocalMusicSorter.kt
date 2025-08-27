@@ -1,6 +1,7 @@
 package net.hearnsoft.tcm.compose.utils
 
 import androidx.media3.common.MediaItem
+import net.hearnsoft.tcm.compose.data.database.entities.SongEntity
 import net.hearnsoft.tcm.compose.domain.model.song.SongSortingRule
 import net.hearnsoft.tcm.compose.domain.model.song.SongSortingStrategy.*
 import net.sourceforge.pinyin4j.PinyinHelper
@@ -30,6 +31,7 @@ object LocalMusicSorter {
      * @param rule 要应用的排序规则
      * @return 排序后的MediaItems列表
      */
+    @JvmName("sortMediaItemList")
     fun sortMusicList(items: List<MediaItem>?, rule: SongSortingRule): List<MediaItem> {
         if (items.isNullOrEmpty()) {
             return emptyList()
@@ -72,7 +74,11 @@ object LocalMusicSorter {
                 compareChinese(title1, title2)
             }
 
-            AlbumName -> TODO()
+            AlbumName -> { item1: MediaItem, item2: MediaItem ->
+                val album1 = item1.mediaMetadata.albumTitle?.toString() ?: ""
+                val album2 = item2.mediaMetadata.albumTitle?.toString() ?: ""
+                compareChinese(album1, album2)
+            }
             Duration -> TODO()
             LastPlayed -> TODO()
             DateAdded -> TODO()
@@ -83,6 +89,69 @@ object LocalMusicSorter {
             Comparator<MediaItem> { item1, item2 -> comparator(item1, item2) }.reversed()
         } else {
             Comparator<MediaItem> { item1, item2 -> comparator(item1, item2) }
+        }
+
+        sortedList.sortWith(finalComparator)
+        return sortedList
+    }
+
+    /**
+     * 根据提供的排序规则对SongEntity列表进行排序
+     *
+     * @param items 要排序的SongEntity列表
+     * @param rule 要应用的排序规则
+     * @return 排序后的SongEntity列表
+     */
+    @JvmName("sortSongEntityList")
+    fun sortMusicList(items: List<SongEntity>?, rule: SongSortingRule): List<SongEntity> {
+        if (items.isNullOrEmpty()) {
+            return emptyList()
+        }
+
+        val sortedList = items.toMutableList()
+
+        val comparator = when (rule.strategy) {
+            Title -> { item1: SongEntity, item2: SongEntity ->
+                compareChinese(item1.title, item2.title)
+            }
+
+            ArtistName -> { item1: SongEntity, item2: SongEntity ->
+                compareChinese(item1.artistName, item2.artistName)
+            }
+            CreatedAt -> { item1: SongEntity, item2: SongEntity ->
+                val id1 = item1.mediaStoreId
+                val id2 = item2.mediaStoreId
+                try {
+                    id1.compareTo(id2)
+                } catch (e: NumberFormatException) {
+                    id1.compareTo(id2)
+                }
+            }
+            UpdatedAt -> { item1: SongEntity, item2: SongEntity ->
+                Logger.debug(TAG, "Play count sorting not implemented yet")
+                // 默认按标题排序
+                compareChinese(item1.title, item2.title)
+            }
+            PlayCount -> { item1: SongEntity, item2: SongEntity ->
+                // 默认按标题排序
+                compareChinese(item1.title, item2.title)
+            }
+
+            AlbumName -> { item1: SongEntity, item2: SongEntity ->
+                val album1 = item1.albumName ?: ""
+                val album2 = item2.albumName ?: ""
+                compareChinese(album1, album2)
+            }
+            Duration -> TODO()
+            LastPlayed -> TODO()
+            DateAdded -> TODO()
+        }
+
+        // 如果需要逆序排序
+        val finalComparator = if (rule.reverse) {
+            Comparator<SongEntity> { item1, item2 -> comparator(item1, item2) }.reversed()
+        } else {
+            Comparator<SongEntity> { item1, item2 -> comparator(item1, item2) }
         }
 
         sortedList.sortWith(finalComparator)

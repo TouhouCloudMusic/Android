@@ -106,15 +106,4 @@ object LocalMusicScanner {
 
         return musicItems
     }
-
-    /**
-     * 对音乐列表进行排序（使用已有的LocalMusicSorter）
-     *
-     * @param items 要排序的音乐列表
-     * @param rule 排序规则
-     * @return 排序后的列表
-     */
-    fun sortMusicList(items: List<MediaItem>, rule: SongSortingRule): List<MediaItem> {
-        return LocalMusicSorter.sortMusicList(items, rule)
-    }
 }

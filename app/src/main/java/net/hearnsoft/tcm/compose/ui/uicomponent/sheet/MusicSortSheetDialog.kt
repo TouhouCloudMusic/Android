@@ -1,0 +1,91 @@
+package net.hearnsoft.tcm.compose.ui.uicomponent.sheet
+
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.RadioButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.dp
+import com.moriafly.salt.ui.RoundedColumn
+import com.moriafly.salt.ui.SaltTheme
+import com.moriafly.salt.ui.Text
+import net.hearnsoft.tcm.compose.domain.model.song.SongSortingRule
+import net.hearnsoft.tcm.compose.domain.model.song.SongSortingStrategy
+
+@ExperimentalMaterial3Api
+@Composable
+fun MusicSortSheetDialog(
+    modifier: Modifier = Modifier,
+    currentRule: SongSortingRule,
+    onSortRuleSelected: (SongSortingRule) -> Unit,
+    onDismissRequest: () -> Unit = {},
+) {
+
+    val sortRulesOptions = listOf(
+        "标题" to SongSortingStrategy.Title,
+        "艺术家" to SongSortingStrategy.ArtistName,
+        "专辑" to SongSortingStrategy.AlbumName,
+        "时长" to SongSortingStrategy.Duration,
+        "添加时间" to SongSortingStrategy.DateAdded
+    )
+
+    BottomSheetDialog(
+        modifier = modifier,
+        onDismissRequest = onDismissRequest,
+        title = "音乐排序规则",
+    ) { dismiss ->
+        RoundedColumn(modifier.selectableGroup()) {
+            sortRulesOptions.forEach { (optionText, strategy) ->
+                val isSelected = currentRule.strategy == strategy
+                val arrow = if (isSelected) {
+                    if (currentRule.reverse) " ↓" else " ↑"
+                } else ""
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp)
+                        .selectable(
+                            selected = isSelected,
+                            onClick = {
+                                val newRule = if (isSelected) {
+                                    // 如果点击的是当前选中项，切换reverse状态
+                                    SongSortingRule(strategy, !currentRule.reverse)
+                                } else {
+                                    // 如果点击的是其他项，选择该项且默认为正序
+                                    SongSortingRule(strategy, false)
+                                }
+                                onSortRuleSelected(newRule)
+                                dismiss()
+                            },
+                            role = Role.RadioButton
+                        )
+                        .padding(horizontal = 16.dp)
+                ) {
+                    RadioButton(
+                        selected = isSelected,
+                        onClick = null,
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                    )
+                    Text(
+                        text = "$optionText$arrow",
+                        style = SaltTheme.textStyles.main,
+                        color = if (isSelected) SaltTheme.colors.highlight else SaltTheme.colors.text,
+                        modifier = Modifier
+                            .padding(start = 16.dp)
+                            .align(Alignment.CenterVertically)
+                    )
+                }
+            }
+        }
+    }
+}

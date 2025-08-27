@@ -25,6 +25,7 @@ import net.hearnsoft.tcm.compose.data.repository.MusicRepository
 import net.hearnsoft.tcm.compose.domain.model.song.SongSortingRule
 import net.hearnsoft.tcm.compose.domain.model.song.SongSortingStrategy
 import net.hearnsoft.tcm.compose.utils.LocalMusicScanner
+import net.hearnsoft.tcm.compose.utils.LocalMusicSorter
 import net.hearnsoft.tcm.compose.utils.Logger
 import net.hearnsoft.tcm.compose.utils.PlayerController
 import javax.inject.Inject
@@ -109,54 +110,66 @@ class PlayerViewModel @Inject constructor(
         viewModelScope.launch {
             combine(
                 _allSongs,
-                _currentSortingRule,
-                _searchQuery
-            ) { songs, sortingRule, query ->
-                Triple(songs, sortingRule, query)
-            }.collectLatest { (songs, sortingRule, query) ->
-                applyFilterAndSort(songs, sortingRule, query)
+                _currentSortingRule
+            ) { songs, sortingRule ->
+                Pair(songs, sortingRule)
+            }.collectLatest { (songs, sortingRule) ->
+                applySort(songs, sortingRule)
             }
         }
     }
 
-    private fun applyFilterAndSort(
+    /**
+     * 应用过滤逻辑
+     * @param songs 要过滤的歌曲列表
+     * @param query 搜索查询条件
+     * @return 过滤后的歌曲列表
+     */
+    private suspend fun applyFilter(
         songs: List<SongEntity>,
-        sortingRule: SongSortingRule,
         query: String
+    ): List<SongEntity> {
+        return withContext(Dispatchers.Default) {
+            if (query.isBlank()) {
+                songs
+            } else {
+                songs.filter { song ->
+                    song.title.contains(query, ignoreCase = true) ||
+                            song.artistName.contains(query, ignoreCase = true) ||
+                            song.albumName.contains(query, ignoreCase = true)
+                }
+            }
+        }
+    }
+
+    /**
+     * 应用排序逻辑
+     * @param songs 要排序的歌曲列表
+     * @param sortingRule 排序规则
+     */
+    private fun applySort(
+        songs: List<SongEntity>,
+        sortingRule: SongSortingRule
     ) {
         viewModelScope.launch {
             try {
                 _isLoading.value = true
                 // 将CPU密集型任务切换到后台线程
-                val (filteredSongs, sortedMediaItems) = withContext(Dispatchers.Default) {
-                    // 先过滤
-                    val filtered = if (query.isBlank()) {
-                        songs
-                    } else {
-                        songs.filter { song ->
-                            song.title.contains(query, ignoreCase = true) ||
-                                    song.artistName.contains(query, ignoreCase = true) ||
-                                    song.albumName.contains(query, ignoreCase = true)
-                        }
-                    }
-
-                    // 转换为 MediaItem 进行排序
-                    val mediaItems = filtered.map { songEntity ->
-                        convertSongEntityToMediaItem(songEntity)
-                    }
-
-                    // 应用排序
-                    val sorted = LocalMusicScanner.sortMusicList(mediaItems, sortingRule)
-                    Pair(filtered, sorted)
+                val sortedSongs = withContext(Dispatchers.Default) {
+                    // 使用 LocalMusicSorter 的 SongEntity 版本进行排序
+                    LocalMusicSorter.sortMusicList(songs, sortingRule)
                 }
 
                 // 更新状态
-                _filteredSongs.value = filteredSongs
-                _currentPlaylist.value = sortedMediaItems
+                _allSongs.value = sortedSongs
+                _filteredSongs.value = sortedSongs
+                _currentPlaylist.value = sortedSongs.map {
+                    convertSongEntityToMediaItem(it)
+                }
 
-                Logger.debug(TAG, "应用过滤和排序: ${filteredSongs.size} 首歌曲")
+                Logger.debug(TAG, "应用排序: ${sortedSongs.size} 首歌曲")
             } catch (e: Exception) {
-                Logger.err(TAG, "应用过滤和排序时出错: ${e.message}")
+                Logger.err(TAG, "应用排序时出错: ${e.message}")
                 _errorMessage.value = "排序失败: ${e.message}"
             } finally {
                 _isLoading.value = false // 结束时关闭加载状态

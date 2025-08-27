@@ -25,7 +25,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -40,6 +42,8 @@ import com.moriafly.salt.ui.Text
 import com.moriafly.salt.ui.UnstableSaltUiApi
 import net.hearnsoft.tcm.compose.ui.theme.TouhouCloudMusicTheme
 import net.hearnsoft.tcm.compose.ui.uicomponent.MusicListItem
+import net.hearnsoft.tcm.compose.ui.uicomponent.sheet.BottomSheetDialog
+import net.hearnsoft.tcm.compose.ui.uicomponent.sheet.MusicSortSheetDialog
 import net.hearnsoft.tcm.compose.ui.utils.LocalPlayerAwareWindowInsets
 import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
 
@@ -65,6 +69,11 @@ fun MusicScreen(
     // 当前播放的媒体
     val currentPlaying = playerViewModel.currentMediaItem.collectAsState().value
 
+    // 当前排序规则
+    val currentSortingRule = playerViewModel.currentSortingRule.collectAsState().value
+
+    var showSortDialog by remember { mutableStateOf(false) }
+
     // 处理错误消息
     LaunchedEffect(errorMessage) {
         errorMessage?.let { message ->
@@ -72,6 +81,20 @@ fun MusicScreen(
             playerViewModel.clearErrorMessage()
         }
     }
+
+    if (showSortDialog) {
+        MusicSortSheetDialog(
+            currentRule = currentSortingRule,
+            onSortRuleSelected = { rule ->
+                playerViewModel.updateSortingRule(rule)
+                showSortDialog = false
+            },
+            onDismissRequest = {
+                showSortDialog = false
+            }
+        )
+    }
+
 
     // 顶部间距
     Spacer(
@@ -103,6 +126,7 @@ fun MusicScreen(
                     Button(
                         onClick = {
                             playerViewModel.scanAndUpdateMusicLibrary()
+                            //playerViewModel.reloadAllSongs()
                         },
                         text = "扫描音乐",
                     )
@@ -116,6 +140,13 @@ fun MusicScreen(
                             enabled = !isLoading && currentPlaylist.isNotEmpty()
                         )
                     }
+
+                    Button(
+                        onClick = {
+                            showSortDialog = true
+                        },
+                        text = "排序",
+                    )
                 }
 
                 // 歌曲数量显示

@@ -72,6 +72,7 @@ import net.hearnsoft.tcm.compose.ui.screens.navigationBuilder
 import net.hearnsoft.tcm.compose.ui.uicomponent.TopAppBar
 import net.hearnsoft.tcm.compose.ui.utils.LocalPlayerAwareWindowInsets
 import net.hearnsoft.tcm.compose.ui.utils.appBarScrollBehavior
+import net.hearnsoft.tcm.compose.ui.utils.canGoBack
 import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
 
 @OptIn(androidx.media3.common.util.UnstableApi::class)
@@ -145,19 +146,31 @@ fun AppRootView(
         // 获取当前路由
         val currentRoute = navBackStackEntry?.destination?.route
 
+        // 判断是否为二级页面
+        val isSecondaryScreen = remember(currentRoute) {
+            currentRoute != null && !ScreenRoute.MainScreens.any { it.route == currentRoute }
+        }
+
         // 根据当前路由设置标题
-        val title = when (currentRoute) {
-            ScreenRoute.Explore.route -> "发现"
-            ScreenRoute.Library.route -> "曲库"
-            ScreenRoute.Statistics.route -> "统计"
-            ScreenRoute.Music.route -> "音乐"
-            ScreenRoute.Account.route -> "个人"
+        val title = when {
+            currentRoute?.startsWith("album/") == true -> "专辑"
+            currentRoute == ScreenRoute.Explore.route -> "发现"
+            currentRoute == ScreenRoute.Library.route -> "曲库"
+            currentRoute == ScreenRoute.Statistics.route -> "统计"
+            currentRoute == ScreenRoute.Music.route -> "音乐"
+            currentRoute == ScreenRoute.Account.route -> "个人"
             else -> stringResource(R.string.app_name)
         }
 
         TopAppBar(
             modifier = modifier.systemBarsPadding(),
             title = title,
+            showSecondaryTitleBar = isSecondaryScreen,
+            onBackClick = {
+                if (navController.canGoBack) {
+                    navController.popBackStack()
+                }
+            }
         )
         CompositionLocalProvider(
             // 提供智能WindowInsets给所有子Screen

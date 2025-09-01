@@ -44,6 +44,7 @@ import net.hearnsoft.tcm.compose.ui.theme.TouhouCloudMusicTheme
 import net.hearnsoft.tcm.compose.ui.uicomponent.MusicListItem
 import net.hearnsoft.tcm.compose.ui.uicomponent.sheet.BottomSheetDialog
 import net.hearnsoft.tcm.compose.ui.uicomponent.sheet.MusicSortSheetDialog
+import net.hearnsoft.tcm.compose.ui.uicomponent.sheet.SongActionSheetDialog
 import net.hearnsoft.tcm.compose.ui.utils.LocalPlayerAwareWindowInsets
 import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
 
@@ -73,6 +74,8 @@ fun MusicScreen(
     val currentSortingRule = playerViewModel.currentSortingRule.collectAsState().value
 
     var showSortDialog by remember { mutableStateOf(false) }
+    var showActionDialog by remember { mutableStateOf(false) }
+    var selectedSong by remember { mutableStateOf(allSongs.firstOrNull()) }
 
     // 处理错误消息
     LaunchedEffect(errorMessage) {
@@ -95,6 +98,17 @@ fun MusicScreen(
         )
     }
 
+    if (showActionDialog) {
+        selectedSong?.let {
+            SongActionSheetDialog(
+                onDismissRequest = {
+                    showActionDialog = false
+                },
+                songEntity = it,
+                navController = navController
+            )
+        }
+    }
 
     // 顶部间距
     Spacer(
@@ -211,6 +225,10 @@ fun MusicScreen(
                                 currentPlaying = currentPlaying,
                                 onClick = {
                                     playerViewModel.playSong(songEntity)
+                                },
+                                onActionClick = {
+                                    showActionDialog = true
+                                    selectedSong = songEntity
                                 }
                             )
                         }

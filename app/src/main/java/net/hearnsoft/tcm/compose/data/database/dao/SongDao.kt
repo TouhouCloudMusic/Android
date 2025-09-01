@@ -25,6 +25,9 @@ interface SongDao {
     @Query("SELECT * FROM songs WHERE is_favorite = 1 ORDER BY title ASC")
     fun getFavoriteSongs(): Flow<List<SongEntity>>
 
+    @Query("SELECT * FROM songs WHERE album_id = :albumId ORDER BY COALESCE(disc_number, 999), COALESCE(track_number, 999), title ASC")
+    fun getSongsByAlbumOrdered(albumId: Long): Flow<List<SongEntity>>
+
     @Query("SELECT * FROM songs ORDER BY play_count DESC LIMIT :limit")
     fun getMostPlayedSongs(limit: Int = 50): Flow<List<SongEntity>>
 

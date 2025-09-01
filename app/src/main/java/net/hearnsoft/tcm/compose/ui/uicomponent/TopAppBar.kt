@@ -15,42 +15,60 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.moriafly.salt.ui.Icon
 import com.moriafly.salt.ui.Text
+import com.moriafly.salt.ui.TitleBar
+import com.moriafly.salt.ui.UnstableSaltUiApi
 import net.hearnsoft.tcm.compose.R
 
+@UnstableSaltUiApi
 @Composable
 fun TopAppBar(
     modifier: Modifier = Modifier,
     title: String,
+    showSecondaryTitleBar: Boolean = false,
+    onBackClick: () -> Unit = { },
 ) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        IconButton(
-            onClick = {},
-            modifier = modifier.padding(4.dp)
+    if (showSecondaryTitleBar) {
+        Row(
+            modifier = modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_menu_24px),
-                contentDescription = "侧边栏抽屉"
+            TitleBar(
+                onBack = onBackClick,
+                text = title,
+                showBackBtn = true
             )
         }
-        Text(
-            text = title,
-            modifier = modifier.fillMaxWidth().weight(1f),
-            fontWeight = FontWeight.SemiBold,
-            textAlign = TextAlign.Center,
-            overflow = TextOverflow.Ellipsis,
-            maxLines = 1
-        )
-        IconButton(
-            onClick = { /* TODO: 打开搜索界面 */ },
-            modifier = modifier.padding(4.dp)
+    } else {
+        Row(
+            modifier = modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_search_24px),
-                contentDescription = "搜索"
+            IconButton(
+                onClick = {},
+                modifier = modifier.padding(4.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_menu_24px),
+                    contentDescription = "侧边栏抽屉"
+                )
+            }
+            Text(
+                text = title,
+                modifier = modifier.fillMaxWidth().weight(1f),
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Center,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1
             )
+            IconButton(
+                onClick = { /* TODO: 打开搜索界面 */ },
+                modifier = modifier.padding(4.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_search_24px),
+                    contentDescription = "搜索"
+                )
+            }
         }
     }
 }

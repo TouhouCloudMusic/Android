@@ -137,9 +137,12 @@ class LocalMusicRepository @Inject constructor(
         val albumName = metadata.albumTitle?.toString() ?: "Unknown Album"
         val title = metadata.title?.toString() ?: "Unknown Title"
 
-        // 从 MediaItem 的 URI 中提取专辑ID（如果可能）
+        // 从 extras 中获取音轨信息
+        val trackNumber = metadata.extras?.getInt("track_number")
+        val discNumber = metadata.extras?.getInt("disc_number")
+
+        // 从 MediaItem 的 URI 中提取专辑ID
         val albumId = try {
-            // 假设 LocalMusicScanner 在扫描时已经设置了正确的专辑信息
             metadata.extras?.getLong("album_id") ?: 0L
         } catch (e: Exception) {
             0L
@@ -173,7 +176,9 @@ class LocalMusicRepository @Inject constructor(
             albumName = albumName,   // 添加专辑名称
             duration = metadata.durationMs ?: 0L,
             filePath = mediaItem.localConfiguration?.uri?.path ?: "",
-            contentUri = mediaItem.localConfiguration?.uri ?: Uri.EMPTY
+            contentUri = mediaItem.localConfiguration?.uri ?: Uri.EMPTY,
+            trackNumber = trackNumber,
+            discNumber = discNumber
         )
 
         return Triple(songEntity, albumEntity, artistEntity)

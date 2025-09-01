@@ -65,6 +65,12 @@ data class SongEntity(
     @ColumnInfo(name = "content_uri")
     val contentUri: Uri,
 
+    @ColumnInfo(name = "track_number")
+    val trackNumber: Int? = null,
+
+    @ColumnInfo(name = "disc_number")
+    val discNumber: Int? = null,
+
     @ColumnInfo(name = "date_added")
     val dateAdded: Long = System.currentTimeMillis(),
 

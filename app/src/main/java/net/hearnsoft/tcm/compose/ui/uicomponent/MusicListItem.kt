@@ -47,7 +47,8 @@ fun MusicListItem(
     modifier: Modifier = Modifier,
     songEntity: SongEntity,
     currentPlaying: MediaItem?,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
+    onActionClick: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val isCurrentPlaying = currentPlaying?.mediaId == songEntity.mediaStoreId.toString()
@@ -82,15 +83,15 @@ fun MusicListItem(
                 .align(Alignment.CenterVertically)
         ) {
             Text(
-                text = songEntity.title.toString() ?: "未知歌曲",
+                text = songEntity.title ?: "未知歌曲",
                 style = SaltTheme.textStyles.main,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 color = if (isCurrentPlaying) Theme.colors.primary else SaltTheme.colors.text
             )
 
-            val artist = songEntity.artistName.toString() ?: "未知艺术家"
-            val album = songEntity.albumName.toString() ?: "未知专辑"
+            val artist = songEntity.artistName ?: "未知艺术家"
+            val album = songEntity.albumName ?: "未知专辑"
 
             val subTitle = "$artist - $album"
             Text(
@@ -106,7 +107,7 @@ fun MusicListItem(
             modifier = Modifier
                 .align(Alignment.CenterVertically)
                 .padding(8.dp),
-            onClick = { /* TODO: Handle play action */ }
+            onClick = { onActionClick() }
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_more_vert_24px),

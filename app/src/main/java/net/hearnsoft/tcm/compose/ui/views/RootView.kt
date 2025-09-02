@@ -83,6 +83,7 @@ import net.hearnsoft.tcm.compose.ui.player.COLLAPSED_ANCHOR
 import net.hearnsoft.tcm.compose.ui.player.rememberBottomSheetState
 import net.hearnsoft.tcm.compose.ui.screens.ScreenRoute
 import net.hearnsoft.tcm.compose.ui.screens.navigationBuilder
+import net.hearnsoft.tcm.compose.ui.uicomponent.AppDrawer
 import net.hearnsoft.tcm.compose.ui.uicomponent.TopAppBar
 import net.hearnsoft.tcm.compose.ui.utils.LocalPlayerAwareWindowInsets
 import net.hearnsoft.tcm.compose.ui.utils.appBarScrollBehavior
@@ -184,8 +185,6 @@ fun AppRootView(
             LocalPlayerAwareWindowInsets provides playerAwareWindowInsets
         ) {
             val drawerState = rememberDrawerState(DrawerValue.Closed)
-            val drawerList = listOf("首页", "设置")
-            val drawerSelectedItem = remember { mutableStateOf(drawerList[0]) }
 
             // 侧边栏打开时，让返回键优先响应关闭侧边栏
             BackHandler(enabled = drawerState.isOpen) {
@@ -195,44 +194,11 @@ fun AppRootView(
             DismissibleNavigationDrawer(
                 drawerState = drawerState,
                 drawerContent = {
-                    DismissibleDrawerSheet(
+                    AppDrawer(
                         drawerState = drawerState,
-                        drawerContainerColor = SaltTheme.colors.background
-                    ) {
-                        RoundedColumn(Modifier.verticalScroll(rememberScrollState())) {
-                            Spacer(Modifier.height(4.dp))
-                            Item(
-                                onClick = {
-                                    drawerSelectedItem.value = drawerList[0]
-                                    scope.launch {
-                                        drawerState.close()
-                                    }
-                                },
-                                text = drawerList[0],
-                                textColor = if (drawerSelectedItem.value == drawerList[0]) SaltTheme.colors.highlight else SaltTheme.colors.text,
-                                modifier = Modifier
-                                    .padding(horizontal = 2.dp)
-                            )
-                            Spacer(Modifier.height(4.dp))
-                            Item(
-                                onClick = {
-                                    drawerSelectedItem.value = drawerList[1]
-                                    scope.launch {
-                                        navController.navigate(ScreenRoute.Settings.route) {
-                                            // 避免多次点击侧边栏设置按钮时，重复添加Settings到返回栈
-                                            launchSingleTop = true
-                                        }
-                                        drawerState.close()
-                                    }
-                                },
-                                text = drawerList[1],
-                                textColor = if (drawerSelectedItem.value == drawerList[1]) SaltTheme.colors.highlight else SaltTheme.colors.text,
-                                modifier = Modifier
-                                    .padding(horizontal = 2.dp)
-                            )
-                            Spacer(Modifier.height(4.dp))
-                        }
-                    }
+                        scope = scope,
+                        navController = navController
+                    )
                 }
             ) {
                 TopAppBar(

@@ -1,6 +1,7 @@
 [versions]
 agp = "8.12.0"
 coilCompose = "3.2.0"
+datastorePreferences = "1.1.7"
 hiltCompiler = "2.57"
 hiltNavigationCompose = "1.2.0"
 kotlin = "2.2.10"
@@ -32,6 +33,7 @@ palette = "1.0.0"
 androidx-animation-graphics = { module = "androidx.compose.animation:animation-graphics", version.ref = "animationGraphics" }
 androidx-animation-graphics-android = { module = "androidx.compose.animation:animation-graphics-android", version.ref = "animationGraphics" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidx-navigation-compose-android = { module = "androidx.navigation:navigation-compose-android", version.ref = "navigationComposeAndroid" }

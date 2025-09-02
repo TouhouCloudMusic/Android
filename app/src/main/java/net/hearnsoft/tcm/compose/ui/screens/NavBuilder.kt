@@ -52,4 +52,7 @@ fun NavGraphBuilder.navigationBuilder(
             playerViewModel = playerViewModel
         )
     }
+    composable(ScreenRoute.Settings.route) {
+        SettingsScreen()
+    }
 }

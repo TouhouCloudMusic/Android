@@ -11,6 +11,8 @@ sealed class ScreenRoute(open val route: String) {
         fun createRoute(albumId: Long): String = "album/$albumId"
     }
 
+    object Settings : ScreenRoute("settings")
+
     companion object {
         val MainScreens = listOf(
             Explore,

@@ -175,6 +175,7 @@ fun AppRootView(
             currentRoute == ScreenRoute.Statistics.route -> "统计"
             currentRoute == ScreenRoute.Music.route -> "音乐"
             currentRoute == ScreenRoute.Account.route -> "个人"
+            currentRoute == ScreenRoute.Settings.route -> "设置"
             else -> stringResource(R.string.app_name)
         }
 
@@ -200,18 +201,35 @@ fun AppRootView(
                     ) {
                         RoundedColumn(Modifier.verticalScroll(rememberScrollState())) {
                             Spacer(Modifier.height(4.dp))
-                            drawerList.forEach { item ->
-                                Item(
-                                    onClick = {
-                                        drawerSelectedItem.value = item
-                                        scope.launch { drawerState.close() }
-                                    },
-                                    text = item,
-                                    textColor = if (drawerSelectedItem.value == item) SaltTheme.colors.highlight else SaltTheme.colors.text,
-                                    modifier = Modifier
-                                        .padding(horizontal = 2.dp)
-                                )
-                            }
+                            Item(
+                                onClick = {
+                                    drawerSelectedItem.value = drawerList[0]
+                                    scope.launch {
+                                        drawerState.close()
+                                    }
+                                },
+                                text = drawerList[0],
+                                textColor = if (drawerSelectedItem.value == drawerList[0]) SaltTheme.colors.highlight else SaltTheme.colors.text,
+                                modifier = Modifier
+                                    .padding(horizontal = 2.dp)
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            Item(
+                                onClick = {
+                                    drawerSelectedItem.value = drawerList[1]
+                                    scope.launch {
+                                        navController.navigate(ScreenRoute.Settings.route) {
+                                            // 避免多次点击侧边栏设置按钮时，重复添加Settings到返回栈
+                                            launchSingleTop = true
+                                        }
+                                        drawerState.close()
+                                    }
+                                },
+                                text = drawerList[1],
+                                textColor = if (drawerSelectedItem.value == drawerList[1]) SaltTheme.colors.highlight else SaltTheme.colors.text,
+                                modifier = Modifier
+                                    .padding(horizontal = 2.dp)
+                            )
                             Spacer(Modifier.height(4.dp))
                         }
                     }

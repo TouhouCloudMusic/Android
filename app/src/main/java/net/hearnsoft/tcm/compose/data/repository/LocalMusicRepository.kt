@@ -138,8 +138,13 @@ class LocalMusicRepository @Inject constructor(
         val title = metadata.title?.toString() ?: "Unknown Title"
 
         // 从 extras 中获取音轨信息
-        val trackNumber = metadata.extras?.getInt("track_number")
-        val discNumber = metadata.extras?.getInt("disc_number")
+        val trackNumber = if (metadata.extras?.containsKey("track_number") == true) {
+            metadata.extras?.getInt("track_number")
+        } else null
+
+        val discNumber = if (metadata.extras?.containsKey("disc_number") == true) {
+            metadata.extras?.getInt("disc_number")
+        } else null
 
         // 从 MediaItem 的 URI 中提取专辑ID
         val albumId = try {

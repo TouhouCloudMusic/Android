@@ -2,6 +2,7 @@ package net.hearnsoft.tcm.compose.utils
 
 import android.content.Context
 import android.net.Uri
+import android.os.Bundle
 import android.provider.MediaStore
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
@@ -69,18 +70,31 @@ object LocalMusicScanner {
                     val albumId = cursor.getLong(albumIdColumn)
                     val duration = cursor.getLong(durationColumn)
                     // 获取音轨号和碟号
-                    val trackInfo = if (trackColumn >= 0) cursor.getInt(trackColumn) else 0
-                    val cdTrackInfo = if (cdTrackColumn >= 0) cursor.getInt(cdTrackColumn) else 0
+                    val trackInfo = if (trackColumn >= 0) {
+                        val value = cursor.getInt(trackColumn)
+                        if (value > 0) value else null
+                    } else null
+
+                    val cdTrackInfo = if (cdTrackColumn >= 0) {
+                        val value = cursor.getInt(cdTrackColumn)
+                        if (value > 0) value else null
+                    } else null
 
                     // 创建专辑封面URI
                     val albumArtUri = "content://media/external/audio/albumart/$albumId".toUri()
                     Logger.debug(TAG, "专辑封面URI: $albumArtUri for 专辑ID: $albumId")
 
                     // 解析音轨号和碟号（TRACK 字段格式通常是 DDTT，DD是碟号，TT是音轨号）
-                    val discNumber = if (trackInfo > 1000) trackInfo / 1000 else null
-                    val trackNumber = if (trackInfo > 0) {
-                        if (trackInfo > 1000) trackInfo % 1000 else trackInfo
-                    } else if (cdTrackInfo > 0) cdTrackInfo else null
+                    val discNumber = trackInfo?.let { track ->
+                        if (track > 1000) track / 1000 else null
+                    }
+
+                    val trackNumber = when {
+                        trackInfo != null && trackInfo > 1000 -> trackInfo % 1000
+                        trackInfo != null && trackInfo > 0 -> trackInfo
+                        cdTrackInfo != null && cdTrackInfo > 0 -> cdTrackInfo
+                        else -> null
+                    }
 
                     // 创建媒体项URI
                     val contentUri = Uri.withAppendedPath(
@@ -89,7 +103,7 @@ object LocalMusicScanner {
                     )
 
                     // 创建额外信息Bundle，包含专辑ID
-                    val extras = android.os.Bundle().apply {
+                    val extras = Bundle().apply {
                         putLong("album_id", albumId)
                     }
 
@@ -105,8 +119,8 @@ object LocalMusicScanner {
                                 .setArtworkUri(albumArtUri)
                                 .setDurationMs(duration)
                                 .setExtras(extras.apply {
-                                    if (trackNumber != null) putInt("track_number", trackNumber)
-                                    if (discNumber != null) putInt("disc_number", discNumber)
+                                    trackNumber?.let { putInt("track_number", it) }
+                                    discNumber?.let { putInt("disc_number", it) }
                                 })
                                 .build()
                         )

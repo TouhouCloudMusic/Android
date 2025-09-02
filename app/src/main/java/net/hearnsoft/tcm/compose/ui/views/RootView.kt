@@ -2,6 +2,7 @@ package net.hearnsoft.tcm.compose.ui.views
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import androidx.activity.compose.BackHandler
 import androidx.annotation.OptIn
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -9,12 +10,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
@@ -22,13 +25,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.DismissibleDrawerSheet
+import androidx.compose.material3.DismissibleNavigationDrawer
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -54,10 +65,13 @@ import androidx.navigation.compose.rememberNavController
 import com.moriafly.salt.ui.BottomBar
 import com.moriafly.salt.ui.BottomBarItem
 import com.moriafly.salt.ui.Icon
+import com.moriafly.salt.ui.Item
+import com.moriafly.salt.ui.RoundedColumn
 import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.Text
 import com.moriafly.salt.ui.UnstableSaltUiApi
 import dagger.hilt.android.UnstableApi
+import kotlinx.coroutines.launch
 import net.hearnsoft.tcm.compose.R
 import net.hearnsoft.tcm.compose.constants.AppBarHeight
 import net.hearnsoft.tcm.compose.constants.MiniPlayerHeight
@@ -105,6 +119,8 @@ fun AppRootView(
         val bottomInset = with(density) { windowsInsets.getBottom(density).toDp() }
 
         var active by rememberSaveable { mutableStateOf(false) }
+
+        val scope = rememberCoroutineScope()
 
         val shouldShowNavigationBar =
             remember(navBackStackEntry, active) {
@@ -162,35 +178,80 @@ fun AppRootView(
             else -> stringResource(R.string.app_name)
         }
 
-        TopAppBar(
-            modifier = modifier.systemBarsPadding(),
-            title = title,
-            showSecondaryTitleBar = isSecondaryScreen,
-            onBackClick = {
-                if (navController.canGoBack) {
-                    navController.popBackStack()
-                }
-            }
-        )
         CompositionLocalProvider(
             // 提供智能WindowInsets给所有子Screen
             LocalPlayerAwareWindowInsets provides playerAwareWindowInsets
         ) {
-            NavHost(
-                navController = navController,
-                startDestination = ScreenRoute.Explore.route,
-                modifier = Modifier
-                    .nestedScroll(
-                        topAppBarScrollBehavior.nestedScrollConnection
-                    )
-                    // 为NavHost添加智能边距
-                    .windowInsetsPadding(playerAwareWindowInsets)
+            val drawerState = rememberDrawerState(DrawerValue.Closed)
+            val drawerList = listOf("首页", "设置")
+            val drawerSelectedItem = remember { mutableStateOf(drawerList[0]) }
+
+            // 侧边栏打开时，让返回键优先响应关闭侧边栏
+            BackHandler(enabled = drawerState.isOpen) {
+                scope.launch { drawerState.close() }
+            }
+
+            DismissibleNavigationDrawer(
+                drawerState = drawerState,
+                drawerContent = {
+                    DismissibleDrawerSheet(
+                        drawerState = drawerState,
+                        drawerContainerColor = SaltTheme.colors.background
+                    ) {
+                        RoundedColumn(Modifier.verticalScroll(rememberScrollState())) {
+                            Spacer(Modifier.height(4.dp))
+                            drawerList.forEach { item ->
+                                Item(
+                                    onClick = {
+                                        drawerSelectedItem.value = item
+                                        scope.launch { drawerState.close() }
+                                    },
+                                    text = item,
+                                    textColor = if (drawerSelectedItem.value == item) SaltTheme.colors.highlight else SaltTheme.colors.text,
+                                    modifier = Modifier
+                                        .padding(horizontal = 2.dp)
+                                )
+                            }
+                            Spacer(Modifier.height(4.dp))
+                        }
+                    }
+                }
             ) {
-                navigationBuilder(
-                    navController,
-                    topAppBarScrollBehavior,
-                    playerViewModel
+                TopAppBar(
+                    modifier = modifier.systemBarsPadding(),
+                    title = title,
+                    showSecondaryTitleBar = isSecondaryScreen,
+                    onBackClick = {
+                        if (navController.canGoBack) {
+                            navController.popBackStack()
+                        }
+                    },
+                    onDrawerClick = {
+                        scope.launch {
+                            if (drawerState.isClosed) {
+                                drawerState.open()
+                            } else {
+                                drawerState.close()
+                            }
+                        }
+                    }
                 )
+                NavHost(
+                    navController = navController,
+                    startDestination = ScreenRoute.Explore.route,
+                    modifier = Modifier
+                        .nestedScroll(
+                            topAppBarScrollBehavior.nestedScrollConnection
+                        )
+                        // 为NavHost添加智能边距
+                        .windowInsetsPadding(playerAwareWindowInsets)
+                ) {
+                    navigationBuilder(
+                        navController,
+                        topAppBarScrollBehavior,
+                        playerViewModel
+                    )
+                }
             }
 
             BottomSheetPlayer(

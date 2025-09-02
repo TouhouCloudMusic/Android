@@ -26,6 +26,8 @@ fun TopAppBar(
     title: String,
     showSecondaryTitleBar: Boolean = false,
     onBackClick: () -> Unit = { },
+    onDrawerClick: () -> Unit = { },
+    onSearchClick: () -> Unit = { }
 ) {
     if (showSecondaryTitleBar) {
         Row(
@@ -44,7 +46,7 @@ fun TopAppBar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(
-                onClick = {},
+                onClick = { onDrawerClick() },
                 modifier = modifier.padding(4.dp)
             ) {
                 Icon(
@@ -61,7 +63,7 @@ fun TopAppBar(
                 maxLines = 1
             )
             IconButton(
-                onClick = { /* TODO: 打开搜索界面 */ },
+                onClick = { onSearchClick() },
                 modifier = modifier.padding(4.dp)
             ) {
                 Icon(

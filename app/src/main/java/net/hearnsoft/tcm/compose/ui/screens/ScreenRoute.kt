@@ -13,6 +13,8 @@ sealed class ScreenRoute(open val route: String) {
 
     object Settings : ScreenRoute("settings")
 
+    object Scan : ScreenRoute("scan")
+
     companion object {
         val MainScreens = listOf(
             Explore,

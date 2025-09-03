@@ -33,7 +33,7 @@ fun AppDrawer(
     navController: NavController,
     currentMainScreenRoute: MutableState<String>
 ) {
-    val drawerList = listOf("首页", "设置")
+    val drawerList = listOf("首页", "扫描媒体", "设置")
     val drawerSelectedItem = remember { mutableStateOf(drawerList[0]) }
 
     DismissibleDrawerSheet(
@@ -64,8 +64,7 @@ fun AppDrawer(
                 onClick = {
                     drawerSelectedItem.value = drawerList[1]
                     scope.launch {
-                        navController.navigate(ScreenRoute.Settings.route) {
-                            // 避免多次点击侧边栏设置按钮时，重复添加Settings到返回栈
+                        navController.navigate(ScreenRoute.Scan.route) {
                             launchSingleTop = true
                         }
                         drawerState.close()
@@ -73,6 +72,23 @@ fun AppDrawer(
                 },
                 text = drawerList[1],
                 textColor = if (drawerSelectedItem.value == drawerList[1]) SaltTheme.colors.highlight else SaltTheme.colors.text,
+                modifier = Modifier
+                    .padding(horizontal = 2.dp)
+            )
+            Spacer(Modifier.height(4.dp))
+            Item(
+                onClick = {
+                    drawerSelectedItem.value = drawerList[2]
+                    scope.launch {
+                        navController.navigate(ScreenRoute.Settings.route) {
+                            // 避免多次点击侧边栏设置按钮时，重复添加Settings到返回栈
+                            launchSingleTop = true
+                        }
+                        drawerState.close()
+                    }
+                },
+                text = drawerList[2],
+                textColor = if (drawerSelectedItem.value == drawerList[2]) SaltTheme.colors.highlight else SaltTheme.colors.text,
                 modifier = Modifier
                     .padding(horizontal = 2.dp)
             )

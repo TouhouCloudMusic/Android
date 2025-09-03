@@ -55,4 +55,7 @@ fun NavGraphBuilder.navigationBuilder(
     composable(ScreenRoute.Settings.route) {
         SettingsScreen()
     }
+    composable(ScreenRoute.Scan.route) {
+        MusicScanScreen()
+    }
 }

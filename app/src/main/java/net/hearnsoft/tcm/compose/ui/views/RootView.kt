@@ -7,32 +7,20 @@ import androidx.annotation.OptIn
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.add
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.DismissibleDrawerSheet
 import androidx.compose.material3.DismissibleNavigationDrawer
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -45,15 +33,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastAny
@@ -64,11 +47,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.moriafly.salt.ui.BottomBar
 import com.moriafly.salt.ui.BottomBarItem
-import com.moriafly.salt.ui.Icon
-import com.moriafly.salt.ui.Item
-import com.moriafly.salt.ui.RoundedColumn
 import com.moriafly.salt.ui.SaltTheme
-import com.moriafly.salt.ui.Text
 import com.moriafly.salt.ui.UnstableSaltUiApi
 import dagger.hilt.android.UnstableApi
 import kotlinx.coroutines.launch
@@ -78,7 +57,6 @@ import net.hearnsoft.tcm.compose.constants.MiniPlayerHeight
 import net.hearnsoft.tcm.compose.constants.NavigationBarAnimationSpec
 import net.hearnsoft.tcm.compose.constants.NavigationBarHeight
 import net.hearnsoft.tcm.compose.ui.player.BottomSheetPlayer
-import net.hearnsoft.tcm.compose.ui.player.BottomSheetState
 import net.hearnsoft.tcm.compose.ui.player.COLLAPSED_ANCHOR
 import net.hearnsoft.tcm.compose.ui.player.rememberBottomSheetState
 import net.hearnsoft.tcm.compose.ui.screens.ScreenRoute
@@ -160,8 +138,14 @@ fun AppRootView(
                 .add(WindowInsets(top = AppBarHeight, bottom = bottom))
         }
 
-        // 获取当前路由
+        // 记录当前的主屏幕路由，默认为 Explore
+        val currentMainScreenRoute = remember { mutableStateOf(ScreenRoute.Explore.route) }
         val currentRoute = navBackStackEntry?.destination?.route
+
+        // 当路由变化时，如果新路由是主屏幕之一，则更新状态
+        if (ScreenRoute.MainScreens.any { it.route == currentRoute }) {
+            currentRoute?.let { currentMainScreenRoute.value = it }
+        }
 
         // 判断是否为二级页面
         val isSecondaryScreen = remember(currentRoute) {
@@ -197,7 +181,8 @@ fun AppRootView(
                     AppDrawer(
                         drawerState = drawerState,
                         scope = scope,
-                        navController = navController
+                        navController = navController,
+                        currentMainScreenRoute = currentMainScreenRoute
                     )
                 }
             ) {
@@ -289,86 +274,40 @@ fun MainBottomBar(
         backgroundColor = Color.Transparent,
         modifier = modifier
     ) {
-        BottomBarItem(
-            text = "发现",
-            onClick = {
-                if (currentRoute != ScreenRoute.Explore.route) {
-                    navController.navigate(ScreenRoute.Explore.route) {
-                        popUpTo(navController.graph.startDestinationId)
-                        launchSingleTop = true
+        ScreenRoute.MainScreens.forEach { screen ->
+            BottomBarItem(
+                text = when (screen) {
+                    ScreenRoute.Explore -> "发现"
+                    ScreenRoute.Library -> "曲库"
+                    ScreenRoute.Statistics -> "统计"
+                    ScreenRoute.Music -> "音乐"
+                    ScreenRoute.Account -> "个人"
+                    else -> ""
+                },
+                onClick = {
+                    if (currentRoute != screen.route) {
+                        navController.navigate(screen.route) {
+                            // 弹出到导航图的起始位置（ID为0），并清空包括它在内的所有内容
+                            popUpTo(0) {
+                                inclusive = true
+                            }
+                            // 确保在栈顶只有一个实例
+                            launchSingleTop = true
+                        }
                     }
-                }
-            },
-            state = currentRoute == ScreenRoute.Explore.route,
-            painter = painterResource(id = R.drawable.ic_explore),
-        )
-        BottomBarItem(
-            text = "曲库",
-            onClick = {
-                if (currentRoute != ScreenRoute.Library.route) {
-                    navController.navigate(ScreenRoute.Library.route) {
-                        popUpTo(navController.graph.startDestinationId)
-                        launchSingleTop = true
+                },
+                state = currentRoute == screen.route,
+                painter = painterResource(
+                    id = when (screen) {
+                        ScreenRoute.Explore -> R.drawable.ic_explore
+                        ScreenRoute.Library -> R.drawable.ic_library_music
+                        ScreenRoute.Statistics -> R.drawable.ic_nav_chart
+                        ScreenRoute.Music -> R.drawable.ic_nav_music
+                        ScreenRoute.Account -> R.drawable.ic_account_circle
+                        else -> R.drawable.ic_explore
                     }
-                }
-            },
-            state = currentRoute == ScreenRoute.Library.route,
-            painter = painterResource(id = R.drawable.ic_library_music),
-        )
-        BottomBarItem(
-            text = "统计",
-            onClick = {
-                if (currentRoute != ScreenRoute.Statistics.route) {
-                    navController.navigate(ScreenRoute.Statistics.route) {
-                        popUpTo(navController.graph.startDestinationId)
-                        launchSingleTop = true
-                    }
-                }
-            },
-            state = currentRoute == ScreenRoute.Statistics.route,
-            painter = painterResource(id = R.drawable.ic_nav_chart),
-        )
-        BottomBarItem(
-            text = "音乐",
-            onClick = {
-                if (currentRoute != ScreenRoute.Music.route) {
-                    navController.navigate(ScreenRoute.Music.route) {
-                        popUpTo(navController.graph.startDestinationId)
-                        launchSingleTop = true
-                    }
-                }
-            },
-            state = currentRoute == ScreenRoute.Music.route,
-            painter = painterResource(id = R.drawable.ic_nav_music),
-        )
-        BottomBarItem(
-            text = "个人",
-            onClick = {
-                if (currentRoute != ScreenRoute.Account.route) {
-                    navController.navigate(ScreenRoute.Account.route) {
-                        popUpTo(navController.graph.startDestinationId)
-                        launchSingleTop = true
-                    }
-                }
-            },
-            state = currentRoute == ScreenRoute.Account.route,
-            painter = painterResource(id = R.drawable.ic_account_circle),
-        )
+                ),
+            )
+        }
     }
 }
-
-/*
-@OptIn(UnstableApi::class)
-@ExperimentalFoundationApi
-@Composable
-@UnstableSaltUiApi
-@ExperimentalMaterial3Api
-@Preview
-fun AppRootViewPreview() {
-    AppRootView(
-        modifier = Modifier
-            .fillMaxSize()
-            .safeMainPadding(),
-        context = Activity() // 使用一个空的Activity实例进行预览
-    )
-}*/

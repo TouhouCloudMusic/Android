@@ -9,6 +9,7 @@ import androidx.compose.material3.DismissibleDrawerSheet
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -29,7 +30,8 @@ fun AppDrawer(
     modifier: Modifier = Modifier,
     drawerState : DrawerState,
     scope: CoroutineScope,
-    navController: NavController
+    navController: NavController,
+    currentMainScreenRoute: MutableState<String>
 ) {
     val drawerList = listOf("首页", "设置")
     val drawerSelectedItem = remember { mutableStateOf(drawerList[0]) }
@@ -44,6 +46,11 @@ fun AppDrawer(
                 onClick = {
                     drawerSelectedItem.value = drawerList[0]
                     scope.launch {
+                        // 导航到当前的主屏幕路由
+                        navController.navigate(currentMainScreenRoute.value) {
+                            popUpTo(0) { inclusive = true }
+                            launchSingleTop = true
+                        }
                         drawerState.close()
                     }
                 },

@@ -23,77 +23,93 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import net.hearnsoft.tcm.compose.ui.screens.ScreenRoute
 
+// 抽取菜单项数据类
+data class DrawerMenuItem(
+    val title: String,
+    val route: String,
+    val isMainScreen: Boolean = false
+)
+
 @ExperimentalMaterial3Api
 @UnstableSaltUiApi
 @Composable
 fun AppDrawer(
     modifier: Modifier = Modifier,
-    drawerState : DrawerState,
+    drawerState: DrawerState,
     scope: CoroutineScope,
     navController: NavController,
     currentMainScreenRoute: MutableState<String>
 ) {
-    val drawerList = listOf("首页", "扫描媒体", "设置")
-    val drawerSelectedItem = remember { mutableStateOf(drawerList[0]) }
+    // 可配置的菜单项列表
+    val drawerMenuItems = remember {
+        listOf(
+            DrawerMenuItem("首页", "", isMainScreen = true),
+            DrawerMenuItem("扫描媒体", ScreenRoute.Scan.route),
+            DrawerMenuItem("设置", ScreenRoute.Settings.route)
+        )
+    }
+
+    val selectedItem = remember { mutableStateOf(drawerMenuItems[0].title) }
 
     DismissibleDrawerSheet(
         drawerState = drawerState,
         drawerContainerColor = SaltTheme.colors.background
     ) {
-        RoundedColumn(Modifier.verticalScroll(rememberScrollState())) {
-            Spacer(Modifier.height(4.dp))
-            Item(
-                onClick = {
-                    drawerSelectedItem.value = drawerList[0]
-                    scope.launch {
-                        // 导航到当前的主屏幕路由
-                        navController.navigate(currentMainScreenRoute.value) {
-                            popUpTo(0) { inclusive = true }
-                            launchSingleTop = true
+        RoundedColumn(
+            modifier = Modifier.verticalScroll(rememberScrollState())
+        ) {
+            // 使用循环生成菜单项
+            drawerMenuItems.forEach { menuItem ->
+                DrawerItemComponent(
+                    menuItem = menuItem,
+                    onClick = {
+                        selectedItem.value = menuItem.title
+                        scope.launch {
+                            handleNavigation(
+                                navController = navController,
+                                menuItem = menuItem,
+                                currentMainScreenRoute = currentMainScreenRoute.value
+                            )
+                            drawerState.close()
                         }
-                        drawerState.close()
                     }
-                },
-                text = drawerList[0],
-                textColor = if (drawerSelectedItem.value == drawerList[0]) SaltTheme.colors.highlight else SaltTheme.colors.text,
-                modifier = Modifier
-                    .padding(horizontal = 2.dp)
-            )
-            Spacer(Modifier.height(4.dp))
-            Item(
-                onClick = {
-                    drawerSelectedItem.value = drawerList[1]
-                    scope.launch {
-                        navController.navigate(ScreenRoute.Scan.route) {
-                            launchSingleTop = true
-                        }
-                        drawerState.close()
-                    }
-                },
-                text = drawerList[1],
-                textColor = if (drawerSelectedItem.value == drawerList[1]) SaltTheme.colors.highlight else SaltTheme.colors.text,
-                modifier = Modifier
-                    .padding(horizontal = 2.dp)
-            )
-            Spacer(Modifier.height(4.dp))
-            Item(
-                onClick = {
-                    drawerSelectedItem.value = drawerList[2]
-                    scope.launch {
-                        navController.navigate(ScreenRoute.Settings.route) {
-                            // 避免多次点击侧边栏设置按钮时，重复添加Settings到返回栈
-                            launchSingleTop = true
-                        }
-                        drawerState.close()
-                    }
-                },
-                text = drawerList[2],
-                textColor = if (drawerSelectedItem.value == drawerList[2]) SaltTheme.colors.highlight else SaltTheme.colors.text,
-                modifier = Modifier
-                    .padding(horizontal = 2.dp)
-            )
-            Spacer(Modifier.height(4.dp))
+                )
+            }
         }
     }
+}
 
+@UnstableSaltUiApi
+@Composable
+private fun DrawerItemComponent(
+    menuItem: DrawerMenuItem,
+    onClick: () -> Unit
+) {
+    Item(
+        onClick = onClick,
+        text = menuItem.title,
+        textColor = SaltTheme.colors.text
+    )
+}
+
+private fun handleNavigation(
+    navController: NavController,
+    menuItem: DrawerMenuItem,
+    currentMainScreenRoute: String
+) {
+    when {
+        menuItem.isMainScreen -> {
+            // 导航到当前的主屏幕路由
+            navController.navigate(currentMainScreenRoute) {
+                popUpTo(0) { inclusive = true }
+                launchSingleTop = true
+            }
+        }
+
+        menuItem.route.isNotEmpty() -> {
+            navController.navigate(menuItem.route) {
+                launchSingleTop = true
+            }
+        }
+    }
 }

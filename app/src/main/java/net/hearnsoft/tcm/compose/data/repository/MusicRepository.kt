@@ -58,9 +58,9 @@ abstract class MusicRepository {
     // === 数据同步操作 ===
     /**
      * 扫描并更新音乐库
-     * 子类实现具体的扫描逻辑（本地扫描、远程同步等）
+     * @param onProgress 进度回调函数
      */
-    abstract suspend fun scanAndUpdateLibrary()
+    abstract suspend fun scanAndUpdateLibrary(onProgress: ((String) -> Unit)? = null)
 
     /**
      * 将 MediaItem 转换为数据库实体

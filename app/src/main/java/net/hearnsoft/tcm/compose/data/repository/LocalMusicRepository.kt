@@ -70,10 +70,12 @@ class LocalMusicRepository @Inject constructor(
     override suspend fun deleteAllArtists() = artistDao.deleteAllArtists()
 
     // === 数据同步操作 ===
-    override suspend fun scanAndUpdateLibrary() {
+    override suspend fun scanAndUpdateLibrary(onProgress: ((String) -> Unit)?) {
         try {
+            onProgress?.invoke("正在扫描文件并更新数据库内容...")
             val scannedItems = LocalMusicScanner.scanDeviceMusic(context)
             Logger.debug("LocalMusicRepository", "扫描到 ${scannedItems.size} 首歌曲")
+            var processedCount = 0
 
             for (mediaItem in scannedItems) {
                 val (songEntity, albumEntity, artistEntity) = convertMediaItemToEntities(mediaItem)
@@ -120,6 +122,11 @@ class LocalMusicRepository @Inject constructor(
                     // 更新现有歌曲信息
                     updateSong(finalSongEntity.copy(songId = existingSong.songId))
                     Logger.debug("LocalMusicRepository", "更新歌曲: ${finalSongEntity.title}")
+                }
+
+                processedCount++
+                if (processedCount % 10 == 0 || processedCount == scannedItems.size) {
+                    onProgress?.invoke("正在更新数据库内容... ($processedCount/${scannedItems.size})")
                 }
             }
 

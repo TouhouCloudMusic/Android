@@ -70,13 +70,10 @@ fun MusicScreen(
     val lazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
 
-    val snackbarHostState = remember { SnackbarHostState() }
-
     // 收集 ViewModel 状态
     val allSongs by playerViewModel.allSongs.collectAsState()
     val currentPlaylist by playerViewModel.currentPlaylist.collectAsState()
     val isLoading by playerViewModel.isLoading.collectAsState()
-    val errorMessage by playerViewModel.errorMessage.collectAsState()
 
     // 当前播放的媒体
     val currentPlaying = playerViewModel.currentMediaItem.collectAsState().value
@@ -87,14 +84,6 @@ fun MusicScreen(
     var showSortDialog by remember { mutableStateOf(false) }
     var showActionDialog by remember { mutableStateOf(false) }
     var selectedSong by remember { mutableStateOf(allSongs.firstOrNull()) }
-
-    // 处理错误消息
-    LaunchedEffect(errorMessage) {
-        errorMessage?.let { message ->
-            snackbarHostState.showSnackbar(message)
-            playerViewModel.clearErrorMessage()
-        }
-    }
 
     // 定位到当前播放歌曲的函数
     fun scrollToCurrentPlaying() {
@@ -162,14 +151,6 @@ fun MusicScreen(
                         .padding(vertical = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Button(
-                        onClick = {
-                            playerViewModel.scanAndUpdateMusicLibrary()
-                            //playerViewModel.reloadAllSongs()
-                        },
-                        text = "扫描音乐",
-                    )
-
                     if (allSongs.isNotEmpty()) {
                         Button(
                             onClick = {

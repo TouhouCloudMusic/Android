@@ -47,6 +47,9 @@ class PlayerViewModel @Inject constructor(
     private val TAG = "PlayerViewModel"
 
     // === 播放列表数据 ===
+    // 原始数据源，直接从数据库获取，不参与排序逻辑
+    private val _rawSongs = MutableStateFlow<List<SongEntity>>(emptyList())
+    // 给UI层使用的排序和过滤后的数据
     private val _allSongs = MutableStateFlow<List<SongEntity>>(emptyList())
     val allSongs: StateFlow<List<SongEntity>> = _allSongs.asStateFlow()
 
@@ -80,6 +83,13 @@ class PlayerViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
+    // === 扫描进度状态 ===
+    private val _scanProgress = MutableStateFlow<String?>(null)
+    val scanProgress: StateFlow<String?> = _scanProgress.asStateFlow()
+
+    private val _scanCompleted = MutableStateFlow(false)
+    val scanCompleted: StateFlow<Boolean> = _scanCompleted.asStateFlow()
+
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
@@ -109,7 +119,7 @@ class PlayerViewModel @Inject constructor(
     private fun observeDataChanges() {
         viewModelScope.launch {
             combine(
-                _allSongs,
+                _rawSongs,
                 _currentSortingRule
             ) { songs, sortingRule ->
                 Pair(songs, sortingRule)
@@ -204,7 +214,7 @@ class PlayerViewModel @Inject constructor(
                     _isLoading.value = false // 确保在出错时也更新状态
                 }
                 .collectLatest { songs ->
-                    _allSongs.value = songs
+                    _rawSongs.value = songs
                     Logger.debug(TAG, "加载了 ${songs.size} 首歌曲")
 
                     // 收到第一次数据后，就认为加载完成
@@ -222,15 +232,34 @@ class PlayerViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 _isLoading.value = true
-                musicRepository.scanAndUpdateLibrary()
+                _scanCompleted.value = false
+                _scanProgress.value = "开始扫描设备音乐文件..."
+
+                // 调用仓库层方法，传入进度回调
+                musicRepository.scanAndUpdateLibrary { progress ->
+                    _scanProgress.value = progress
+                }
+
+                _scanProgress.value = "应用排序中..."
                 Logger.debug(TAG, "音乐库扫描更新完成")
+
+                _scanProgress.value = null
+                _scanCompleted.value = true
             } catch (e: Exception) {
                 Logger.err(TAG, "扫描音乐库失败: ${e.message}")
                 _errorMessage.value = "扫描失败: ${e.message}"
+                _scanProgress.value = null
             } finally {
                 _isLoading.value = false
             }
         }
+    }
+
+    /**
+     * 重置扫描完成状态
+     */
+    fun resetScanCompleted() {
+        _scanCompleted.value = false
     }
 
     // === 播放控制方法 ===

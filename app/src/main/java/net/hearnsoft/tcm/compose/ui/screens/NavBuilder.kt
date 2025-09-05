@@ -60,4 +60,9 @@ fun NavGraphBuilder.navigationBuilder(
             playerViewModel = playerViewModel,
         )
     }
+    composable(ScreenRoute.SearchPage.route) {
+        SearchScreen(
+            playerViewModel = playerViewModel,
+        )
+    }
 }

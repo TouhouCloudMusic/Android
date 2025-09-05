@@ -15,6 +15,8 @@ sealed class ScreenRoute(open val route: String) {
 
     object Scan : ScreenRoute("scan")
 
+    object SearchPage : ScreenRoute("searchPage")
+
     companion object {
         val MainScreens = listOf(
             Explore,

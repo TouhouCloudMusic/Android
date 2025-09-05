@@ -161,6 +161,8 @@ fun AppRootView(
             currentRoute == ScreenRoute.Music.route -> "音乐"
             currentRoute == ScreenRoute.Account.route -> "个人"
             currentRoute == ScreenRoute.Settings.route -> "设置"
+            currentRoute == ScreenRoute.Scan.route -> "扫描媒体"
+            currentRoute == ScreenRoute.SearchPage.route -> "搜索"
             else -> stringResource(R.string.app_name)
         }
 
@@ -203,6 +205,9 @@ fun AppRootView(
                                 drawerState.close()
                             }
                         }
+                    },
+                    onSearchClick = {
+                        navController.navigate(ScreenRoute.SearchPage.route)
                     }
                 )
                 NavHost(

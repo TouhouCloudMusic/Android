@@ -63,10 +63,13 @@ import net.hearnsoft.tcm.compose.ui.screens.ScreenRoute
 import net.hearnsoft.tcm.compose.ui.screens.navigationBuilder
 import net.hearnsoft.tcm.compose.ui.uicomponent.AppDrawer
 import net.hearnsoft.tcm.compose.ui.uicomponent.TopAppBar
+import net.hearnsoft.tcm.compose.ui.uicomponent.TopAppBarType
 import net.hearnsoft.tcm.compose.ui.utils.LocalPlayerAwareWindowInsets
+import net.hearnsoft.tcm.compose.ui.utils.LocalSearchViewModel
 import net.hearnsoft.tcm.compose.ui.utils.appBarScrollBehavior
 import net.hearnsoft.tcm.compose.ui.utils.canGoBack
 import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
+import net.hearnsoft.tcm.compose.ui.viewmodel.SearchViewModel
 
 @OptIn(androidx.media3.common.util.UnstableApi::class)
 @SuppressLint("UnusedBoxWithConstraintsScope")
@@ -82,6 +85,7 @@ fun AppRootView(
 
     // 使用 Hilt 注入的 ViewModel
     val playerViewModel: PlayerViewModel = hiltViewModel()
+    val searchViewModel: SearchViewModel = hiltViewModel()
     
     BoxWithConstraints(
         modifier = modifier
@@ -168,7 +172,8 @@ fun AppRootView(
 
         CompositionLocalProvider(
             // 提供智能WindowInsets给所有子Screen
-            LocalPlayerAwareWindowInsets provides playerAwareWindowInsets
+            LocalPlayerAwareWindowInsets provides playerAwareWindowInsets,
+            LocalSearchViewModel provides searchViewModel
         ) {
             val drawerState = rememberDrawerState(DrawerValue.Closed)
 
@@ -188,10 +193,18 @@ fun AppRootView(
                     )
                 }
             ) {
+                // 获取当前 TopAppBar 类型
+                val currentTopAppBarType = when {
+                    currentRoute == ScreenRoute.SearchPage.route -> TopAppBarType.SEARCH
+                    isSecondaryScreen -> TopAppBarType.SECONDARY
+                    else -> TopAppBarType.MAIN
+                }
+
                 TopAppBar(
                     modifier = modifier.systemBarsPadding(),
                     title = title,
-                    showSecondaryTitleBar = isSecondaryScreen,
+                    titleBarType = currentTopAppBarType,
+                    searchViewModel = searchViewModel,
                     onBackClick = {
                         if (navController.canGoBack) {
                             navController.popBackStack()
@@ -223,7 +236,8 @@ fun AppRootView(
                     navigationBuilder(
                         navController,
                         topAppBarScrollBehavior,
-                        playerViewModel
+                        playerViewModel,
+                        searchViewModel
                     )
                 }
             }

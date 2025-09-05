@@ -3,6 +3,8 @@ package net.hearnsoft.tcm.compose.ui.screens
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -10,7 +12,9 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.moriafly.salt.ui.UnstableSaltUiApi
+import net.hearnsoft.tcm.compose.ui.utils.LocalSearchViewModel
 import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
+import net.hearnsoft.tcm.compose.ui.viewmodel.SearchViewModel
 
 @UnstableSaltUiApi
 @ExperimentalMaterial3Api
@@ -19,7 +23,8 @@ import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
 fun NavGraphBuilder.navigationBuilder(
     navController: NavHostController,
     scrollBehavior: TopAppBarScrollBehavior,
-    playerViewModel: PlayerViewModel
+    playerViewModel: PlayerViewModel,
+    searchViewModel: SearchViewModel,
 ) {
     composable(ScreenRoute.Explore.route) {
         ExploreScreen(navController = navController)
@@ -62,7 +67,8 @@ fun NavGraphBuilder.navigationBuilder(
     }
     composable(ScreenRoute.SearchPage.route) {
         SearchScreen(
-            playerViewModel = playerViewModel,
+            searchViewModel = searchViewModel,
+            playerViewModel = playerViewModel
         )
     }
 }

@@ -50,7 +50,7 @@ class LocalMusicRepository @Inject constructor(
     override fun getAllAlbums(): Flow<List<AlbumEntity>> = albumDao.getAllAlbums()
     override suspend fun getAlbumById(albumId: Long): AlbumEntity? = albumDao.getAlbumById(albumId)
     override suspend fun getAlbumByMediaStoreId(mediaStoreAlbumId: Long): AlbumEntity? = albumDao.getAlbumByMediaStoreId(mediaStoreAlbumId)
-    override suspend fun getAlbumsByArtist(artistName: String): Flow<List<AlbumEntity>> = albumDao.getAlbumsByArtist(artistName)
+    override suspend fun getAlbumsByAlbumArtist(albumArtist: String): Flow<List<AlbumEntity>> = albumDao.getAlbumsByAlbumArtist(albumArtist)
 
     override suspend fun insertAlbum(album: AlbumEntity): Long = albumDao.insertAlbum(album)
     override suspend fun insertAlbums(albums: List<AlbumEntity>): List<Long> = albumDao.insertAlbums(albums)
@@ -142,6 +142,7 @@ class LocalMusicRepository @Inject constructor(
 
         val artistName = metadata.artist?.toString() ?: "Unknown Artist"
         val albumName = metadata.albumTitle?.toString() ?: "Unknown Album"
+        val albumArtist = metadata.albumArtist?.toString() ?: artistName
         val title = metadata.title?.toString() ?: "Unknown Title"
 
         // 从 extras 中获取音轨信息
@@ -171,7 +172,7 @@ class LocalMusicRepository @Inject constructor(
         val albumEntity = AlbumEntity(
             mediaStoreAlbumId = albumId,
             albumName = albumName,
-            artistName = artistName,
+            albumArtist = albumArtist,
             artworkUri = metadata.artworkUri,
             songCount = 0, // 在插入时会正确设置
             totalDuration = 0L

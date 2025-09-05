@@ -24,8 +24,8 @@ data class AlbumEntity(
     @ColumnInfo(name = "album_name")
     val albumName: String,
 
-    @ColumnInfo(name = "artist_name")
-    val artistName: String,
+    @ColumnInfo(name = "album_artist")
+    val albumArtist: String,
 
     @ColumnInfo(name = "artwork_uri")
     val artworkUri: Uri?,

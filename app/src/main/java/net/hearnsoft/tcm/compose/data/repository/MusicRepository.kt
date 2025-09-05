@@ -36,7 +36,7 @@ abstract class MusicRepository {
     abstract fun getAllAlbums(): Flow<List<AlbumEntity>>
     abstract suspend fun getAlbumById(albumId: Long): AlbumEntity?
     abstract suspend fun getAlbumByMediaStoreId(mediaStoreAlbumId: Long): AlbumEntity?
-    abstract suspend fun getAlbumsByArtist(artistName: String): Flow<List<AlbumEntity>>
+    abstract suspend fun getAlbumsByAlbumArtist(albumArtist: String): Flow<List<AlbumEntity>>
 
     abstract suspend fun insertAlbum(album: AlbumEntity): Long
     abstract suspend fun insertAlbums(albums: List<AlbumEntity>): List<Long>

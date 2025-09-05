@@ -16,8 +16,8 @@ interface AlbumDao {
     @Query("SELECT * FROM albums WHERE media_store_album_id = :mediaStoreAlbumId")
     suspend fun getAlbumByMediaStoreId(mediaStoreAlbumId: Long): AlbumEntity?
 
-    @Query("SELECT * FROM albums WHERE artist_name = :artistName ORDER BY album_name ASC")
-    fun getAlbumsByArtist(artistName: String): Flow<List<AlbumEntity>>
+    @Query("SELECT * FROM albums WHERE album_artist = :albumArtist ORDER BY album_name ASC")
+    fun getAlbumsByAlbumArtist(albumArtist: String): Flow<List<AlbumEntity>>
 
     @Query("SELECT * FROM albums WHERE album_name LIKE '%' || :query || '%' ORDER BY album_name ASC")
     fun searchAlbums(query: String): Flow<List<AlbumEntity>>

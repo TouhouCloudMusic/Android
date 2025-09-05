@@ -210,7 +210,7 @@ fun AlbumHeader(album: AlbumEntity) {
                 modifier = Modifier.padding(bottom = 8.dp)
             )
             Text(
-                text = album.artistName,
+                text = album.albumArtist,
                 style = SaltTheme.textStyles.sub,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,

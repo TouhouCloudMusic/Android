@@ -33,6 +33,7 @@ object LocalMusicScanner {
             MediaStore.Audio.Media.ARTIST,
             MediaStore.Audio.Media.ALBUM,
             MediaStore.Audio.Media.ALBUM_ID, // 确保获取专辑ID
+            MediaStore.Audio.Media.ALBUM_ARTIST,
             MediaStore.Audio.Media.DURATION,
             MediaStore.Audio.Media.DATA,
             MediaStore.Audio.Media.TRACK,
@@ -58,6 +59,7 @@ object LocalMusicScanner {
                 val artistColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)
                 val albumColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM)
                 val albumIdColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID)
+                val albumArtistColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ARTIST)
                 val durationColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
                 val trackColumn = cursor.getColumnIndex(MediaStore.Audio.Media.TRACK)
                 val cdTrackColumn = cursor.getColumnIndex(MediaStore.Audio.Media.CD_TRACK_NUMBER)
@@ -67,6 +69,7 @@ object LocalMusicScanner {
                     val title = cursor.getString(titleColumn) ?: "Unknown Title"
                     val artist = cursor.getString(artistColumn) ?: "Unknown Artist"
                     val album = cursor.getString(albumColumn) ?: "Unknown Album"
+                    val albumArtist = cursor.getString(albumArtistColumn) ?: artist
                     val albumId = cursor.getLong(albumIdColumn)
                     val duration = cursor.getLong(durationColumn)
                     // 获取音轨号和碟号
@@ -117,6 +120,7 @@ object LocalMusicScanner {
                                 .setArtist(artist)
                                 .setAlbumTitle(album)
                                 .setArtworkUri(albumArtUri)
+                                .setAlbumArtist(albumArtist)
                                 .setDurationMs(duration)
                                 .setExtras(extras.apply {
                                     trackNumber?.let { putInt("track_number", it) }

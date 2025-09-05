@@ -115,6 +115,9 @@ dependencies {
     // AndroidX DataStore Preferences
     implementation(libs.androidx.datastore.preferences)
 
+    // LazyColumn Scrollbar
+    implementation(libs.lazycolumnscrollbar)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

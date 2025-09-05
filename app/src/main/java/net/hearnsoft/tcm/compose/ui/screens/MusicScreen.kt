@@ -46,6 +46,8 @@ import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.Text
 import com.moriafly.salt.ui.UnstableSaltUiApi
 import kotlinx.coroutines.launch
+import my.nanihadesuka.compose.LazyColumnScrollbar
+import my.nanihadesuka.compose.ScrollbarSettings
 import net.hearnsoft.tcm.compose.R
 import net.hearnsoft.tcm.compose.ui.theme.TouhouCloudMusicTheme
 import net.hearnsoft.tcm.compose.ui.uicomponent.MusicListItem
@@ -192,53 +194,62 @@ fun MusicScreen(
                 }
 
                 Box(modifier = Modifier.fillMaxSize()) {
-                    // 音乐列表
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    LazyColumnScrollbar(
+                        settings = ScrollbarSettings(
+                            thumbSelectedColor = SaltTheme.colors.highlight,
+                            thumbUnselectedColor = SaltTheme.colors.highlight.copy(alpha = 0.5f),
+                        ),
                         state = lazyListState,
+
                     ) {
-                        if (!isLoading && allSongs.isEmpty()) {
-                            item {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(32.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Column(
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                        verticalArrangement = Arrangement.Center
+                        // 音乐列表
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                            state = lazyListState,
+                        ) {
+                            if (!isLoading && allSongs.isEmpty()) {
+                                item {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(32.dp),
+                                        contentAlignment = Alignment.Center
                                     ) {
-                                        Text(
-                                            text = "暂无音乐",
-                                            style = SaltTheme.textStyles.main
-                                        )
-                                        Text(
-                                            text = "点击 扫描音乐 按钮来扫描设备中的音乐文件",
-                                            style = SaltTheme.textStyles.sub,
-                                            modifier = Modifier.padding(top = 8.dp)
-                                        )
+                                        Column(
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            verticalArrangement = Arrangement.Center
+                                        ) {
+                                            Text(
+                                                text = "暂无音乐",
+                                                style = SaltTheme.textStyles.main
+                                            )
+                                            Text(
+                                                text = "点击 扫描音乐 按钮来扫描设备中的音乐文件",
+                                                style = SaltTheme.textStyles.sub,
+                                                modifier = Modifier.padding(top = 8.dp)
+                                            )
+                                        }
                                     }
                                 }
-                            }
-                        } else {
-                            items(
-                                items = allSongs,
-                                key = { it.mediaStoreId.toString() } // 使用 mediaStoreId 作为唯一标识
-                            ) { songEntity ->
-                                // 显示音乐列表项
-                                MusicListItem(
-                                    songEntity = songEntity,
-                                    currentPlaying = currentPlaying,
-                                    onClick = {
-                                        playerViewModel.playSong(songEntity)
-                                    },
-                                    onActionClick = {
-                                        showActionDialog = true
-                                        selectedSong = songEntity
-                                    }
-                                )
+                            } else {
+                                items(
+                                    items = allSongs,
+                                    key = { it.mediaStoreId.toString() } // 使用 mediaStoreId 作为唯一标识
+                                ) { songEntity ->
+                                    // 显示音乐列表项
+                                    MusicListItem(
+                                        songEntity = songEntity,
+                                        currentPlaying = currentPlaying,
+                                        onClick = {
+                                            playerViewModel.playSong(songEntity)
+                                        },
+                                        onActionClick = {
+                                            showActionDialog = true
+                                            selectedSong = songEntity
+                                        }
+                                    )
+                                }
                             }
                         }
                     }

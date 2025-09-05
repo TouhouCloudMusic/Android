@@ -72,6 +72,13 @@ class LocalMusicRepository @Inject constructor(
     // === 数据同步操作 ===
     override suspend fun scanAndUpdateLibrary(onProgress: ((String) -> Unit)?) {
         try {
+            // 先清空所有数据库表
+            onProgress?.invoke("正在清空旧数据...")
+            deleteAllSongs()
+            deleteAllAlbums()
+            deleteAllArtists()
+            Logger.debug("LocalMusicRepository", "已清空所有旧数据")
+
             onProgress?.invoke("正在扫描文件并更新数据库内容...")
             val scannedItems = LocalMusicScanner.scanDeviceMusic(context)
             Logger.debug("LocalMusicRepository", "扫描到 ${scannedItems.size} 首歌曲")

@@ -1,6 +1,7 @@
 package net.hearnsoft.tcm.compose.ui.screens
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -24,11 +26,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material3.ChipColors
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.SelectableChipColors
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -41,6 +45,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -52,10 +57,12 @@ import com.moriafly.salt.ui.Text
 import com.moriafly.salt.ui.UnstableSaltUiApi
 import kotlinx.coroutines.launch
 import my.nanihadesuka.compose.LazyColumnScrollbar
+import my.nanihadesuka.compose.LazyVerticalGridScrollbar
 import my.nanihadesuka.compose.ScrollbarSettings
 import net.hearnsoft.tcm.compose.R
 import net.hearnsoft.tcm.compose.ui.uicomponent.AlbumListItem
 import net.hearnsoft.tcm.compose.ui.uicomponent.MusicListItem
+import net.hearnsoft.tcm.compose.ui.uicomponent.sheet.AlbumSortSheetDialog
 import net.hearnsoft.tcm.compose.ui.uicomponent.sheet.MusicSortSheetDialog
 import net.hearnsoft.tcm.compose.ui.uicomponent.sheet.SongActionSheetDialog
 import net.hearnsoft.tcm.compose.ui.utils.LocalPlayerAwareWindowInsets
@@ -95,7 +102,8 @@ fun MusicScreen(
     var gridColumns by remember { mutableIntStateOf(2) } // 默认2列
     val gridState = rememberLazyGridState()
 
-    var showSortDialog by remember { mutableStateOf(false) }
+    var showSongSortDialog by remember { mutableStateOf(false) }
+    var showAlbumSortDialog by remember { mutableStateOf(false) }
     var showActionDialog by remember { mutableStateOf(false) }
     var selectedSong by remember { mutableStateOf(allSongs.firstOrNull()) }
 
@@ -123,15 +131,29 @@ fun MusicScreen(
         }
     }
 
-    if (showSortDialog) {
+    // 歌曲排序对话框
+    if (showSongSortDialog) {
         MusicSortSheetDialog(
             currentRule = currentSortingRule,
             onSortRuleSelected = { rule ->
                 playerViewModel.updateSongSortingRule(rule)
-                showSortDialog = false
+                showSongSortDialog = false
             },
             onDismissRequest = {
-                showSortDialog = false
+                showSongSortDialog = false
+            }
+        )
+    }
+    // 专辑排序对话框
+    if (showAlbumSortDialog) {
+        AlbumSortSheetDialog(
+            currentRule = currentAlbumSortingRule,
+            onSortRuleSelected = { rule ->
+                playerViewModel.updateAlbumSortingRule(rule)
+                showAlbumSortDialog = false
+            },
+            onDismissRequest = {
+                showAlbumSortDialog = false
             }
         )
     }
@@ -237,15 +259,34 @@ fun MusicScreen(
                                         }
                                     }
                                 },
+                                colors = SelectableChipColors(
+                                    containerColor = SaltTheme.colors.subBackground,
+                                    labelColor = SaltTheme.colors.text,
+                                    leadingIconColor = SaltTheme.colors.text,
+                                    trailingIconColor = Color.Unspecified,
+                                    disabledContainerColor = Color.Unspecified,
+                                    disabledLabelColor = Color.Unspecified,
+                                    disabledLeadingIconColor = Color.Unspecified,
+                                    disabledTrailingIconColor = Color.Unspecified,
+                                    selectedContainerColor = SaltTheme.colors.highlight,
+                                    disabledSelectedContainerColor = Color.Unspecified,
+                                    selectedLabelColor = SaltTheme.colors.text,
+                                    selectedLeadingIconColor = SaltTheme.colors.text,
+                                    selectedTrailingIconColor = Color.Unspecified
+                                ),
                             )
                         }
-
-
                     }
 
                     IconButton(
                         onClick = {
-                            showSortDialog = true
+                            when (selectedType) {
+                                MusicType.SONG ->
+                                    showSongSortDialog = true
+                                MusicType.ALBUM ->
+                                    showAlbumSortDialog = true
+                                else -> {}
+                            }
                         },
                         modifier = Modifier.align(Alignment.CenterVertically)
                     ) {
@@ -289,16 +330,18 @@ fun MusicScreen(
                     }
                 }
 
+                // 内容列表
                 Box(modifier = Modifier.fillMaxSize()) {
-                    LazyColumnScrollbar(
-                        settings = ScrollbarSettings(
-                            thumbSelectedColor = SaltTheme.colors.highlight,
-                            thumbUnselectedColor = SaltTheme.colors.highlight.copy(alpha = 0.5f),
-                        ),
-                        state = lazyListState,
-                    ) {
-                        when (selectedType) {
-                            MusicType.SONG -> {
+                    when (selectedType) {
+                        MusicType.SONG -> {
+                            // 歌曲列表滚动条
+                            LazyColumnScrollbar(
+                                settings = ScrollbarSettings(
+                                    thumbSelectedColor = SaltTheme.colors.highlight,
+                                    thumbUnselectedColor = SaltTheme.colors.highlight.copy(alpha = 0.5f),
+                                ),
+                                state = lazyListState,
+                            ) {
                                 // 歌曲列表
                                 LazyColumn(
                                     modifier = Modifier.fillMaxSize(),
@@ -327,9 +370,17 @@ fun MusicScreen(
                                     }
                                 }
                             }
+                        }
 
-                            MusicType.ALBUM -> {
-                                // 专辑
+                        MusicType.ALBUM -> {
+                            LazyVerticalGridScrollbar(
+                                settings = ScrollbarSettings(
+                                    thumbSelectedColor = SaltTheme.colors.highlight,
+                                    thumbUnselectedColor = SaltTheme.colors.highlight.copy(alpha = 0.5f),
+                                ),
+                                state = gridState,
+                            ) {
+                                // 专辑列表
                                 LazyVerticalGrid(
                                     columns = GridCells.Fixed(gridColumns),
                                     modifier = Modifier.fillMaxSize(),
@@ -361,35 +412,35 @@ fun MusicScreen(
                                     }
                                 }
                             }
-                            // 其他类型待实现
-                            else -> {
-                                LazyColumn(
-                                    modifier = Modifier.fillMaxSize(),
-                                    state = lazyListState,
-                                ) {
-                                    item {
-                                        Text("该功能正在开发中...")
-                                    }
+                        }
+                        // 其他类型待实现
+                        else -> {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                state = lazyListState,
+                            ) {
+                                item {
+                                    Text("该功能正在开发中...")
                                 }
                             }
                         }
+                    }
 
-                        if (selectedType == MusicType.SONG) {
-                            SmallFloatingActionButton(
-                                onClick = {
-                                    scrollToCurrentPlaying()
-                                },
-                                modifier = Modifier
-                                    .align(Alignment.BottomEnd)
-                                    .padding(16.dp),
-                                containerColor = SaltTheme.colors.subBackground,
-                                contentColor = SaltTheme.colors.highlight
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_location_24px),
-                                    contentDescription = "定位当前播放歌曲",
-                                )
-                            }
+                    if (selectedType == MusicType.SONG) {
+                        SmallFloatingActionButton(
+                            onClick = {
+                                scrollToCurrentPlaying()
+                            },
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(16.dp),
+                            containerColor = SaltTheme.colors.subBackground,
+                            contentColor = SaltTheme.colors.highlight
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_location_24px),
+                                contentDescription = "定位当前播放歌曲",
+                            )
                         }
                     }
                 }
@@ -420,12 +471,17 @@ fun EmptyMusicList() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+            Image(
+                painter = painterResource(R.drawable.no_item),
+                contentDescription = "No Music",
+                modifier = Modifier.size(120.dp).aspectRatio(1f)
+            )
             Text(
                 text = "暂无内容",
                 style = SaltTheme.textStyles.main
             )
             Text(
-                text = "点击 扫描音乐 按钮来扫描设备中的音乐文件",
+                text = "在侧边菜单里找到 扫描媒体 来扫描设备中的音乐文件",
                 style = SaltTheme.textStyles.sub,
                 modifier = Modifier.padding(top = 8.dp)
             )

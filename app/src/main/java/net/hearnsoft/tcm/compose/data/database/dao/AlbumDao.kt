@@ -25,12 +25,6 @@ interface AlbumDao {
     @Query("SELECT * FROM albums ORDER BY song_count DESC LIMIT :limit")
     fun getPopularAlbums(limit: Int = 20): Flow<List<AlbumEntity>>
 
-    @Query("UPDATE albums SET song_count = song_count + 1, total_duration = total_duration + :duration WHERE album_id = :albumId")
-    suspend fun incrementAlbumStats(albumId: Long, duration: Long)
-
-    @Query("UPDATE albums SET song_count = song_count - 1, total_duration = total_duration - :duration WHERE album_id = :albumId")
-    suspend fun decrementAlbumStats(albumId: Long, duration: Long)
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAlbum(album: AlbumEntity): Long
 

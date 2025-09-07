@@ -182,6 +182,12 @@ fun AlbumHeader(album: AlbumEntity) {
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 16.dp)
     ) {
+        val subTitle = if (album.albumYear == null || album.albumYear <= 0) {
+            "${album.songCount} 首歌曲"
+        } else {
+            "${album.albumYear}年 - ${album.songCount}首"
+        }
+
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(album.artworkUri)
@@ -211,6 +217,14 @@ fun AlbumHeader(album: AlbumEntity) {
             )
             Text(
                 text = album.albumArtist,
+                style = SaltTheme.textStyles.sub,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                color = SaltTheme.colors.subText,
+                modifier = Modifier.padding(bottom = 2.dp)
+            )
+            Text(
+                text = subTitle,
                 style = SaltTheme.textStyles.sub,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,

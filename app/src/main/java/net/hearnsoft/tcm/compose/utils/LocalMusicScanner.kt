@@ -34,6 +34,7 @@ object LocalMusicScanner {
             MediaStore.Audio.Media.ALBUM,
             MediaStore.Audio.Media.ALBUM_ID, // 确保获取专辑ID
             MediaStore.Audio.Media.ALBUM_ARTIST,
+            MediaStore.Audio.Media.YEAR,
             MediaStore.Audio.Media.DURATION,
             MediaStore.Audio.Media.DATA,
             MediaStore.Audio.Media.TRACK,
@@ -59,6 +60,7 @@ object LocalMusicScanner {
                 val artistColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)
                 val albumColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM)
                 val albumIdColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID)
+                val yearColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.YEAR)
                 val albumArtistColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ARTIST)
                 val durationColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
                 val trackColumn = cursor.getColumnIndex(MediaStore.Audio.Media.TRACK)
@@ -72,6 +74,7 @@ object LocalMusicScanner {
                     val albumArtist = cursor.getString(albumArtistColumn) ?: artist
                     val albumId = cursor.getLong(albumIdColumn)
                     val duration = cursor.getLong(durationColumn)
+                    val year = cursor.getInt(yearColumn)
                     // 获取音轨号和碟号
                     val trackInfo = if (trackColumn >= 0) {
                         val value = cursor.getInt(trackColumn)
@@ -122,6 +125,7 @@ object LocalMusicScanner {
                                 .setArtworkUri(albumArtUri)
                                 .setAlbumArtist(albumArtist)
                                 .setDurationMs(duration)
+                                .setRecordingYear(year)
                                 .setExtras(extras.apply {
                                     trackNumber?.let { putInt("track_number", it) }
                                     discNumber?.let { putInt("disc_number", it) }

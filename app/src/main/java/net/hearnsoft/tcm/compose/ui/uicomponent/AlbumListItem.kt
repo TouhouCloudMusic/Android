@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -13,9 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
@@ -41,6 +39,11 @@ fun AlbumListItem(
             .clickable { onClick(albumEntity.albumId) }
     ) {
         val artworkUri = albumEntity.artworkUri
+        val subTitle = if (albumEntity.albumYear == null || albumEntity.albumYear == 0) {
+            "${albumEntity.songCount}首 - ${albumEntity.albumArtist}"
+        } else {
+            "${albumEntity.albumYear}年 ${albumEntity.songCount}首 - ${albumEntity.albumArtist}"
+        }
 
         AsyncImage(
             model = ImageRequest.Builder(context)
@@ -52,7 +55,7 @@ fun AlbumListItem(
             modifier = Modifier
                 .padding(8.dp)
                 .aspectRatio(1f)
-                .clip(RoundedCornerShape(4.dp))
+                .clip(RoundedCornerShape(8.dp))
                 .align(Alignment.CenterHorizontally),
             contentDescription = "Album Art",
             contentScale = ContentScale.Crop
@@ -64,34 +67,18 @@ fun AlbumListItem(
                     .padding(horizontal = 8.dp, vertical = 4.dp)
                     .align(Alignment.Start),
                 maxLines = 1,
-                style = SaltTheme.textStyles.main
+                style = SaltTheme.textStyles.main,
+                overflow = TextOverflow.Ellipsis
             )
             Text(
-                text = "${albumEntity.albumArtist} ${albumEntity.songCount}",
+                text = subTitle,
                 modifier = Modifier
                     .padding(horizontal = 8.dp, vertical = 2.dp)
                     .align(Alignment.Start),
                 maxLines = 1,
-                style = SaltTheme.textStyles.sub
+                style = SaltTheme.textStyles.sub,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
-}
-
-@UnstableSaltUiApi
-@Composable
-@Preview
-fun AlbumListItemPreview() {
-    AlbumListItem(
-        albumEntity = AlbumEntity(
-            albumId = 1,
-            mediaStoreAlbumId = 1,
-            albumName = "专辑名称",
-            albumArtist = "专辑艺术家",
-            artworkUri = "https://upload.thbwiki.cc/thumb/f/f9/Akyu%27s_Untouched_Eurobeat_Vol._2%E5%B0%81%E9%9D%A2.png/1024px-Akyu%27s_Untouched_Eurobeat_Vol._2%E5%B0%81%E9%9D%A2.png".toUri(),
-            songCount = 10,
-            totalDuration = 3600000
-        ),
-        onClick = {}
-    )
 }

@@ -235,18 +235,11 @@ class PlayerViewModel @Inject constructor(
                                 albums.sortedBy { it.songCount }
                             }
                         }
-                        AlbumSortingStrategy.AlbumArtist -> {
+                        AlbumSortingStrategy.AlbumYear -> {
                             if (sortingRule.reverse) {
-                                albums.sortedByDescending { it.albumArtist }
+                                albums.sortedByDescending { it.albumYear }
                             } else {
-                                albums.sortedBy { it.albumArtist }
-                            }
-                        }
-                        AlbumSortingStrategy.TotalDuration -> {
-                            if (sortingRule.reverse) {
-                                albums.sortedByDescending { it.totalDuration }
-                            } else {
-                                albums.sortedBy { it.totalDuration }
+                                albums.sortedBy { it.albumYear }
                             }
                         }
                     }

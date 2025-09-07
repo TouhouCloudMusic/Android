@@ -33,6 +33,6 @@ data class AlbumEntity(
     @ColumnInfo(name = "song_count")
     val songCount: Int = 0,
 
-    @ColumnInfo(name = "total_duration")
-    val totalDuration: Long = 0
+    @ColumnInfo(name = "album_year")
+    val albumYear: Int? = null
 )

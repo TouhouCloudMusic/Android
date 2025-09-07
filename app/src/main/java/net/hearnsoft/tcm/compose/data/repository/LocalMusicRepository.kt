@@ -72,47 +72,79 @@ class LocalMusicRepository @Inject constructor(
     // === 数据同步操作 ===
     override suspend fun scanAndUpdateLibrary(onProgress: ((String) -> Unit)?) {
         try {
-            // 先清空所有数据库表
-            onProgress?.invoke("正在清空旧数据...")
-            deleteAllSongs()
-            deleteAllAlbums()
-            deleteAllArtists()
-            Logger.debug("LocalMusicRepository", "已清空所有旧数据")
-
             onProgress?.invoke("正在扫描文件并更新数据库内容...")
             val scannedItems = LocalMusicScanner.scanDeviceMusic(context)
             Logger.debug("LocalMusicRepository", "扫描到 ${scannedItems.size} 首歌曲")
+
+            if (scannedItems.isEmpty()) {
+                onProgress?.invoke("未发现音频文件")
+                return
+            }
+
+            // 使用 Map 来追踪已插入的艺术家和专辑，避免重复查询数据库
+            val insertedArtists = mutableMapOf<String, Long>() // artistName -> artistId
+            val insertedAlbums = mutableMapOf<Long, Long>() // mediaStoreAlbumId -> albumId
+            val artistSongCount = mutableMapOf<String, Int>()
+            val albumSongCount = mutableMapOf<Long, Int>()
+
             var processedCount = 0
 
             for (mediaItem in scannedItems) {
                 val (songEntity, albumEntity, artistEntity) = convertMediaItemToEntities(mediaItem)
 
-                // 先处理艺术家（如果不存在则插入）
-                val existingArtist = getArtistByName(artistEntity.artistName)
-                val artistId = if (existingArtist != null) {
-                    // 更新艺术家的歌曲数量
-                    artistDao.incrementSongCount(existingArtist.artistId)
-                    existingArtist.artistId
-                } else {
-                    // 插入新艺术家，初始歌曲数量为1
-                    insertArtist(artistEntity.copy(songCount = 1))
+                // 统计艺术家歌曲数量
+                artistSongCount[artistEntity.artistName] =
+                    artistSongCount.getOrDefault(artistEntity.artistName, 0) + 1
+
+                // 统计专辑歌曲数量
+                albumSongCount[albumEntity.mediaStoreAlbumId] =
+                    albumSongCount.getOrDefault(albumEntity.mediaStoreAlbumId, 0) + 1
+
+                // 处理艺术家
+                val artistId = insertedArtists[artistEntity.artistName] ?: run {
+                    val finalArtistEntity = artistEntity.copy(
+                        songCount = artistSongCount[artistEntity.artistName] ?: 1
+                    )
+                    val newArtistId = insertArtist(finalArtistEntity)
+                    insertedArtists[artistEntity.artistName] = newArtistId
+                    Logger.debug("LocalMusicRepository", "插入艺术家: ${artistEntity.artistName}, 歌曲数: ${finalArtistEntity.songCount}")
+                    newArtistId
                 }
 
-                // 再处理专辑（如果不存在则插入）
-                val existingAlbum = getAlbumByMediaStoreId(albumEntity.mediaStoreAlbumId)
-                val albumId = if (existingAlbum != null) {
-                    // 更新专辑的歌曲数量和总时长
-                    albumDao.incrementAlbumStats(existingAlbum.albumId, songEntity.duration)
-                    existingAlbum.albumId
-                } else {
-                    // 插入新专辑，初始数据
-                    insertAlbum(albumEntity.copy(
-                        songCount = 1,
-                        totalDuration = songEntity.duration
-                    ))
+                // 如果艺术家已存在但歌曲数量发生了变化，需要更新
+                if (insertedArtists.containsKey(artistEntity.artistName)) {
+                    val currentCount = artistSongCount[artistEntity.artistName] ?: 1
+                    val existingArtist = getArtistById(artistId)
+                    if (existingArtist != null && existingArtist.songCount != currentCount) {
+                        updateArtist(existingArtist.copy(songCount = currentCount))
+                        Logger.debug("LocalMusicRepository", "更新艺术家歌曲数: ${artistEntity.artistName} -> $currentCount")
+                    }
                 }
 
-                // 最后插入歌曲，包含完整的关联信息
+                // 处理专辑
+                val albumId = insertedAlbums[albumEntity.mediaStoreAlbumId] ?: run {
+                    val finalAlbumEntity = albumEntity.copy(
+                        songCount = albumSongCount[albumEntity.mediaStoreAlbumId] ?: 1,
+                    )
+                    val newAlbumId = insertAlbum(finalAlbumEntity)
+                    insertedAlbums[albumEntity.mediaStoreAlbumId] = newAlbumId
+                    Logger.debug("LocalMusicRepository", "插入专辑: ${albumEntity.albumName}, 歌曲数: ${finalAlbumEntity.songCount}")
+                    newAlbumId
+                }
+
+                // 如果专辑已存在但歌曲数量或总时长发生了变化，需要更新
+                if (insertedAlbums.containsKey(albumEntity.mediaStoreAlbumId)) {
+                    val currentSongCount = albumSongCount[albumEntity.mediaStoreAlbumId] ?: 1
+                    val existingAlbum = getAlbumById(albumId)
+                    if (existingAlbum != null && existingAlbum.songCount != currentSongCount) {
+                        updateAlbum(existingAlbum.copy(
+                            songCount = currentSongCount
+                        ))
+                        Logger.debug("LocalMusicRepository", "更新专辑: ${albumEntity.albumName}, 歌曲数: $currentSongCount")
+                    }
+                }
+
+                // 插入歌曲
                 val finalSongEntity = songEntity.copy(
                     artistId = artistId,
                     albumId = albumId,
@@ -120,16 +152,8 @@ class LocalMusicRepository @Inject constructor(
                     albumName = albumEntity.albumName
                 )
 
-                // 检查歌曲是否已存在（通过 mediaStoreId）
-                val existingSong = getSongByMediaStoreId(songEntity.mediaStoreId)
-                if (existingSong == null) {
-                    insertSong(finalSongEntity)
-                    Logger.debug("LocalMusicRepository", "插入新歌曲: ${finalSongEntity.title}")
-                } else {
-                    // 更新现有歌曲信息
-                    updateSong(finalSongEntity.copy(songId = existingSong.songId))
-                    Logger.debug("LocalMusicRepository", "更新歌曲: ${finalSongEntity.title}")
-                }
+                insertSong(finalSongEntity)
+                Logger.debug("LocalMusicRepository", "插入歌曲: ${finalSongEntity.title}")
 
                 processedCount++
                 if (processedCount % 10 == 0 || processedCount == scannedItems.size) {
@@ -137,9 +161,11 @@ class LocalMusicRepository @Inject constructor(
                 }
             }
 
-            Logger.debug("LocalMusicRepository", "音乐库更新完成")
+            onProgress?.invoke("音乐库更新完成！共处理 ${scannedItems.size} 首歌曲")
+            Logger.debug("LocalMusicRepository", "音乐库更新完成，共处理 ${scannedItems.size} 首歌曲")
         } catch (e: Exception) {
             Logger.err("LocalMusicRepository", "更新音乐库时出错: ${e.message}")
+            onProgress?.invoke("更新失败: ${e.message}")
         }
     }
 
@@ -151,6 +177,7 @@ class LocalMusicRepository @Inject constructor(
         val albumName = metadata.albumTitle?.toString() ?: "Unknown Album"
         val albumArtist = metadata.albumArtist?.toString() ?: artistName
         val title = metadata.title?.toString() ?: "Unknown Title"
+        val albumYear = metadata.recordingYear
 
         // 从 extras 中获取音轨信息
         val trackNumber = if (metadata.extras?.containsKey("track_number") == true) {
@@ -181,8 +208,8 @@ class LocalMusicRepository @Inject constructor(
             albumName = albumName,
             albumArtist = albumArtist,
             artworkUri = metadata.artworkUri,
-            songCount = 0, // 在插入时会正确设置
-            totalDuration = 0L
+            songCount = 0,
+            albumYear = albumYear
         )
 
         // 创建歌曲实体

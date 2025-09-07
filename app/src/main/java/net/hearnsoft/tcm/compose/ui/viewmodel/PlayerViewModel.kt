@@ -20,8 +20,11 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import net.hearnsoft.tcm.compose.data.database.entities.AlbumEntity
 import net.hearnsoft.tcm.compose.data.database.entities.SongEntity
 import net.hearnsoft.tcm.compose.data.repository.MusicRepository
+import net.hearnsoft.tcm.compose.domain.model.album.AlbumSortingRule
+import net.hearnsoft.tcm.compose.domain.model.album.AlbumSortingStrategy
 import net.hearnsoft.tcm.compose.domain.model.song.SongSortingRule
 import net.hearnsoft.tcm.compose.domain.model.song.SongSortingStrategy
 import net.hearnsoft.tcm.compose.utils.LocalMusicScanner
@@ -56,14 +59,22 @@ class PlayerViewModel @Inject constructor(
     private val _currentPlaylist = MutableStateFlow<List<MediaItem>>(emptyList())
     val currentPlaylist: StateFlow<List<MediaItem>> = _currentPlaylist.asStateFlow()
 
-    private val _filteredSongs = MutableStateFlow<List<SongEntity>>(emptyList())
-    val filteredSongs: StateFlow<List<SongEntity>> = _filteredSongs.asStateFlow()
+    // === 专辑数据 ===
+    private val _rawAlbums = MutableStateFlow<List<AlbumEntity>>(emptyList())
+    private val _allAlbums = MutableStateFlow<List<AlbumEntity>>(emptyList())
+    val allAlbums: StateFlow<List<AlbumEntity>> = _allAlbums.asStateFlow()
 
     // === 排序和过滤状态 ===
-    private val _currentSortingRule = MutableStateFlow(
+    private val _currentSongSortingRule = MutableStateFlow(
         SongSortingRule(SongSortingStrategy.Title, false)
     )
-    val currentSortingRule: StateFlow<SongSortingRule> = _currentSortingRule.asStateFlow()
+    val currentSongSortingRule: StateFlow<SongSortingRule> = _currentSongSortingRule.asStateFlow()
+
+    // === 专辑排序状态 ===
+    private val _currentAlbumSortingRule = MutableStateFlow(
+        AlbumSortingRule(AlbumSortingStrategy.AlbumName, false)
+    )
+    val currentAlbumSortingRule: StateFlow<AlbumSortingRule> = _currentAlbumSortingRule.asStateFlow()
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
@@ -114,17 +125,32 @@ class PlayerViewModel @Inject constructor(
 
         // 加载所有歌曲
         loadAllSongs()
+
+        // 加载所有专辑
+        loadAllAlbums()
     }
 
     private fun observeDataChanges() {
+        // 歌曲过滤监听
         viewModelScope.launch {
             combine(
                 _rawSongs,
-                _currentSortingRule
+                _currentSongSortingRule
             ) { songs, sortingRule ->
                 Pair(songs, sortingRule)
             }.collectLatest { (songs, sortingRule) ->
                 applySort(songs, sortingRule)
+            }
+        }
+        // 专辑数据监听
+        viewModelScope.launch {
+            combine(
+                _rawAlbums,
+                _currentAlbumSortingRule
+            ) { albums, sortingRule ->
+                Pair(albums, sortingRule)
+            }.collectLatest { (albums, sortingRule) ->
+                applyAlbumSort(albums, sortingRule)
             }
         }
     }
@@ -172,7 +198,6 @@ class PlayerViewModel @Inject constructor(
 
                 // 更新状态
                 _allSongs.value = sortedSongs
-                _filteredSongs.value = sortedSongs
                 _currentPlaylist.value = sortedSongs.map {
                     convertSongEntityToMediaItem(it)
                 }
@@ -185,6 +210,75 @@ class PlayerViewModel @Inject constructor(
                 _isLoading.value = false // 结束时关闭加载状态
             }
         }
+    }
+
+    // 专辑排序方法
+    private fun applyAlbumSort(
+        albums: List<AlbumEntity>,
+        sortingRule: AlbumSortingRule
+    ) {
+        viewModelScope.launch {
+            try {
+                val sortedAlbums = withContext(Dispatchers.Default) {
+                    when (sortingRule.strategy) {
+                        AlbumSortingStrategy.AlbumName -> {
+                            if (sortingRule.reverse) {
+                                albums.sortedByDescending { it.albumName }
+                            } else {
+                                albums.sortedBy { it.albumName }
+                            }
+                        }
+                        AlbumSortingStrategy.SongCount -> {
+                            if (sortingRule.reverse) {
+                                albums.sortedByDescending { it.songCount }
+                            } else {
+                                albums.sortedBy { it.songCount }
+                            }
+                        }
+                        AlbumSortingStrategy.AlbumArtist -> {
+                            if (sortingRule.reverse) {
+                                albums.sortedByDescending { it.albumArtist }
+                            } else {
+                                albums.sortedBy { it.albumArtist }
+                            }
+                        }
+                        AlbumSortingStrategy.TotalDuration -> {
+                            if (sortingRule.reverse) {
+                                albums.sortedByDescending { it.totalDuration }
+                            } else {
+                                albums.sortedBy { it.totalDuration }
+                            }
+                        }
+                    }
+                }
+
+                _allAlbums.value = sortedAlbums
+                Logger.debug(TAG, "应用专辑排序: ${sortedAlbums.size} 张专辑")
+            } catch (e: Exception) {
+                Logger.err(TAG, "应用专辑排序时出错: ${e.message}")
+            }
+        }
+    }
+
+    // 专辑数据加载方法
+    fun loadAllAlbums() {
+        viewModelScope.launch {
+            musicRepository.getAllAlbums()
+                .catch { e ->
+                    Logger.err(TAG, "加载专辑失败: ${e.message}")
+                    _errorMessage.value = "加载专辑失败: ${e.message}"
+                }
+                .collectLatest { albums ->
+                    _rawAlbums.value = albums
+                    Logger.debug(TAG, "加载了 ${albums.size} 张专辑")
+                }
+        }
+    }
+
+    // 专辑排序规则更新方法
+    fun updateAlbumSortingRule(rule: AlbumSortingRule) {
+        _currentAlbumSortingRule.value = rule
+        Logger.debug(TAG, "更新专辑排序规则: ${rule.strategy}, 倒序: ${rule.reverse}")
     }
 
     private fun startPositionUpdates() {
@@ -383,24 +477,9 @@ class PlayerViewModel @Inject constructor(
     /**
      * 更新排序规则
      */
-    fun updateSortingRule(rule: SongSortingRule) {
-        _currentSortingRule.value = rule
+    fun updateSongSortingRule(rule: SongSortingRule) {
+        _currentSongSortingRule.value = rule
         Logger.debug(TAG, "更新排序规则: ${rule.strategy}, 倒序: ${rule.reverse}")
-    }
-
-    /**
-     * 更新搜索查询
-     */
-    fun updateSearchQuery(query: String) {
-        _searchQuery.value = query
-        Logger.debug(TAG, "更新搜索查询: $query")
-    }
-
-    /**
-     * 清除搜索
-     */
-    fun clearSearch() {
-        _searchQuery.value = ""
     }
 
     /**

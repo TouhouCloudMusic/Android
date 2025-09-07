@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.asPaddingValues
@@ -14,6 +15,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
@@ -27,9 +33,11 @@ import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,11 +54,13 @@ import kotlinx.coroutines.launch
 import my.nanihadesuka.compose.LazyColumnScrollbar
 import my.nanihadesuka.compose.ScrollbarSettings
 import net.hearnsoft.tcm.compose.R
+import net.hearnsoft.tcm.compose.ui.uicomponent.AlbumListItem
 import net.hearnsoft.tcm.compose.ui.uicomponent.MusicListItem
 import net.hearnsoft.tcm.compose.ui.uicomponent.sheet.MusicSortSheetDialog
 import net.hearnsoft.tcm.compose.ui.uicomponent.sheet.SongActionSheetDialog
 import net.hearnsoft.tcm.compose.ui.utils.LocalPlayerAwareWindowInsets
 import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
+import net.hearnsoft.tcm.compose.utils.Logger
 
 @UnstableSaltUiApi
 @ExperimentalMaterial3Api
@@ -69,18 +79,35 @@ fun MusicScreen(
 
     // 收集 ViewModel 状态
     val allSongs by playerViewModel.allSongs.collectAsState()
-    val currentPlaylist by playerViewModel.currentPlaylist.collectAsState()
     val isLoading by playerViewModel.isLoading.collectAsState()
+
+    // 收集专辑数据
+    val allAlbums by playerViewModel.allAlbums.collectAsState()
+    val currentAlbumSortingRule = playerViewModel.currentAlbumSortingRule.collectAsState().value
 
     // 当前播放的媒体
     val currentPlaying = playerViewModel.currentMediaItem.collectAsState().value
 
     // 当前排序规则
-    val currentSortingRule = playerViewModel.currentSortingRule.collectAsState().value
+    val currentSortingRule = playerViewModel.currentSongSortingRule.collectAsState().value
+
+    // 网格列表数配置
+    var gridColumns by remember { mutableIntStateOf(2) } // 默认2列
+    val gridState = rememberLazyGridState()
 
     var showSortDialog by remember { mutableStateOf(false) }
     var showActionDialog by remember { mutableStateOf(false) }
     var selectedSong by remember { mutableStateOf(allSongs.firstOrNull()) }
+
+    // 选择的音乐类型
+    var selectedType by rememberSaveable { mutableStateOf(MusicType.SONG) }
+    val typeList = listOf(
+        MusicType.SONG,
+        MusicType.ALBUM,
+        MusicType.ARTIST,
+        MusicType.FOLDER
+    )
+    val scrollState = rememberLazyListState()
 
     // 定位到当前播放歌曲的函数
     fun scrollToCurrentPlaying() {
@@ -100,7 +127,7 @@ fun MusicScreen(
         MusicSortSheetDialog(
             currentRule = currentSortingRule,
             onSortRuleSelected = { rule ->
-                playerViewModel.updateSortingRule(rule)
+                playerViewModel.updateSongSortingRule(rule)
                 showSortDialog = false
             },
             onDismissRequest = {
@@ -148,15 +175,6 @@ fun MusicScreen(
                         .padding(vertical = 4.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    var selectedType by remember { mutableStateOf(MusicType.SONG) }
-                    val typeList = listOf(
-                        MusicType.SONG,
-                        MusicType.ALBUM,
-                        MusicType.ARTIST,
-                        MusicType.FOLDER
-                    )
-                    val scrollState = rememberLazyListState()
-
 
                     LazyRow(
                         modifier = Modifier
@@ -172,16 +190,6 @@ fun MusicScreen(
                                 selected = selectedType == type,
                                 onClick = {
                                     selectedType = type
-                                    when (type) {
-                                        MusicType.SONG -> {
-                                        }
-                                        MusicType.ALBUM -> {
-                                        }
-                                        MusicType.ARTIST -> {
-                                        }
-                                        MusicType.FOLDER -> {
-                                        }
-                                    }
                                 },
                                 label = {
                                     Text(text = type.displayName)
@@ -248,12 +256,25 @@ fun MusicScreen(
                     }
                 }
 
-                // 歌曲数量显示
-                if (allSongs.isNotEmpty()) {
-                    Text(
-                        text = "共 ${allSongs.size} 首歌曲",
-                        style = SaltTheme.textStyles.sub
-                    )
+                // 歌曲/专辑数量显示
+                when (selectedType) {
+                    MusicType.SONG -> {
+                        if (allSongs.isNotEmpty()) {
+                            Text(
+                                text = "共 ${allSongs.size} 首歌曲",
+                                style = SaltTheme.textStyles.sub
+                            )
+                        }
+                    }
+                    MusicType.ALBUM -> {
+                        if (allAlbums.isNotEmpty()) {
+                            Text(
+                                text = "共 ${allAlbums.size} 张专辑",
+                                style = SaltTheme.textStyles.sub
+                            )
+                        }
+                    }
+                    else -> {}
                 }
 
                 // 加载指示器
@@ -275,73 +296,101 @@ fun MusicScreen(
                             thumbUnselectedColor = SaltTheme.colors.highlight.copy(alpha = 0.5f),
                         ),
                         state = lazyListState,
-
                     ) {
-                        // 音乐列表
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.spacedBy(4.dp),
-                            state = lazyListState,
-                        ) {
-                            if (!isLoading && allSongs.isEmpty()) {
-                                item {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(32.dp),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Column(
-                                            horizontalAlignment = Alignment.CenterHorizontally,
-                                            verticalArrangement = Arrangement.Center
-                                        ) {
-                                            Text(
-                                                text = "暂无音乐",
-                                                style = SaltTheme.textStyles.main
-                                            )
-                                            Text(
-                                                text = "点击 扫描音乐 按钮来扫描设备中的音乐文件",
-                                                style = SaltTheme.textStyles.sub,
-                                                modifier = Modifier.padding(top = 8.dp)
+                        when (selectedType) {
+                            MusicType.SONG -> {
+                                // 歌曲列表
+                                LazyColumn(
+                                    modifier = Modifier.fillMaxSize(),
+                                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                                    state = lazyListState,
+                                ) {
+                                    if (!isLoading && allSongs.isEmpty()) {
+                                        item {
+                                            EmptyMusicList()
+                                        }
+                                    } else {
+                                        items(
+                                            items = allSongs,
+                                            key = { it.mediaStoreId.toString() }
+                                        ) { songEntity ->
+                                            MusicListItem(
+                                                songEntity = songEntity,
+                                                currentPlaying = currentPlaying,
+                                                onClick = { playerViewModel.playSong(songEntity) },
+                                                onActionClick = {
+                                                    showActionDialog = true
+                                                    selectedSong = songEntity
+                                                }
                                             )
                                         }
                                     }
                                 }
-                            } else {
-                                items(
-                                    items = allSongs,
-                                    key = { it.mediaStoreId.toString() } // 使用 mediaStoreId 作为唯一标识
-                                ) { songEntity ->
-                                    // 显示音乐列表项
-                                    MusicListItem(
-                                        songEntity = songEntity,
-                                        currentPlaying = currentPlaying,
-                                        onClick = {
-                                            playerViewModel.playSong(songEntity)
-                                        },
-                                        onActionClick = {
-                                            showActionDialog = true
-                                            selectedSong = songEntity
+                            }
+
+                            MusicType.ALBUM -> {
+                                // 专辑
+                                LazyVerticalGrid(
+                                    columns = GridCells.Fixed(gridColumns),
+                                    modifier = Modifier.fillMaxSize(),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    contentPadding = PaddingValues(
+                                        4.dp
+                                    ),
+                                    state = gridState
+                                ) {
+                                    if (!isLoading && allAlbums.isEmpty()) {
+                                        item(span = {
+                                            GridItemSpan(gridColumns)
+                                        }) {
+                                            EmptyMusicList()
                                         }
-                                    )
+                                    } else {
+                                        items(
+                                            items = allAlbums,
+                                            key = { it.albumId.toString() }
+                                        ) { albumEntity ->
+                                            AlbumListItem(
+                                                albumEntity = albumEntity,
+                                                onClick = { albumId ->
+                                                    navController.navigate(ScreenRoute.Album.createRoute(albumId))
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                            // 其他类型待实现
+                            else -> {
+                                LazyColumn(
+                                    modifier = Modifier.fillMaxSize(),
+                                    state = lazyListState,
+                                ) {
+                                    item {
+                                        Text("该功能正在开发中...")
+                                    }
                                 }
                             }
                         }
-                    }
-                    SmallFloatingActionButton(
-                        onClick = {
-                            scrollToCurrentPlaying()
-                        },
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(16.dp),
-                        containerColor = SaltTheme.colors.subBackground,
-                        contentColor = SaltTheme.colors.highlight
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_location_24px),
-                            contentDescription = "定位当前播放歌曲",
-                        )
+
+                        if (selectedType == MusicType.SONG) {
+                            SmallFloatingActionButton(
+                                onClick = {
+                                    scrollToCurrentPlaying()
+                                },
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .padding(16.dp),
+                                containerColor = SaltTheme.colors.subBackground,
+                                contentColor = SaltTheme.colors.highlight
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_location_24px),
+                                    contentDescription = "定位当前播放歌曲",
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -357,6 +406,31 @@ fun MusicScreen(
         )
     }
 
+}
+
+@Composable
+fun EmptyMusicList() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(32.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "暂无内容",
+                style = SaltTheme.textStyles.main
+            )
+            Text(
+                text = "点击 扫描音乐 按钮来扫描设备中的音乐文件",
+                style = SaltTheme.textStyles.sub,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+        }
+    }
 }
 
 private enum class MusicType(val displayName: String) {

@@ -11,11 +11,14 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import com.moriafly.salt.ui.Icon
 import com.moriafly.salt.ui.RoundedColumn
 import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.Text
+import net.hearnsoft.tcm.compose.R
 import net.hearnsoft.tcm.compose.domain.model.song.SongSortingRule
 import net.hearnsoft.tcm.compose.domain.model.song.SongSortingStrategy
 
@@ -45,8 +48,11 @@ fun MusicSortSheetDialog(
             sortRulesOptions.forEach { (optionText, strategy) ->
                 val isSelected = currentRule.strategy == strategy
                 val arrow = if (isSelected) {
-                    if (currentRule.reverse) " ↓" else " ↑"
-                } else ""
+                    if (currentRule.reverse)
+                        painterResource(R.drawable.ic_sort_alphabetical_descending)
+                    else
+                        painterResource(R.drawable.ic_sort_alphabetical_ascending)
+                } else null
 
                 Row(
                     modifier = Modifier
@@ -75,13 +81,22 @@ fun MusicSortSheetDialog(
                         modifier = Modifier.align(Alignment.CenterVertically)
                     )
                     Text(
-                        text = "$optionText$arrow",
+                        text = optionText,
                         style = SaltTheme.textStyles.main,
                         color = if (isSelected) SaltTheme.colors.highlight else SaltTheme.colors.text,
                         modifier = Modifier
                             .padding(start = 16.dp)
                             .align(Alignment.CenterVertically)
                     )
+                    if (arrow != null) {
+                        Icon(
+                            painter = arrow,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .align(Alignment.CenterVertically)
+                                .padding(start = 8.dp)
+                        )
+                    }
                 }
             }
         }

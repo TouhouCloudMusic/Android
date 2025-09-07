@@ -4,7 +4,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.asPaddingValues
@@ -12,19 +11,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.SmallFloatingActionButton
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,14 +33,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
-import com.moriafly.salt.ui.Button
 import com.moriafly.salt.ui.Icon
 import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.Text
@@ -49,9 +46,7 @@ import kotlinx.coroutines.launch
 import my.nanihadesuka.compose.LazyColumnScrollbar
 import my.nanihadesuka.compose.ScrollbarSettings
 import net.hearnsoft.tcm.compose.R
-import net.hearnsoft.tcm.compose.ui.theme.TouhouCloudMusicTheme
 import net.hearnsoft.tcm.compose.ui.uicomponent.MusicListItem
-import net.hearnsoft.tcm.compose.ui.uicomponent.sheet.BottomSheetDialog
 import net.hearnsoft.tcm.compose.ui.uicomponent.sheet.MusicSortSheetDialog
 import net.hearnsoft.tcm.compose.ui.uicomponent.sheet.SongActionSheetDialog
 import net.hearnsoft.tcm.compose.ui.utils.LocalPlayerAwareWindowInsets
@@ -150,34 +145,114 @@ fun MusicScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp),
+                        .padding(vertical = 4.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    if (allSongs.isNotEmpty()) {
-                        Button(
-                            onClick = {
-                                playerViewModel.playCurrentPlaylist()
-                            },
-                            text = "播放全部",
-                            enabled = !isLoading && currentPlaylist.isNotEmpty()
-                        )
+                    var selectedType by remember { mutableStateOf(MusicType.SONG) }
+                    val typeList = listOf(
+                        MusicType.SONG,
+                        MusicType.ALBUM,
+                        MusicType.ARTIST,
+                        MusicType.FOLDER
+                    )
+                    val scrollState = rememberLazyListState()
+
+
+                    LazyRow(
+                        modifier = Modifier
+                            .weight(1f),
+                        state = scrollState,
+                        horizontalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
+                        items(
+                            items = typeList,
+                            key = { it.displayName }
+                        ) { type ->
+                            FilterChip(
+                                selected = selectedType == type,
+                                onClick = {
+                                    selectedType = type
+                                    when (type) {
+                                        MusicType.SONG -> {
+                                        }
+                                        MusicType.ALBUM -> {
+                                        }
+                                        MusicType.ARTIST -> {
+                                        }
+                                        MusicType.FOLDER -> {
+                                        }
+                                    }
+                                },
+                                label = {
+                                    Text(text = type.displayName)
+                                },
+                                modifier = Modifier.padding(end = 8.dp),
+                                leadingIcon = if (selectedType == type) {
+                                    {
+                                        Icon(
+                                            imageVector = Icons.Filled.Done,
+                                            contentDescription = "Done icon",
+                                            modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                        )
+                                    }
+                                } else {
+                                    {
+                                        when (type) {
+                                            MusicType.SONG -> {
+                                                Icon(
+                                                    painter = painterResource(R.drawable.ic_nav_music),
+                                                    contentDescription = "歌曲",
+                                                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                                )
+                                            }
+                                            MusicType.ALBUM -> {
+                                                Icon(
+                                                    painter = painterResource(R.drawable.ic_album_24px),
+                                                    contentDescription = "专辑",
+                                                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                                )
+                                            }
+                                            MusicType.ARTIST -> {
+                                                Icon(
+                                                    painter = painterResource(R.drawable.ic_artist_24px),
+                                                    contentDescription = "艺术家",
+                                                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                                )
+                                            }
+                                            MusicType.FOLDER -> {
+                                                Icon(
+                                                    painter = painterResource(R.drawable.ic_folder_24px),
+                                                    contentDescription = "文件夹",
+                                                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                                )
+                                            }
+                                        }
+                                    }
+                                },
+                            )
+                        }
+
+
                     }
 
-                    Button(
+                    IconButton(
                         onClick = {
                             showSortDialog = true
                         },
-                        text = "排序",
-                    )
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_sort_24px),
+                            contentDescription = "排序"
+                        )
+                    }
                 }
 
                 // 歌曲数量显示
                 if (allSongs.isNotEmpty()) {
                     Text(
                         text = "共 ${allSongs.size} 首歌曲",
-                        style = SaltTheme.textStyles.sub,
-                        modifier = Modifier.
-                        padding(vertical = 8.dp)
+                        style = SaltTheme.textStyles.sub
                     )
                 }
 
@@ -282,4 +357,11 @@ fun MusicScreen(
         )
     }
 
+}
+
+private enum class MusicType(val displayName: String) {
+    SONG("歌曲"),
+    ALBUM("专辑"),
+    ARTIST("艺术家"),
+    FOLDER("文件夹")
 }

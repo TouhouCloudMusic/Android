@@ -2,7 +2,11 @@ package net.hearnsoft.tcm.compose.ui.screens
 
 import androidx.annotation.OptIn
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -72,13 +76,90 @@ fun SearchScreen(
 
     val searchResults by searchViewModel.searchResults.collectAsState()
     val isSearching by searchViewModel.isSearching.collectAsState()
+    val searchQuery by searchViewModel.searchQuery.collectAsState()
 
     Column(modifier.fillMaxSize()) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        // 什么都不做时显示的默认内容
+        AnimatedVisibility(
+            visible = !isSearching && searchResults.isEmpty() && searchQuery.isBlank(),
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.no_item),
+                        contentDescription = "搜索",
+                        modifier = Modifier.size(200.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = "键入关键字以搜索",
+                        style = SaltTheme.textStyles.main,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+
+                    Text(
+                        text = "可以搜索本机音乐以及东方同音鉴站内的任何内容",
+                        style = SaltTheme.textStyles.sub
+                    )
+                }
+            }
+        }
+
+        // 搜索结果为空时的显示（有搜索但无结果）
+        AnimatedVisibility(
+            visible = !isSearching && searchResults.isEmpty() && searchQuery.isNotBlank(),
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.no_item), // 无结果图标
+                        contentDescription = "无搜索结果",
+                        modifier = Modifier.size(200.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = "未找到相关内容",
+                        style = SaltTheme.textStyles.main,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+
+                    Text(
+                        text = "尝试使用其他关键词",
+                        style = SaltTheme.textStyles.sub
+                    )
+                }
+            }
+        }
+
         // 搜索结果
-        AnimatedVisibility(visible = isSearching) {
+        AnimatedVisibility(
+            visible = isSearching,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
             // 显示加载指示器
             RoundedColumn {
                 Row(
@@ -95,7 +176,12 @@ fun SearchScreen(
                 }
             }
         }
-        AnimatedVisibility(visible = searchResults.isNotEmpty()) {
+
+        AnimatedVisibility(
+            visible = searchResults.isNotEmpty(),
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
             LazyColumn {
                 // 按搜索结果类型分组
                 val groupedResults = searchResults.groupBy { it.type }

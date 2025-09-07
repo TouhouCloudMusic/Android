@@ -175,7 +175,7 @@ fun SearchTopAppBar(
                 onChange = { query ->
                     searchViewModel.updateSearchQuery(query)
                 },
-                hint = "搜索本地音乐和网络内容...",
+                hint = "在此处键入关键字以搜索",
                 hintColor = SaltTheme.colors.text,
             )
 

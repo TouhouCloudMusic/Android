@@ -26,7 +26,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -102,24 +104,58 @@ fun AlbumScreen(
             // 按碟号分组
             val groupedSongs = albumSongs.groupBy { it.discNumber }
             val hasMultipleDiscs = groupedSongs.size > 1 || groupedSongs.keys.any { it != null }
+            val artworkUri = albumEntity.artworkUri
 
-            LazyColumn(
-                modifier = modifier.fillMaxSize().padding(horizontal = 8.dp)
-            ) {
-                item {
-                    AlbumHeader(album = albumEntity)
-                }
+            Box(modifier.fillMaxSize()) {
+                // 背景艺术图高斯模糊
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(artworkUri)
+                        .crossfade(true)
+                        .placeholder(R.drawable.ic_album_24px)
+                        .build(),
+                    contentDescription = albumEntity.albumName,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize().blur(15.dp),
+                    alpha = 0.1f
+                )
 
-                if (hasMultipleDiscs) {
-                    // 显示分碟列表
-                    groupedSongs.toSortedMap(compareBy<Int?> { it ?: Int.MAX_VALUE }).forEach { (discNumber, songs) ->
-                        item {
-                            DiscHeader(discNumber = discNumber)
+                LazyColumn(
+                    modifier = modifier.fillMaxSize().padding(horizontal = 8.dp)
+                ) {
+                    item {
+                        AlbumHeader(album = albumEntity)
+                    }
+
+                    if (hasMultipleDiscs) {
+                        // 显示分碟列表
+                        groupedSongs.toSortedMap(compareBy<Int?> { it ?: Int.MAX_VALUE }).forEach { (discNumber, songs) ->
+                            item {
+                                DiscHeader(discNumber = discNumber)
+                            }
+
+                            items(
+                                items = songs,
+                                key = { "${it.discNumber}_${it.songId}" }
+                            ) { song ->
+                                AlbumSongItem(
+                                    songEntity = song,
+                                    currentPlaying = currentPlaying,
+                                    onClick = {
+                                        playerViewModel.playSong(song)
+                                    },
+                                    onActionClick = {
+                                        showActionDialog = true
+                                        selectedSong = song
+                                    }
+                                )
+                            }
                         }
-
+                    } else {
+                        // 不分碟显示
                         items(
-                            items = songs,
-                            key = { "${it.discNumber}_${it.songId}" }
+                            items = albumSongs,
+                            key = { it.songId }
                         ) { song ->
                             AlbumSongItem(
                                 songEntity = song,
@@ -133,24 +169,6 @@ fun AlbumScreen(
                                 }
                             )
                         }
-                    }
-                } else {
-                    // 不分碟显示
-                    items(
-                        items = albumSongs,
-                        key = { it.songId }
-                    ) { song ->
-                        AlbumSongItem(
-                            songEntity = song,
-                            currentPlaying = currentPlaying,
-                            onClick = {
-                                playerViewModel.playSong(song)
-                            },
-                            onActionClick = {
-                                showActionDialog = true
-                                selectedSong = song
-                            }
-                        )
                     }
                 }
             }
@@ -247,7 +265,7 @@ fun AlbumSongItem(
 
     Row(
         modifier = modifier
-            .background(SaltTheme.colors.background)
+            .background(Color.Transparent)
             .clip(RoundedCornerShape(8.dp))
             .clickable(onClick = onClick)
     ) {
@@ -300,6 +318,7 @@ fun AlbumSongItem(
             Icon(
                 painter = painterResource(R.drawable.ic_more_vert_24px),
                 contentDescription = "More Options",
+                tint = SaltTheme.colors.text
             )
         }
     }

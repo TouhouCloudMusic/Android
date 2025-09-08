@@ -1,5 +1,10 @@
 package net.hearnsoft.tcm.compose.ui.screens
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -340,115 +345,122 @@ fun MusicScreen(
 
                 // 内容列表
                 Box(modifier = Modifier.fillMaxSize()) {
-                    when (selectedType) {
-                        MusicType.SONG -> {
-                            // 歌曲列表滚动条
-                            LazyColumnScrollbar(
-                                settings = ScrollbarSettings(
-                                    thumbSelectedColor = SaltTheme.colors.highlight,
-                                    thumbUnselectedColor = SaltTheme.colors.highlight.copy(alpha = 0.5f),
-                                ),
-                                state = lazyListState,
-                            ) {
-                                // 歌曲列表
+                    AnimatedContent(
+                        targetState = selectedType,
+                        transitionSpec = {
+                            fadeIn() togetherWith fadeOut()
+                        },
+                        label = "contentTypeChange"
+                    ) { type ->
+                        when (type) {
+                            MusicType.SONG -> {
+                                Box(Modifier.fillMaxSize()) {
+                                    // 歌曲列表滚动条
+                                    LazyColumnScrollbar(
+                                        settings = ScrollbarSettings(
+                                            thumbSelectedColor = SaltTheme.colors.highlight,
+                                            thumbUnselectedColor = SaltTheme.colors.highlight.copy(alpha = 0.5f),
+                                        ),
+                                        state = lazyListState,
+                                    ) {
+                                        // 歌曲列表
+                                        LazyColumn(
+                                            modifier = Modifier.fillMaxSize(),
+                                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                                            state = lazyListState,
+                                        ) {
+                                            if (!isLoading && allSongs.isEmpty()) {
+                                                item {
+                                                    EmptyMusicList()
+                                                }
+                                            } else {
+                                                items(
+                                                    items = allSongs,
+                                                    key = { it.mediaStoreId.toString() }
+                                                ) { songEntity ->
+                                                    MusicListItem(
+                                                        songEntity = songEntity,
+                                                        currentPlaying = currentPlaying,
+                                                        onClick = { playerViewModel.playSong(songEntity) },
+                                                        onActionClick = {
+                                                            showActionDialog = true
+                                                            selectedSong = songEntity
+                                                        }
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                    SmallFloatingActionButton(
+                                        onClick = {
+                                            scrollToCurrentPlaying()
+                                        },
+                                        modifier = Modifier
+                                            .align(Alignment.BottomEnd)
+                                            .padding(16.dp),
+                                        containerColor = SaltTheme.colors.subBackground,
+                                        contentColor = SaltTheme.colors.highlight
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.ic_location_24px),
+                                            contentDescription = "定位当前播放歌曲",
+                                        )
+                                    }
+                                }
+                            }
+
+                            MusicType.ALBUM -> {
+                                LazyVerticalGridScrollbar(
+                                    settings = ScrollbarSettings(
+                                        thumbSelectedColor = SaltTheme.colors.highlight,
+                                        thumbUnselectedColor = SaltTheme.colors.highlight.copy(alpha = 0.5f),
+                                    ),
+                                    state = gridState,
+                                ) {
+                                    // 专辑列表
+                                    LazyVerticalGrid(
+                                        columns = GridCells.Fixed(gridColumns),
+                                        modifier = Modifier.fillMaxSize(),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        contentPadding = PaddingValues(
+                                            4.dp
+                                        ),
+                                        state = gridState
+                                    ) {
+                                        if (!isLoading && allAlbums.isEmpty()) {
+                                            item(span = {
+                                                GridItemSpan(gridColumns)
+                                            }) {
+                                                EmptyMusicList()
+                                            }
+                                        } else {
+                                            items(
+                                                items = allAlbums,
+                                                key = { it.albumId.toString() }
+                                            ) { albumEntity ->
+                                                AlbumListItem(
+                                                    albumEntity = albumEntity,
+                                                    onClick = { albumId ->
+                                                        navController.navigate(ScreenRoute.Album.createRoute(albumId))
+                                                    }
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            // 其他类型待实现
+                            else -> {
                                 LazyColumn(
                                     modifier = Modifier.fillMaxSize(),
-                                    verticalArrangement = Arrangement.spacedBy(4.dp),
                                     state = lazyListState,
                                 ) {
-                                    if (!isLoading && allSongs.isEmpty()) {
-                                        item {
-                                            EmptyMusicList()
-                                        }
-                                    } else {
-                                        items(
-                                            items = allSongs,
-                                            key = { it.mediaStoreId.toString() }
-                                        ) { songEntity ->
-                                            MusicListItem(
-                                                songEntity = songEntity,
-                                                currentPlaying = currentPlaying,
-                                                onClick = { playerViewModel.playSong(songEntity) },
-                                                onActionClick = {
-                                                    showActionDialog = true
-                                                    selectedSong = songEntity
-                                                }
-                                            )
-                                        }
+                                    item {
+                                        Text("该功能正在开发中...")
                                     }
                                 }
                             }
-                        }
-
-                        MusicType.ALBUM -> {
-                            LazyVerticalGridScrollbar(
-                                settings = ScrollbarSettings(
-                                    thumbSelectedColor = SaltTheme.colors.highlight,
-                                    thumbUnselectedColor = SaltTheme.colors.highlight.copy(alpha = 0.5f),
-                                ),
-                                state = gridState,
-                            ) {
-                                // 专辑列表
-                                LazyVerticalGrid(
-                                    columns = GridCells.Fixed(gridColumns),
-                                    modifier = Modifier.fillMaxSize(),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    contentPadding = PaddingValues(
-                                        4.dp
-                                    ),
-                                    state = gridState
-                                ) {
-                                    if (!isLoading && allAlbums.isEmpty()) {
-                                        item(span = {
-                                            GridItemSpan(gridColumns)
-                                        }) {
-                                            EmptyMusicList()
-                                        }
-                                    } else {
-                                        items(
-                                            items = allAlbums,
-                                            key = { it.albumId.toString() }
-                                        ) { albumEntity ->
-                                            AlbumListItem(
-                                                albumEntity = albumEntity,
-                                                onClick = { albumId ->
-                                                    navController.navigate(ScreenRoute.Album.createRoute(albumId))
-                                                }
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        // 其他类型待实现
-                        else -> {
-                            LazyColumn(
-                                modifier = Modifier.fillMaxSize(),
-                                state = lazyListState,
-                            ) {
-                                item {
-                                    Text("该功能正在开发中...")
-                                }
-                            }
-                        }
-                    }
-
-                    if (selectedType == MusicType.SONG) {
-                        SmallFloatingActionButton(
-                            onClick = {
-                                scrollToCurrentPlaying()
-                            },
-                            modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .padding(16.dp),
-                            containerColor = SaltTheme.colors.subBackground,
-                            contentColor = SaltTheme.colors.highlight
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_location_24px),
-                                contentDescription = "定位当前播放歌曲",
-                            )
                         }
                     }
                 }

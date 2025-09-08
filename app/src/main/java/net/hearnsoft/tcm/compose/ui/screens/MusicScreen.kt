@@ -214,7 +214,10 @@ fun MusicScreen(
                                     selectedType = type
                                 },
                                 label = {
-                                    Text(text = type.displayName)
+                                    Text(
+                                        text = type.displayName,
+                                        color = if (selectedType == type) Color.White else SaltTheme.colors.text
+                                    )
                                 },
                                 modifier = Modifier.padding(end = 8.dp),
                                 leadingIcon = if (selectedType == type) {
@@ -222,7 +225,8 @@ fun MusicScreen(
                                         Icon(
                                             imageVector = Icons.Filled.Done,
                                             contentDescription = "Done icon",
-                                            modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                            modifier = Modifier.size(FilterChipDefaults.IconSize),
+                                            tint = Color.White
                                         )
                                     }
                                 } else {
@@ -232,28 +236,32 @@ fun MusicScreen(
                                                 Icon(
                                                     painter = painterResource(R.drawable.ic_nav_music),
                                                     contentDescription = "歌曲",
-                                                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                                    modifier = Modifier.size(FilterChipDefaults.IconSize),
+                                                    tint = SaltTheme.colors.text
                                                 )
                                             }
                                             MusicType.ALBUM -> {
                                                 Icon(
                                                     painter = painterResource(R.drawable.ic_album_24px),
                                                     contentDescription = "专辑",
-                                                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                                    modifier = Modifier.size(FilterChipDefaults.IconSize),
+                                                    tint = SaltTheme.colors.text
                                                 )
                                             }
                                             MusicType.ARTIST -> {
                                                 Icon(
                                                     painter = painterResource(R.drawable.ic_artist_24px),
                                                     contentDescription = "艺术家",
-                                                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                                    modifier = Modifier.size(FilterChipDefaults.IconSize),
+                                                    tint = SaltTheme.colors.text
                                                 )
                                             }
                                             MusicType.FOLDER -> {
                                                 Icon(
                                                     painter = painterResource(R.drawable.ic_folder_24px),
                                                     contentDescription = "文件夹",
-                                                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                                    modifier = Modifier.size(FilterChipDefaults.IconSize),
+                                                    tint = SaltTheme.colors.text
                                                 )
                                             }
                                         }
@@ -270,8 +278,8 @@ fun MusicScreen(
                                     disabledTrailingIconColor = Color.Unspecified,
                                     selectedContainerColor = SaltTheme.colors.highlight,
                                     disabledSelectedContainerColor = Color.Unspecified,
-                                    selectedLabelColor = SaltTheme.colors.text,
-                                    selectedLeadingIconColor = SaltTheme.colors.text,
+                                    selectedLabelColor = Color.White,
+                                    selectedLeadingIconColor = Color.White,
                                     selectedTrailingIconColor = Color.Unspecified
                                 ),
                             )

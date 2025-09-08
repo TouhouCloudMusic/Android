@@ -42,7 +42,7 @@ fun AlbumSortSheetDialog(
     BottomSheetDialog(
         modifier = modifier,
         onDismissRequest = onDismissRequest,
-        title = "音乐排序规则",
+        title = "专辑排序规则",
     ) { dismiss ->
         RoundedColumn(modifier.selectableGroup()) {
             sortRulesOptions.forEach { (optionText, strategy) ->

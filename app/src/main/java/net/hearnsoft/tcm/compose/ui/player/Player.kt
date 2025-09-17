@@ -55,6 +55,7 @@ import kotlinx.coroutines.withContext
 import me.saket.squiggles.SquigglySlider
 import net.hearnsoft.tcm.compose.R
 import net.hearnsoft.tcm.compose.constants.PlayerHorizontalPadding
+import net.hearnsoft.tcm.compose.pref.SettingsDataStore
 import net.hearnsoft.tcm.compose.ui.uicomponent.HashTag
 import net.hearnsoft.tcm.compose.ui.uicomponent.ResizableIconButton
 import net.hearnsoft.tcm.compose.ui.uicomponent.flowing.FlowingLightBackground
@@ -106,6 +107,11 @@ fun BottomSheetPlayer(
     val shuffleModeEnabled = playerViewModel.shuffleModeEnabled.collectAsState().value
 
     val isSystemInDarkTheme = isSystemInDarkTheme()
+
+    // 设置数据存储
+    val settingsDataStore = remember { SettingsDataStore(context) }
+    // 播放器进度条波形动画设置项
+    val isPlayerSquigglyWaveEnabled by settingsDataStore.isPlayerSquigglyWaveEnabled.collectAsState(initial = true)
 
     // Pager状态
     val pagerState = rememberPagerState(
@@ -401,7 +407,11 @@ fun BottomSheetPlayer(
                                 modifier = Modifier,
                                 squigglesSpec =
                                     SquigglySlider.SquigglesSpec(
-                                        amplitude = if (isPlaying) (2.dp).coerceAtLeast(2.dp) else 0.dp,
+                                        amplitude = if (isPlayerSquigglyWaveEnabled) {
+                                            if (isPlaying) (2.dp).coerceAtLeast(2.dp) else 0.dp
+                                        } else {
+                                            0.dp
+                                        },
                                         strokeWidth = 3.dp,
                                         wavelength = (24.dp).coerceAtLeast(16.dp),
                                     ),

@@ -15,18 +15,19 @@ class SettingsDataStore(context: Context) {
     private val dataStore = context.dataStore
 
     companion object {
-        /*val PREDICTIVE_BACK_GESTURE_ENABLED = booleanPreferencesKey("predictive_back_gesture_enabled")*/
+        val PLAYER_SQUIGGLY_WAVE_ENABLED = booleanPreferencesKey("player_squiggly_wave_enabled")
     }
 
-    /*val isPredictiveBackGestureEnabled: Flow<Boolean> = dataStore.data
+    val isPlayerSquigglyWaveEnabled: Flow<Boolean> = dataStore.data
         .map { preferences ->
             // 默认启用
-            preferences[PREDICTIVE_BACK_GESTURE_ENABLED] ?: true
+            preferences[PLAYER_SQUIGGLY_WAVE_ENABLED] ?: true
         }
 
-    suspend fun setPredictiveBackGestureEnabled(isEnabled: Boolean) {
+    suspend fun setPlayerSquigglyWaveEnabled(isEnabled: Boolean) {
         dataStore.edit { settings ->
-            settings[PREDICTIVE_BACK_GESTURE_ENABLED] = isEnabled
+            settings[PLAYER_SQUIGGLY_WAVE_ENABLED] = isEnabled
         }
-    }*/
+    }
+
 }

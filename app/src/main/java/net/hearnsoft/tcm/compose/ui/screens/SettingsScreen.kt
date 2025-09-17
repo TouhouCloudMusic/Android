@@ -30,21 +30,20 @@ fun SettingsScreen(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val settingsDataStore = remember { SettingsDataStore(context) }
-    /*val isPredictiveBackEnabled by settingsDataStore.isPredictiveBackGestureEnabled.collectAsState(initial = true)*/
+    val isPlayerSquigglyWaveEnabled by settingsDataStore.isPlayerSquigglyWaveEnabled.collectAsState(initial = true)
 
     Box(Modifier.fillMaxSize()) {
         RoundedColumn(Modifier.fillMaxSize()) {
             ItemOuterTitle(text = "通用")
-            /*ItemSwitcher(
-                text = "启用预测性返回手势",
-                state = isPredictiveBackEnabled,
-                onChange = { enabled ->
+            ItemSwitcher(
+                text = "启用播放器进度条波形动画",
+                state = isPlayerSquigglyWaveEnabled,
+                onChange = { state ->
                     coroutineScope.launch {
-                        settingsDataStore.setPredictiveBackGestureEnabled(enabled)
+                        settingsDataStore.setPlayerSquigglyWaveEnabled(state)
                     }
-
                 }
-            )*/
+            )
         }
     }
 

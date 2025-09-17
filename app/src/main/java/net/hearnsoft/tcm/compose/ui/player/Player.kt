@@ -112,6 +112,7 @@ fun BottomSheetPlayer(
     val settingsDataStore = remember { SettingsDataStore(context) }
     // 播放器进度条波形动画设置项
     val isPlayerSquigglyWaveEnabled by settingsDataStore.isPlayerSquigglyWaveEnabled.collectAsState(initial = true)
+    val isPlayerShowMusicTagsEnabled by settingsDataStore.isPlayerShowMusicTagsEnabled.collectAsState(initial = true)
 
     // Pager状态
     val pagerState = rememberPagerState(
@@ -377,17 +378,19 @@ fun BottomSheetPlayer(
                             }
 
                             // Tags
-                            LazyRow(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp),
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                // 测试10个标签
-                                items(10) { index ->
-                                    HashTag(
-                                        label = "Tag ${index + 1}"
-                                    )
+                            if (isPlayerShowMusicTagsEnabled) {
+                                LazyRow(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    // 测试10个标签
+                                    items(10) { index ->
+                                        HashTag(
+                                            label = "Tag ${index + 1}"
+                                        )
+                                    }
                                 }
                             }
 

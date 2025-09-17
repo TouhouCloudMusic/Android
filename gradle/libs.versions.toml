@@ -19,6 +19,7 @@ lyricsCore = "0.3.1"
 lyricsUi = "1.0.6"
 navigationCompose = "2.9.0"
 navigationComposeAndroid = "2.9.0"
+renderscripToolkit = "1.0.2"
 roomRuntime = "2.7.2"
 saltUi = "2.5.2"
 media3 = "1.8.0"
@@ -68,6 +69,7 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 lazycolumnscrollbar = { module = "com.github.nanihadesuka:LazyColumnScrollbar", version.ref = "lazycolumnscrollbar" }
 lyrics-core = { module = "com.mocharealm.accompanist:lyrics-core", version.ref = "lyricsCore" }
 lyrics-ui = { module = "com.mocharealm.accompanist:lyrics-ui", version.ref = "lyricsUi" }
+renderscrip-toolkit = { module = "io.github.limuyang2:renderscrip-toolkit", version.ref = "renderscripToolkit" }
 salt-ui = { module = "io.github.moriafly:salt-ui", version.ref = "saltUi" }
 salt-core = { module = "io.github.moriafly:salt-core", version.ref = "saltUi" }
 arrow-core = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }

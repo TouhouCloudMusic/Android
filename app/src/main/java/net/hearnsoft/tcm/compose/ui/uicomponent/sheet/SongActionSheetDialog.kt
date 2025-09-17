@@ -177,16 +177,6 @@ fun SongActionSheetContent(
 }
 
 @Composable
-@UnstableSaltUiApi
-@ExperimentalMaterial3Api
-@Preview
-fun SongActionSheetDialogPreview() {
-    SongActionSheetDialog(
-        songEntity = sampleData
-    )
-}
-
-@Composable
 @Preview
 fun SongActionHeaderPreview() {
     Surface(

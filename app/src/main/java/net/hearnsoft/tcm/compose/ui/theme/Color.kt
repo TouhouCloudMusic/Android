@@ -23,7 +23,6 @@ val SecondaryLight = Color(0xFFD7B568) // marisa-400
 val Background = Color(0xFFFFFFFF)
 val Surface = Color(0xFFF3F4F5) // slate-100
 val SurfaceVariant = Color(0xFFE8EAED) // slate-200
-val AlphaStroke = Color(0x26000000) // 10%透明度的黑色
 
 // 文字颜色
 val TextPrimary = Color(0xFF32363F) // slate-1000

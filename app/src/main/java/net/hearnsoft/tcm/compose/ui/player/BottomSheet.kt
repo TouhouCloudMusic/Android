@@ -37,8 +37,8 @@ import com.moriafly.salt.ui.SaltTheme
 fun BottomSheet(
     state: BottomSheetState,
     modifier: Modifier = Modifier,
-    brushBackgroundColor: Brush,
     collapsedContent: @Composable BoxScope.() -> Unit,
+    backgroundContent: @Composable BoxScope.() -> Unit = {},
     content: @Composable BoxScope.() -> Unit,
 ) {
     // 主容器，通过偏移实现底部面板的滑动效果
@@ -102,9 +102,12 @@ fun BottomSheet(
                         // 根据展开进度计算透明度，实现渐显效果
                         // 当进度超过0.25时开始显示，完全展开时透明度为1
                         alpha = ((state.progress - 0.1f) * 4).coerceIn(0f, 1f)
-                    }.background(brushBackgroundColor),
-                content = content
-            )
+                    }
+            ) {
+                backgroundContent()
+
+                content()
+            }
         }
 
         // 折叠状态下的内容显示（当面板未完全展开且允许显示时）

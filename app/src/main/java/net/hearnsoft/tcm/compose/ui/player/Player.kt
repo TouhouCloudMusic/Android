@@ -3,12 +3,8 @@ package net.hearnsoft.tcm.compose.ui.player
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.view.Window
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.basicMarquee
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,9 +20,7 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.runtime.Composable
@@ -41,22 +35,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.ColorUtils
 import androidx.core.view.WindowCompat
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
-import coil3.BitmapImage
-import coil3.ImageLoader
-import coil3.request.ImageRequest
-import coil3.request.allowHardware
 import com.moriafly.salt.ui.Icon
 import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.Surface
@@ -69,11 +55,15 @@ import kotlinx.coroutines.withContext
 import me.saket.squiggles.SquigglySlider
 import net.hearnsoft.tcm.compose.R
 import net.hearnsoft.tcm.compose.constants.PlayerHorizontalPadding
-import net.hearnsoft.tcm.compose.ui.theme.extractGradientColors
 import net.hearnsoft.tcm.compose.ui.uicomponent.HashTag
 import net.hearnsoft.tcm.compose.ui.uicomponent.ResizableIconButton
-import net.hearnsoft.tcm.compose.ui.utils.LocalPlayerBackgroundColor
+import net.hearnsoft.tcm.compose.ui.uicomponent.flowing.FlowingLightBackground
+import net.hearnsoft.tcm.compose.ui.utils.LocalPlayerUIColor
+import net.hearnsoft.tcm.compose.ui.utils.PlayerForegroundColorDark
+import net.hearnsoft.tcm.compose.ui.utils.PlayerForegroundColorLight
+import net.hearnsoft.tcm.compose.ui.utils.getPlayerUIColor
 import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
+import net.hearnsoft.tcm.compose.utils.Logger
 import net.hearnsoft.tcm.compose.utils.SystemMediaDialogUtils
 import net.hearnsoft.tcm.compose.utils.formatTimeString
 
@@ -123,55 +113,6 @@ fun BottomSheetPlayer(
         initialPage = 1
     )
 
-    // 渐变颜色状态管理
-    var gradientColors by remember {
-        mutableStateOf<List<Color>>(emptyList())
-    }
-
-    val hasGradientColours : Boolean = gradientColors.size >= 2
-    val whiteContrastThreshold = 2.0
-    val blackContrastThreshold = 2.0
-
-    val whiteGradientContrast : Double = when {
-        hasGradientColours -> {
-            ColorUtils.calculateContrast(
-                gradientColors.first().toArgb(),
-                Color.White.toArgb(),
-            )
-        }
-        else -> whiteContrastThreshold
-    }
-
-    val blackGradientContrast : Double = when {
-        hasGradientColours -> {
-            ColorUtils.calculateContrast(
-                gradientColors.last().toArgb(),
-                Color.Black.toArgb(),
-            )
-        }
-        else -> blackContrastThreshold
-    }
-
-    val onBackgroundColor =
-        when {
-            hasGradientColours -> {
-                // 计算渐变色的平均亮度
-                val averageLuminance = gradientColors.map { color ->
-                    ColorUtils.calculateLuminance(color.toArgb())
-                }.average()
-
-                // 亮度阈值：0.5
-                if (averageLuminance > 0.5) {
-                    Color.Black // 背景亮，用黑色文字
-                } else {
-                    Color.White // 背景暗，用白色文字
-                }
-            }
-            else -> {
-                SaltTheme.colors.text // 默认颜色
-            }
-        }
-
     // 进度条位置
     var sliderPosition by remember {
         mutableStateOf<Long?>(null)
@@ -187,42 +128,52 @@ fun BottomSheetPlayer(
         mutableIntStateOf(9)
     }
 
-    // 渐变色背景响应事件
-    LaunchedEffect(currentPlaying, artworkUri) {
-        if (artworkUri != null) {
-            withContext(Dispatchers.IO) {
-                val result =
-                    (
-                            ImageLoader(context)
-                                .execute(
-                                    ImageRequest
-                                        .Builder(context)
-                                        .data(artworkUri)
-                                        .allowHardware(false)
-                                        .build(),
-                                ).image as? BitmapImage
-                            )?.bitmap?.extractGradientColors(
-                            darkTheme = isSystemInDarkTheme,
-                        )
-
-                result?.let {
-                    gradientColors = it
-                }
-            }
-        } else {
-            gradientColors = emptyList()
-        }
+    // 播放器UI部分前景染色
+    var playerUIColor by remember {
+        mutableStateOf(getPlayerUIColor(isSystemInDarkTheme))
     }
 
-    // 状态栏颜色控制
-    LaunchedEffect(state.isExpanded, onBackgroundColor) {
+    // 封面是否加载完成
+    var coverLoaded by remember {
+        mutableStateOf(false)
+    }
+
+    // 状态栏颜色控制和全局前景色控制
+    LaunchedEffect(state.isExpanded, currentPlaying, coverLoaded, isSystemInDarkTheme) {
+        // 更新播放器UI颜色逻辑
+        playerUIColor = when {
+            // 当没有播放内容或封面未加载完成时，根据系统主题决定颜色
+            currentPlaying == null || !coverLoaded -> getPlayerUIColor(isSystemInDarkTheme)
+            // 当有播放内容且封面加载完成时，使用浅色前景
+            else -> PlayerForegroundColorLight
+        }
+
+        Logger.debug("BottomSheetPlayer",
+            "状态栏颜色控制: isExpanded=${state.isExpanded}," +
+                    " currentPlaying=${currentPlaying?.mediaId ?: "null"}," +
+                    " coverLoaded=$coverLoaded," +
+                    " isSystemInDarkTheme=$isSystemInDarkTheme")
+
         val window: Window = context.window
         val insetsController = WindowCompat.getInsetsController(window, window.decorView)
         if (state.isExpanded) {
-            withContext(Dispatchers.Main) {
-                insetsController.isAppearanceLightStatusBars = ColorUtils.calculateLuminance(onBackgroundColor.toArgb()) < 0.5
+            // 展开时的状态栏逻辑，与 playerUIColor 逻辑保持一致
+            when {
+                // 当没有播放内容或封面未加载完成时，根据系统主题决定状态栏颜色
+                currentPlaying == null || !coverLoaded -> {
+                    withContext(Dispatchers.Main) {
+                        insetsController.isAppearanceLightStatusBars = !isSystemInDarkTheme
+                    }
+                }
+                // 当有播放内容且封面加载完成时，使用浅色状态栏（因为背景是流光溢彩效果，较暗）
+                else -> {
+                    withContext(Dispatchers.Main) {
+                        insetsController.isAppearanceLightStatusBars = false
+                    }
+                }
             }
         } else {
+            // 折叠时始终根据系统主题决定状态栏颜色
             withContext(Dispatchers.Main) {
                 insetsController.isAppearanceLightStatusBars = !isSystemInDarkTheme
             }
@@ -246,20 +197,19 @@ fun BottomSheetPlayer(
                 }
             )
         },
-        brushBackgroundColor =
-            if (hasGradientColours) {
-                Brush.verticalGradient(gradientColors)
-            } else {
-                Brush.verticalGradient(
-                    listOf(
-                        SaltTheme.colors.subBackground,
-                        SaltTheme.colors.subBackground,
-                    ),
-                )
-            },
+        backgroundContent = {
+            // 流光溢彩背景
+            FlowingLightBackground(
+                imageUrl = artworkUri,
+                modifier = Modifier.fillMaxSize(),
+                onImageLoadResult = { result ->
+                    coverLoaded = result
+                },
+            )
+        }
     ) {
         CompositionLocalProvider(
-            LocalPlayerBackgroundColor provides onBackgroundColor
+            LocalPlayerUIColor provides playerUIColor
         ) {
             Surface(
                 modifier = Modifier
@@ -288,7 +238,7 @@ fun BottomSheetPlayer(
                                 Icon(
                                     painter = painterResource(id = R.drawable.ic_arrow_collapse),
                                     contentDescription = "收起抽屉",
-                                    tint = LocalPlayerBackgroundColor.current
+                                    tint = LocalPlayerUIColor.current
                                 )
                             }
                             Spacer(modifier = Modifier.weight(1f))
@@ -303,7 +253,7 @@ fun BottomSheetPlayer(
                                     Icon(
                                         painter = painterResource(id = R.drawable.ic_cast_24px),
                                         contentDescription = "投送",
-                                        tint = LocalPlayerBackgroundColor.current
+                                        tint = LocalPlayerUIColor.current
                                     )
                                 }
                                 IconButton(
@@ -313,7 +263,7 @@ fun BottomSheetPlayer(
                                     Icon(
                                         painter = painterResource(id = R.drawable.ic_share),
                                         contentDescription = "分享",
-                                        tint = LocalPlayerBackgroundColor.current
+                                        tint = LocalPlayerUIColor.current
                                     )
                                 }
                             }
@@ -360,14 +310,15 @@ fun BottomSheetPlayer(
                                             .padding(horizontal = 4.dp, vertical = 2.dp)
                                             .basicMarquee(iterations = Int.MAX_VALUE),
                                         maxLines = 1,
-                                        color = LocalPlayerBackgroundColor.current
+                                        color = LocalPlayerUIColor.current
                                     )
                                     Text(
                                         text = artist.toString(),
                                         style = SaltTheme.textStyles.sub,
-                                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                                        modifier = Modifier
+                                            .padding(horizontal = 4.dp, vertical = 2.dp),
                                         maxLines = 1,
-                                        color = LocalPlayerBackgroundColor.current
+                                        color = LocalPlayerUIColor.current
                                     )
                                 }
                                 // 部分控制按钮
@@ -402,14 +353,14 @@ fun BottomSheetPlayer(
                                             Icon(
                                                 painter = painterResource(id = R.drawable.ic_chat_bubble_count),
                                                 contentDescription = "评论",
-                                                tint = LocalPlayerBackgroundColor.current
+                                                tint = LocalPlayerUIColor.current,
                                             )
                                         }
                                         if (commentCount > 0) {
                                             Text(
                                                 text = if (commentCount > 99) "99+" else commentCount.toString(),
                                                 style = SaltTheme.textStyles.sub,
-                                                color = LocalPlayerBackgroundColor.current,
+                                                color = LocalPlayerUIColor.current,
                                                 modifier = Modifier
                                                     .padding(end = 4.dp, top = 4.dp)
                                                     .align(Alignment.TopEnd)
@@ -424,6 +375,7 @@ fun BottomSheetPlayer(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(vertical = 8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
                                 // 测试10个标签
                                 items(10) { index ->
@@ -473,7 +425,8 @@ fun BottomSheetPlayer(
                                     style = SaltTheme.textStyles.sub,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
-                                    color = LocalPlayerBackgroundColor.current
+                                    color = LocalPlayerUIColor.current,
+                                    modifier = Modifier
                                 )
 
                                 Text(
@@ -481,7 +434,8 @@ fun BottomSheetPlayer(
                                     style = SaltTheme.textStyles.sub,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
-                                    color = LocalPlayerBackgroundColor.current
+                                    color = LocalPlayerUIColor.current,
+                                    modifier = Modifier
                                 )
                             }
 
@@ -501,7 +455,7 @@ fun BottomSheetPlayer(
                                     }
                                     ResizableIconButton(
                                         icon = iconRes,
-                                        color = LocalPlayerBackgroundColor.current,
+                                        color = LocalPlayerUIColor.current,
                                         modifier = Modifier
                                             .size(32.dp)
                                             .padding(4.dp)
@@ -527,7 +481,7 @@ fun BottomSheetPlayer(
                                 Box(modifier = Modifier.weight(1f)) {
                                     ResizableIconButton(
                                         icon = R.drawable.ic_music_prev,
-                                        color = LocalPlayerBackgroundColor.current,
+                                        color = LocalPlayerUIColor.current,
                                         modifier = Modifier
                                             .size(32.dp)
                                             .padding(4.dp)
@@ -540,70 +494,27 @@ fun BottomSheetPlayer(
 
                                 // 播放/暂停按钮
                                 Box(modifier = Modifier.weight(1f)) {
-                                    var isPressed by remember { mutableStateOf(false) }
-
-                                    val scale by animateFloatAsState(
-                                        targetValue = if (isPressed) 0.9f else 1f,
-                                        animationSpec = tween(100),
-                                        label = "fab_scale"
-                                    )
-
-                                    val animatedCornerRadius by animateFloatAsState(
-                                        targetValue = if (isPlaying) 16f else 50f,
-                                        animationSpec = tween(500),
-                                        label = "corner_radius"
-                                    )
-
-                                    FloatingActionButton(
+                                    ResizableIconButton(
+                                        icon = if (isPlaying) {
+                                            R.drawable.pause
+                                        } else {
+                                            R.drawable.play
+                                        },
+                                        color = LocalPlayerUIColor.current,
+                                        modifier = Modifier
+                                            .size(50.dp)
+                                            .align(Alignment.Center),
                                         onClick = {
                                             playerViewModel.togglePlayPause()
                                         },
-                                        shape = RoundedCornerShape(animatedCornerRadius.dp),
-                                        containerColor = SaltTheme.colors.highlight,
-                                        modifier = Modifier
-                                            .scale(scale)
-                                            .align(Alignment.Center),
-                                        interactionSource = remember { MutableInteractionSource() }
-                                            .also { interactionSource ->
-                                                LaunchedEffect(interactionSource) {
-                                                    interactionSource.interactions.collect { interaction ->
-                                                        when (interaction) {
-                                                            is PressInteraction.Press -> isPressed = true
-                                                            is PressInteraction.Release -> isPressed = false
-                                                            is PressInteraction.Cancel -> isPressed = false
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                    ) {
-                                        val stateScale by animateFloatAsState(
-                                            targetValue = if (isPlaying) 1.1f else 1f,
-                                            animationSpec = tween(300),
-                                            label = "icon_state_scale"
-                                        )
-
-                                        Icon(
-                                            painter = painterResource(
-                                                if (isPlaying) {
-                                                    R.drawable.pause
-                                                } else {
-                                                    R.drawable.play
-                                                }
-                                            ),
-                                            contentDescription = if (isPlaying) "Pause" else "Play",
-                                            modifier = Modifier
-                                                .size(24.dp)
-                                                .scale(stateScale),
-                                            tint = SaltTheme.colors.onHighlight
-                                        )
-                                    }
+                                    )
                                 }
 
                                 // 下一首按钮
                                 Box(modifier = Modifier.weight(1f)) {
                                     ResizableIconButton(
                                         icon = R.drawable.ic_music_next,
-                                        color = LocalPlayerBackgroundColor.current,
+                                        color = LocalPlayerUIColor.current,
                                         modifier = Modifier
                                             .size(32.dp)
                                             .padding(4.dp)
@@ -618,7 +529,7 @@ fun BottomSheetPlayer(
                                 Box(modifier = Modifier.weight(1f)) {
                                     ResizableIconButton(
                                         icon = R.drawable.ic_music_list,
-                                        color = LocalPlayerBackgroundColor.current,
+                                        color = LocalPlayerUIColor.current,
                                         modifier = Modifier
                                             .size(32.dp)
                                             .padding(4.dp)

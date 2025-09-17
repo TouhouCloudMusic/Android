@@ -1,6 +1,6 @@
 package net.hearnsoft.tcm.compose.ui.uicomponent
 
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ChipColors
 import androidx.compose.material3.ElevatedAssistChip
@@ -13,36 +13,46 @@ import com.moriafly.salt.ui.Icon
 import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.Text
 import net.hearnsoft.tcm.compose.R
+import net.hearnsoft.tcm.compose.ui.utils.LocalPlayerUIColor
 
 @Composable
 fun HashTag(
     label: String,
 ) {
+    val uiColor = LocalPlayerUIColor.current
+
     ElevatedAssistChip(
-        modifier = Modifier.padding(end = 4.dp),
+        modifier = Modifier,
         colors = ChipColors(
-            containerColor = SaltTheme.colors.subBackground,
-            leadingIconContentColor = SaltTheme.colors.text,
+            containerColor = Color.DarkGray.copy(alpha = 0.2f), // 0.2f的深灰色半透明
+            leadingIconContentColor = Color.Transparent,
             labelColor = SaltTheme.colors.text,
-            trailingIconContentColor = Color.Unspecified,
-            disabledContainerColor = Color.Unspecified,
-            disabledLabelColor = Color.Unspecified,
-            disabledLeadingIconContentColor = Color.Unspecified,
-            disabledTrailingIconContentColor = Color.Unspecified,
+            trailingIconContentColor = Color.Transparent,
+            disabledContainerColor = Color.Transparent,
+            disabledLabelColor = Color.Transparent,
+            disabledLeadingIconContentColor = Color.Transparent,
+            disabledTrailingIconContentColor = Color.Transparent,
         ),
         label = {
             Text(
                 text = label,
-                style = SaltTheme.textStyles.sub
+                style = SaltTheme.textStyles.sub,
+                color = uiColor
             )
         },
         leadingIcon = {
             Icon(
                 painter = painterResource(id = R.drawable.ic_tag_24px),
                 contentDescription = "Tag Icon",
-                modifier = Modifier.size(16.dp)
+                modifier = Modifier.size(16.dp),
+                tint = uiColor
             )
         },
-        onClick = {}
+        onClick = {},
+        border = BorderStroke(
+            width = 1.dp,
+            color = uiColor
+        ),
+        elevation = null
     )
 }

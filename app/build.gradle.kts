@@ -118,6 +118,9 @@ dependencies {
     // LazyColumn Scrollbar
     implementation(libs.lazycolumnscrollbar)
 
+    // RenderScript Toolkit
+    implementation(libs.renderscrip.toolkit)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

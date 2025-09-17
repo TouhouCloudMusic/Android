@@ -152,6 +152,6 @@ object Theme {
         val darkSurfaceVariant = DarkSurfaceVariant
         val darkOutline = DarkOutline
 
-        val alphaStroke = AlphaStroke
+        val alphaStroke = Color.DarkGray.copy(alpha = 0.3f) // 20%透明度的深灰色
     }
 }

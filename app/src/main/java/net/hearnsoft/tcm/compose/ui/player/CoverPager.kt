@@ -1,6 +1,7 @@
 package net.hearnsoft.tcm.compose.ui.player
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.net.Uri
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.aspectRatio
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -20,6 +22,8 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
+import coil3.request.error
+import coil3.request.fallback
 import net.hearnsoft.tcm.compose.R
 import net.hearnsoft.tcm.compose.constants.PlayerCoverVerticalPadding
 import net.hearnsoft.tcm.compose.constants.PlayerHorizontalPadding
@@ -30,6 +34,7 @@ fun CoverPager(
     modifier: Modifier = Modifier,
     artworkUri: Uri?
 ) {
+
     // 封面容器
     BoxWithConstraints(
         modifier = Modifier
@@ -50,6 +55,8 @@ fun CoverPager(
                     .data(artworkUri ?: R.drawable.ic_nav_music)
                     .crossfade(true)
                     .crossfade(1000)
+                    .error(R.drawable.ic_nav_music) // 错误时使用占位图
+                    .fallback(R.drawable.ic_nav_music) // URI为null时使用占位图
                     .build(),
                 modifier = Modifier
                     .fillMaxWidth()

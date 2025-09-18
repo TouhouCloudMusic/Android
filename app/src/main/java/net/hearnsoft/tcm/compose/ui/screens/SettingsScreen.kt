@@ -12,12 +12,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.moriafly.salt.ui.ItemOuterTitle
+import com.moriafly.salt.ui.ItemPopup
 import com.moriafly.salt.ui.ItemSwitcher
-import com.moriafly.salt.ui.ItemTitle
 import com.moriafly.salt.ui.RoundedColumn
-import com.moriafly.salt.ui.Text
 import com.moriafly.salt.ui.UnstableSaltUiApi
+import com.moriafly.salt.ui.popup.PopupMenuItem
+import com.moriafly.salt.ui.popup.rememberPopupState
 import kotlinx.coroutines.launch
+import net.hearnsoft.tcm.compose.pref.PlayerSeekToPreviousAction
 import net.hearnsoft.tcm.compose.pref.SettingsDataStore
 
 @UnstableSaltUiApi
@@ -57,7 +59,58 @@ fun SettingsScreen(
                     },
                 )
             }
+            ItemOuterTitle(text = "播放器行为")
+            RoundedColumn {
+                val popupState = rememberPopupState()
+                ItemPopup(
+                    state = popupState,
+                    text = "上一曲行为",
+                    sub = "点击“上一曲”按钮时的行为"
+                ) {
+                    val currentAction by settingsDataStore.playerSeekToPreviousAction.collectAsState(initial = PlayerSeekToPreviousAction.DEFAULT.ordinal)
+                    PopupMenuItem(
+                        text = "默认",
+                        onClick = {
+                            coroutineScope.launch {
+                                setPlayerSeekToPreviousAction(settingsDataStore,
+                                    PlayerSeekToPreviousAction.DEFAULT)
+                            }
+                            popupState.dismiss()
+                        },
+                        selected = currentAction == PlayerSeekToPreviousAction.DEFAULT.ordinal
+                    )
+                    PopupMenuItem(
+                        text = "上一首",
+                        onClick = {
+                            coroutineScope.launch {
+                                setPlayerSeekToPreviousAction(settingsDataStore,
+                                    PlayerSeekToPreviousAction.ALWAYS_PREVIOUS)
+                            }
+                            popupState.dismiss()
+                        },
+                        selected = currentAction == PlayerSeekToPreviousAction.ALWAYS_PREVIOUS.ordinal
+                    )
+                    PopupMenuItem(
+                        text = "回到开头",
+                        onClick = {
+                            coroutineScope.launch {
+                                setPlayerSeekToPreviousAction(settingsDataStore,
+                                    PlayerSeekToPreviousAction.ALWAYS_RESTART)
+                            }
+                            popupState.dismiss()
+                        },
+                        selected = currentAction == PlayerSeekToPreviousAction.ALWAYS_RESTART.ordinal
+                    )
+                }
+            }
         }
     }
 
+}
+
+private suspend fun setPlayerSeekToPreviousAction(
+    dataStore: SettingsDataStore,
+    action: PlayerSeekToPreviousAction
+) {
+    dataStore.setPlayerSeekToPreviousAction(action)
 }

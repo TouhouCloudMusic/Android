@@ -4,6 +4,10 @@ import android.content.ComponentName
 import android.content.Context
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
+import androidx.lifecycle.asFlow
+import androidx.lifecycle.asLiveData
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -12,13 +16,20 @@ import androidx.media3.session.SessionToken
 import com.google.common.util.concurrent.ListenableFuture
 import com.moriafly.salt.ui.UnstableSaltUiApi
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import net.hearnsoft.tcm.compose.pref.PlayerSeekToPreviousAction
+import net.hearnsoft.tcm.compose.pref.SettingsDataStore
 import net.hearnsoft.tcm.compose.service.MusicPlaybackService
 import net.hearnsoft.tcm.compose.utils.LyricsExtractor.LyricsFormat
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.let
 
 // 全局桥接对象
 object PlayerLyricsBridge {
@@ -54,6 +65,11 @@ class PlayerController @Inject constructor(
 ) {
     private var mediaController: MediaController? = null
     private var controllerFuture: ListenableFuture<MediaController>? = null
+
+    // 设置数据存储
+    val settingsDataStore = SettingsDataStore(context)
+
+    val scope = CoroutineScope(Dispatchers.Main)
 
     // 连接状态
     private val _isConnected = MutableStateFlow(false)
@@ -228,8 +244,28 @@ class PlayerController @Inject constructor(
      * 上一首
      */
     fun skipToPrevious() {
-        mediaController?.seekToPrevious() ?: run {
-            Logger.warn("PlayerController", "媒体控制器未连接，无法跳到上一首")
+        scope.launch {
+            mediaController?.let { controller ->
+                val actionOrdinal = settingsDataStore.playerSeekToPreviousAction.first()
+                Logger.debug("PlayerController", "上一曲行为设置值: $actionOrdinal")
+                val action = PlayerSeekToPreviousAction.entries.getOrNull(actionOrdinal)
+                when (action) {
+                    PlayerSeekToPreviousAction.DEFAULT -> {
+                        controller.seekToPrevious()
+                    }
+                    PlayerSeekToPreviousAction.ALWAYS_PREVIOUS -> {
+                        controller.seekToPreviousMediaItem()
+                    }
+                    PlayerSeekToPreviousAction.ALWAYS_RESTART -> {
+                        controller.seekTo(0L)
+                    }
+                    else -> {
+                        controller.seekToPrevious()
+                    }
+                }
+            } ?: run {
+                Logger.warn("PlayerController", "媒体控制器未连接，无法跳到上一首")
+            }
         }
     }
 

@@ -36,6 +36,12 @@ fun SettingsScreen(
     val isPlayerSquigglyWaveEnabled by settingsDataStore.isPlayerSquigglyWaveEnabled.collectAsState(initial = true)
     val isPlayerShowMusicTagsEnabled by settingsDataStore.isPlayerShowMusicTagsEnabled.collectAsState(initial = true)
 
+    val seekToPreviousActionLabels = listOf(
+        "默认",
+        "上一曲",
+        "回到开头"
+    )
+
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize()) {
             ItemOuterTitle(text = "用户界面")
@@ -62,45 +68,29 @@ fun SettingsScreen(
             ItemOuterTitle(text = "播放器行为")
             RoundedColumn {
                 val popupState = rememberPopupState()
+                // 上一曲行为的设置
+                val currentAction by settingsDataStore.playerSeekToPreviousAction
+                    .collectAsState(initial = PlayerSeekToPreviousAction.DEFAULT.ordinal)
                 ItemPopup(
                     state = popupState,
                     text = "上一曲行为",
-                    sub = "点击“上一曲”按钮时的行为"
+                    sub = "点击“上一曲”按钮时进行 “${seekToPreviousActionLabels[currentAction]}” 操作"
                 ) {
-                    val currentAction by settingsDataStore.playerSeekToPreviousAction.collectAsState(initial = PlayerSeekToPreviousAction.DEFAULT.ordinal)
-                    PopupMenuItem(
-                        text = "默认",
-                        onClick = {
-                            coroutineScope.launch {
-                                setPlayerSeekToPreviousAction(settingsDataStore,
-                                    PlayerSeekToPreviousAction.DEFAULT)
+                    seekToPreviousActionLabels.forEachIndexed { index, label ->
+                        PopupMenuItem(
+                            text = label,
+                            selected = currentAction == index,
+                            onClick = {
+                                coroutineScope.launch {
+                                    setPlayerSeekToPreviousAction(
+                                        dataStore = settingsDataStore,
+                                        action = PlayerSeekToPreviousAction.entries[index]
+                                    )
+                                }
+                                popupState.dismiss()
                             }
-                            popupState.dismiss()
-                        },
-                        selected = currentAction == PlayerSeekToPreviousAction.DEFAULT.ordinal
-                    )
-                    PopupMenuItem(
-                        text = "上一首",
-                        onClick = {
-                            coroutineScope.launch {
-                                setPlayerSeekToPreviousAction(settingsDataStore,
-                                    PlayerSeekToPreviousAction.ALWAYS_PREVIOUS)
-                            }
-                            popupState.dismiss()
-                        },
-                        selected = currentAction == PlayerSeekToPreviousAction.ALWAYS_PREVIOUS.ordinal
-                    )
-                    PopupMenuItem(
-                        text = "回到开头",
-                        onClick = {
-                            coroutineScope.launch {
-                                setPlayerSeekToPreviousAction(settingsDataStore,
-                                    PlayerSeekToPreviousAction.ALWAYS_RESTART)
-                            }
-                            popupState.dismiss()
-                        },
-                        selected = currentAction == PlayerSeekToPreviousAction.ALWAYS_RESTART.ordinal
-                    )
+                        )
+                    }
                 }
             }
         }

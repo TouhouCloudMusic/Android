@@ -117,7 +117,7 @@ fun AlbumScreen(
                     contentDescription = albumEntity.albumName,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize().blur(15.dp),
-                    alpha = 0.1f
+                    alpha = 0.3f
                 )
 
                 LazyColumn(

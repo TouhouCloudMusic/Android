@@ -22,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextAlign
@@ -35,6 +36,7 @@ import com.moriafly.salt.ui.UnstableSaltUiApi
 import kotlinx.coroutines.android.awaitFrame
 import net.hearnsoft.tcm.compose.constants.PlayerCoverVerticalPadding
 import net.hearnsoft.tcm.compose.constants.PlayerHorizontalPadding
+import net.hearnsoft.tcm.compose.ui.utils.LocalPlayerUIColor
 import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
 import net.hearnsoft.tcm.compose.utils.Logger
 
@@ -145,6 +147,8 @@ fun LyricsPager(
 private fun NoLyricsPlaceholder(
     modifier: Modifier = Modifier
 ) {
+    val uiColor = LocalPlayerUIColor.current
+
     Column(
         modifier = modifier.padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -153,13 +157,13 @@ private fun NoLyricsPlaceholder(
             text = "暂无歌词",
             style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            color = uiColor,
         )
         Text(
             text = "享受纯音乐的美妙时光",
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+            color = uiColor,
             modifier = Modifier.padding(top = 8.dp)
         )
     }

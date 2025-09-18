@@ -30,7 +30,7 @@ import com.moriafly.salt.ui.UnstableSaltUiApi
 import net.hearnsoft.tcm.compose.constants.PlayerCoverVerticalPadding
 import net.hearnsoft.tcm.compose.constants.PlayerHorizontalPadding
 import net.hearnsoft.tcm.compose.ui.uicomponent.PlaylistItem
-import net.hearnsoft.tcm.compose.ui.utils.LocalPlayerBackgroundColor
+import net.hearnsoft.tcm.compose.ui.utils.LocalPlayerUIColor
 import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
 
 @Composable
@@ -43,6 +43,8 @@ fun PlaylistPager(
     modifier: Modifier = Modifier,
     playerViewModel: PlayerViewModel,
 ) {
+    val uiColor = LocalPlayerUIColor.current
+
     // 当前播放列表
     val playlist = playerViewModel.currentPlaylist.collectAsState().value
     // 当前播放的媒体
@@ -52,9 +54,6 @@ fun PlaylistPager(
     val targetIndex = remember(playlist) {
         playlist.indexOfFirst { it.mediaId == currentPlaying?.mediaId }
     }
-
-    // 由LocalPlayerBackgroundColor提供颜色
-    val backgroundColor = LocalPlayerBackgroundColor.current
 
     LaunchedEffect(targetIndex, listState) {
         if (targetIndex != -1) {
@@ -70,14 +69,16 @@ fun PlaylistPager(
             .sizeIn(maxHeight = 600.dp, maxWidth = 600.dp)
     ) {
         RoundedColumn(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize(),
             color = Color.Transparent
         ) {
             Text(
                 text = "播放列表",
                 style = SaltTheme.textStyles.main,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                color = backgroundColor
+                modifier = Modifier
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                color = uiColor
             )
 
             LazyColumn(
@@ -100,13 +101,13 @@ fun PlaylistPager(
                                 Text(
                                     text = "暂无音乐",
                                     style = SaltTheme.textStyles.main,
-                                    color = backgroundColor
+                                    color = uiColor
                                 )
                                 Text(
                                     text = "添加媒体文件到播放列表",
                                     style = SaltTheme.textStyles.sub,
                                     modifier = Modifier.padding(top = 8.dp),
-                                    color = backgroundColor
+                                    color = uiColor
                                 )
                             }
                         }
@@ -123,7 +124,7 @@ fun PlaylistPager(
                             onRemoveClick = {
                                 playerViewModel.removeFromPlaylist(it)
                             },
-                            textColor = backgroundColor
+                            textColor = uiColor
                         )
                     }
                 }

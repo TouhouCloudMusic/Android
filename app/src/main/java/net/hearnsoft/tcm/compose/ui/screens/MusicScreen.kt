@@ -1,5 +1,9 @@
 package net.hearnsoft.tcm.compose.ui.screens
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -26,7 +30,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
-import androidx.compose.material3.ChipColors
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -67,7 +70,6 @@ import net.hearnsoft.tcm.compose.ui.uicomponent.sheet.MusicSortSheetDialog
 import net.hearnsoft.tcm.compose.ui.uicomponent.sheet.SongActionSheetDialog
 import net.hearnsoft.tcm.compose.ui.utils.LocalPlayerAwareWindowInsets
 import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
-import net.hearnsoft.tcm.compose.utils.Logger
 
 @UnstableSaltUiApi
 @ExperimentalMaterial3Api
@@ -214,7 +216,10 @@ fun MusicScreen(
                                     selectedType = type
                                 },
                                 label = {
-                                    Text(text = type.displayName)
+                                    Text(
+                                        text = type.displayName,
+                                        color = if (selectedType == type) Color.White else SaltTheme.colors.text
+                                    )
                                 },
                                 modifier = Modifier.padding(end = 8.dp),
                                 leadingIcon = if (selectedType == type) {
@@ -222,7 +227,8 @@ fun MusicScreen(
                                         Icon(
                                             imageVector = Icons.Filled.Done,
                                             contentDescription = "Done icon",
-                                            modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                            modifier = Modifier.size(FilterChipDefaults.IconSize),
+                                            tint = Color.White
                                         )
                                     }
                                 } else {
@@ -232,28 +238,32 @@ fun MusicScreen(
                                                 Icon(
                                                     painter = painterResource(R.drawable.ic_nav_music),
                                                     contentDescription = "歌曲",
-                                                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                                    modifier = Modifier.size(FilterChipDefaults.IconSize),
+                                                    tint = SaltTheme.colors.text
                                                 )
                                             }
                                             MusicType.ALBUM -> {
                                                 Icon(
                                                     painter = painterResource(R.drawable.ic_album_24px),
                                                     contentDescription = "专辑",
-                                                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                                    modifier = Modifier.size(FilterChipDefaults.IconSize),
+                                                    tint = SaltTheme.colors.text
                                                 )
                                             }
                                             MusicType.ARTIST -> {
                                                 Icon(
                                                     painter = painterResource(R.drawable.ic_artist_24px),
                                                     contentDescription = "艺术家",
-                                                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                                    modifier = Modifier.size(FilterChipDefaults.IconSize),
+                                                    tint = SaltTheme.colors.text
                                                 )
                                             }
                                             MusicType.FOLDER -> {
                                                 Icon(
                                                     painter = painterResource(R.drawable.ic_folder_24px),
                                                     contentDescription = "文件夹",
-                                                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                                    modifier = Modifier.size(FilterChipDefaults.IconSize),
+                                                    tint = SaltTheme.colors.text
                                                 )
                                             }
                                         }
@@ -270,8 +280,8 @@ fun MusicScreen(
                                     disabledTrailingIconColor = Color.Unspecified,
                                     selectedContainerColor = SaltTheme.colors.highlight,
                                     disabledSelectedContainerColor = Color.Unspecified,
-                                    selectedLabelColor = SaltTheme.colors.text,
-                                    selectedLeadingIconColor = SaltTheme.colors.text,
+                                    selectedLabelColor = Color.White,
+                                    selectedLeadingIconColor = Color.White,
                                     selectedTrailingIconColor = Color.Unspecified
                                 ),
                             )
@@ -332,115 +342,122 @@ fun MusicScreen(
 
                 // 内容列表
                 Box(modifier = Modifier.fillMaxSize()) {
-                    when (selectedType) {
-                        MusicType.SONG -> {
-                            // 歌曲列表滚动条
-                            LazyColumnScrollbar(
-                                settings = ScrollbarSettings(
-                                    thumbSelectedColor = SaltTheme.colors.highlight,
-                                    thumbUnselectedColor = SaltTheme.colors.highlight.copy(alpha = 0.5f),
-                                ),
-                                state = lazyListState,
-                            ) {
-                                // 歌曲列表
+                    AnimatedContent(
+                        targetState = selectedType,
+                        transitionSpec = {
+                            fadeIn() togetherWith fadeOut()
+                        },
+                        label = "contentTypeChange"
+                    ) { type ->
+                        when (type) {
+                            MusicType.SONG -> {
+                                Box(Modifier.fillMaxSize()) {
+                                    // 歌曲列表滚动条
+                                    LazyColumnScrollbar(
+                                        settings = ScrollbarSettings(
+                                            thumbSelectedColor = SaltTheme.colors.highlight,
+                                            thumbUnselectedColor = SaltTheme.colors.highlight.copy(alpha = 0.5f),
+                                        ),
+                                        state = lazyListState,
+                                    ) {
+                                        // 歌曲列表
+                                        LazyColumn(
+                                            modifier = Modifier.fillMaxSize(),
+                                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                                            state = lazyListState,
+                                        ) {
+                                            if (!isLoading && allSongs.isEmpty()) {
+                                                item {
+                                                    EmptyMusicList()
+                                                }
+                                            } else {
+                                                items(
+                                                    items = allSongs,
+                                                    key = { it.mediaStoreId.toString() }
+                                                ) { songEntity ->
+                                                    MusicListItem(
+                                                        songEntity = songEntity,
+                                                        currentPlaying = currentPlaying,
+                                                        onClick = { playerViewModel.playSong(songEntity) },
+                                                        onActionClick = {
+                                                            showActionDialog = true
+                                                            selectedSong = songEntity
+                                                        }
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                    SmallFloatingActionButton(
+                                        onClick = {
+                                            scrollToCurrentPlaying()
+                                        },
+                                        modifier = Modifier
+                                            .align(Alignment.BottomEnd)
+                                            .padding(16.dp),
+                                        containerColor = SaltTheme.colors.subBackground,
+                                        contentColor = SaltTheme.colors.highlight
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.ic_location_24px),
+                                            contentDescription = "定位当前播放歌曲",
+                                        )
+                                    }
+                                }
+                            }
+
+                            MusicType.ALBUM -> {
+                                LazyVerticalGridScrollbar(
+                                    settings = ScrollbarSettings(
+                                        thumbSelectedColor = SaltTheme.colors.highlight,
+                                        thumbUnselectedColor = SaltTheme.colors.highlight.copy(alpha = 0.5f),
+                                    ),
+                                    state = gridState,
+                                ) {
+                                    // 专辑列表
+                                    LazyVerticalGrid(
+                                        columns = GridCells.Fixed(gridColumns),
+                                        modifier = Modifier.fillMaxSize(),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        contentPadding = PaddingValues(
+                                            4.dp
+                                        ),
+                                        state = gridState
+                                    ) {
+                                        if (!isLoading && allAlbums.isEmpty()) {
+                                            item(span = {
+                                                GridItemSpan(gridColumns)
+                                            }) {
+                                                EmptyMusicList()
+                                            }
+                                        } else {
+                                            items(
+                                                items = allAlbums,
+                                                key = { it.albumId.toString() }
+                                            ) { albumEntity ->
+                                                AlbumListItem(
+                                                    albumEntity = albumEntity,
+                                                    onClick = { albumId ->
+                                                        navController.navigate(ScreenRoute.Album.createRoute(albumId))
+                                                    }
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            // 其他类型待实现
+                            else -> {
                                 LazyColumn(
                                     modifier = Modifier.fillMaxSize(),
-                                    verticalArrangement = Arrangement.spacedBy(4.dp),
                                     state = lazyListState,
                                 ) {
-                                    if (!isLoading && allSongs.isEmpty()) {
-                                        item {
-                                            EmptyMusicList()
-                                        }
-                                    } else {
-                                        items(
-                                            items = allSongs,
-                                            key = { it.mediaStoreId.toString() }
-                                        ) { songEntity ->
-                                            MusicListItem(
-                                                songEntity = songEntity,
-                                                currentPlaying = currentPlaying,
-                                                onClick = { playerViewModel.playSong(songEntity) },
-                                                onActionClick = {
-                                                    showActionDialog = true
-                                                    selectedSong = songEntity
-                                                }
-                                            )
-                                        }
+                                    item {
+                                        Text("该功能正在开发中...")
                                     }
                                 }
                             }
-                        }
-
-                        MusicType.ALBUM -> {
-                            LazyVerticalGridScrollbar(
-                                settings = ScrollbarSettings(
-                                    thumbSelectedColor = SaltTheme.colors.highlight,
-                                    thumbUnselectedColor = SaltTheme.colors.highlight.copy(alpha = 0.5f),
-                                ),
-                                state = gridState,
-                            ) {
-                                // 专辑列表
-                                LazyVerticalGrid(
-                                    columns = GridCells.Fixed(gridColumns),
-                                    modifier = Modifier.fillMaxSize(),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    contentPadding = PaddingValues(
-                                        4.dp
-                                    ),
-                                    state = gridState
-                                ) {
-                                    if (!isLoading && allAlbums.isEmpty()) {
-                                        item(span = {
-                                            GridItemSpan(gridColumns)
-                                        }) {
-                                            EmptyMusicList()
-                                        }
-                                    } else {
-                                        items(
-                                            items = allAlbums,
-                                            key = { it.albumId.toString() }
-                                        ) { albumEntity ->
-                                            AlbumListItem(
-                                                albumEntity = albumEntity,
-                                                onClick = { albumId ->
-                                                    navController.navigate(ScreenRoute.Album.createRoute(albumId))
-                                                }
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        // 其他类型待实现
-                        else -> {
-                            LazyColumn(
-                                modifier = Modifier.fillMaxSize(),
-                                state = lazyListState,
-                            ) {
-                                item {
-                                    Text("该功能正在开发中...")
-                                }
-                            }
-                        }
-                    }
-
-                    if (selectedType == MusicType.SONG) {
-                        SmallFloatingActionButton(
-                            onClick = {
-                                scrollToCurrentPlaying()
-                            },
-                            modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .padding(16.dp),
-                            containerColor = SaltTheme.colors.subBackground,
-                            contentColor = SaltTheme.colors.highlight
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_location_24px),
-                                contentDescription = "定位当前播放歌曲",
-                            )
                         }
                     }
                 }

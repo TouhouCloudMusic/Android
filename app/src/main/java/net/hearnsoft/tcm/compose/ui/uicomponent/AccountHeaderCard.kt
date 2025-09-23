@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -25,6 +26,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
@@ -35,6 +37,7 @@ import com.moriafly.salt.ui.Text
 import com.moriafly.salt.ui.UnstableSaltUiApi
 import net.hearnsoft.tcm.compose.R
 import net.hearnsoft.tcm.compose.domain.model.user.User
+import net.hearnsoft.tcm.compose.domain.model.user.UserRole
 import net.hearnsoft.tcm.compose.ui.utils.getFullImageUrl
 
 @Composable
@@ -60,7 +63,7 @@ fun AccountHeaderCard(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(140.dp)
+                .height(180.dp)
         ) {
             // 背景图片
             AsyncImage(
@@ -73,7 +76,7 @@ fun AccountHeaderCard(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(140.dp)
+                    .height(180.dp)
             )
             // 遮罩层
             Box(
@@ -82,12 +85,12 @@ fun AccountHeaderCard(
                     .matchParentSize()
                     .background(Color.DarkGray.copy(alpha = 0.3f))
             )
-            Row(
+            Column (
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(24.dp)
                     .align(Alignment.Center),
-                verticalAlignment = Alignment.CenterVertically
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
@@ -101,17 +104,45 @@ fun AccountHeaderCard(
                         .size(64.dp)
                         .clip(RoundedCornerShape(50.dp))
                 )
-                Spacer(modifier = Modifier.size(16.dp))
+                Spacer(modifier = Modifier.size(8.dp))
                 Column(
                     modifier = Modifier.fillMaxWidth()
-                        .weight(1f)
-                        .align(Alignment.CenterVertically)
+                        .align(Alignment.CenterHorizontally)
                 ) {
-                    Text(
-                        text = user?.name ?: "未登录",
-                        style = SaltTheme.textStyles.main,
-                        maxLines = 1
-                    )
+                    Row(Modifier.padding(vertical = 8.dp)
+                        .align(Alignment.CenterHorizontally)) {
+                        Text(
+                            text = user?.name ?: "未登录",
+                            style = SaltTheme.textStyles.main,
+                            maxLines = 1,
+                            color = Color.White,
+                            modifier = Modifier.align(Alignment.CenterVertically)
+                        )
+                        // 用户角色标签
+                        if (!user?.roles.isNullOrEmpty()) {
+                            Row(Modifier.padding(start = 8.dp)) {
+                                user.roles.take(3).forEach { role ->
+                                    Box(
+                                        modifier = Modifier
+                                            .background(
+                                                SaltTheme.colors.highlight.copy(alpha = 0.8f),
+                                                RoundedCornerShape(12.dp)
+                                            )
+                                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                                    ) {
+                                        Text(
+                                            text = role.name,
+                                            style = SaltTheme.textStyles.sub.copy(
+                                                fontSize = 12.sp,
+                                                color = Color.White.copy(alpha = 0.8f)
+                                            )
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                }
+                            }
+                        }
+                    }
                     Text(
                         text = if (user != null) {
                             if (!user.bio.isNullOrBlank()) {
@@ -123,7 +154,9 @@ fun AccountHeaderCard(
                             "点击登录"
                         },
                         maxLines = 1,
-                        style = SaltTheme.textStyles.sub
+                        style = SaltTheme.textStyles.sub,
+                        color = Color.White.copy(alpha = 0.8f),
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
                 }
             }
@@ -142,7 +175,12 @@ fun AccountHeaderCardPreview() {
             avatarUrl = "https://avatars.githubusercontent.com/u/20487725?v=4",
             bannerUrl = null,
             lastLogin = null,
-            roles = emptyList(),
+            roles = listOf(
+                UserRole(
+                    id = 1,
+                    name = "Admin"
+                )
+            ),
             isFollowing = null,
             bio = "This is a sample bio for preview purposes."
         )

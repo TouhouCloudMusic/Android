@@ -55,12 +55,12 @@ import kotlinx.coroutines.withContext
 import me.saket.squiggles.SquigglySlider
 import net.hearnsoft.tcm.compose.R
 import net.hearnsoft.tcm.compose.constants.PlayerHorizontalPadding
+import net.hearnsoft.tcm.compose.pref.PlayerCoverType
 import net.hearnsoft.tcm.compose.pref.SettingsDataStore
 import net.hearnsoft.tcm.compose.ui.uicomponent.HashTag
 import net.hearnsoft.tcm.compose.ui.uicomponent.ResizableIconButton
 import net.hearnsoft.tcm.compose.ui.uicomponent.flowing.FlowingLightBackground
 import net.hearnsoft.tcm.compose.ui.utils.LocalPlayerUIColor
-import net.hearnsoft.tcm.compose.ui.utils.PlayerForegroundColorDark
 import net.hearnsoft.tcm.compose.ui.utils.PlayerForegroundColorLight
 import net.hearnsoft.tcm.compose.ui.utils.getPlayerUIColor
 import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
@@ -113,6 +113,7 @@ fun BottomSheetPlayer(
     // 播放器进度条波形动画设置项
     val isPlayerSquigglyWaveEnabled by settingsDataStore.isPlayerSquigglyWaveEnabled.collectAsState(initial = true)
     val isPlayerShowMusicTagsEnabled by settingsDataStore.isPlayerShowMusicTagsEnabled.collectAsState(initial = true)
+    val playerCoverType by settingsDataStore.playerCoverType.collectAsState(initial = PlayerCoverType.DEFAULT.ordinal)
 
     // Pager状态
     val pagerState = rememberPagerState(
@@ -287,7 +288,8 @@ fun BottomSheetPlayer(
                         ) { page ->
                             when (page) {
                                 0 -> LyricsPager(playerViewModel = playerViewModel)
-                                1 -> CoverPager(artworkUri = artworkUri)
+                                1 -> CoverPager(artworkUri = artworkUri,
+                                    isPlaying = isPlaying, coverType = playerCoverType)
                                 2 -> PlaylistPager(playerViewModel = playerViewModel)
                             }
                         }

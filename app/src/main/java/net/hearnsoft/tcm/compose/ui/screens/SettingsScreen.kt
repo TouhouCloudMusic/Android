@@ -19,6 +19,7 @@ import com.moriafly.salt.ui.UnstableSaltUiApi
 import com.moriafly.salt.ui.popup.PopupMenuItem
 import com.moriafly.salt.ui.popup.rememberPopupState
 import kotlinx.coroutines.launch
+import net.hearnsoft.tcm.compose.pref.PlayerCoverType
 import net.hearnsoft.tcm.compose.pref.PlayerSeekToPreviousAction
 import net.hearnsoft.tcm.compose.pref.SettingsDataStore
 
@@ -35,6 +36,12 @@ fun SettingsScreen(
     val settingsDataStore = remember { SettingsDataStore(context) }
     val isPlayerSquigglyWaveEnabled by settingsDataStore.isPlayerSquigglyWaveEnabled.collectAsState(initial = true)
     val isPlayerShowMusicTagsEnabled by settingsDataStore.isPlayerShowMusicTagsEnabled.collectAsState(initial = true)
+    val playerCoverType by settingsDataStore.playerCoverType.collectAsState(initial = 0)
+
+    val playerCoverTypeLabels = listOf(
+        "方形封面",
+        "圆形封面"
+    )
 
     val seekToPreviousActionLabels = listOf(
         "默认",
@@ -44,6 +51,9 @@ fun SettingsScreen(
 
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize()) {
+            val popupState = rememberPopupState()
+            val currentCoverType by settingsDataStore.playerCoverType
+                .collectAsState(initial = PlayerCoverType.DEFAULT.ordinal)
             ItemOuterTitle(text = "用户界面")
             RoundedColumn {
                 ItemSwitcher(
@@ -64,6 +74,26 @@ fun SettingsScreen(
                         }
                     },
                 )
+                ItemPopup(
+                    state = popupState,
+                    text = "播放器封面类型",
+                    sub = playerCoverTypeLabels[currentCoverType]
+                ) {
+                    playerCoverTypeLabels.forEachIndexed { index, label ->
+                        PopupMenuItem(
+                            text = label,
+                            selected = currentCoverType == index,
+                            onClick = {
+                                coroutineScope.launch {
+                                    settingsDataStore.setPlayerCoverType(
+                                        PlayerCoverType.entries[index]
+                                    )
+                                }
+                                popupState.dismiss()
+                            }
+                        )
+                    }
+                }
             }
             ItemOuterTitle(text = "播放器行为")
             RoundedColumn {

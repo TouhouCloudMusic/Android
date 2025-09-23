@@ -23,6 +23,7 @@ class SettingsDataStore(context: Context) {
         // 用户界面
         val PLAYER_SQUIGGLY_WAVE_ENABLED = booleanPreferencesKey("player_squiggly_wave_enabled")
         val PLAYER_SHOW_MUSIC_TAGS_ENABLED = booleanPreferencesKey("player_show_music_tags_enabled")
+        val PLAYER_COVER_TYPE = intPreferencesKey("player_cover_type")
 
         // 播放器行为
         val PLAYER_SEEK_TO_PREVIOUS_ACTION = intPreferencesKey("player_seek_to_previous_action")
@@ -40,6 +41,12 @@ class SettingsDataStore(context: Context) {
         .map { preferences ->
             // 默认启用
             preferences[PLAYER_SHOW_MUSIC_TAGS_ENABLED] ?: true
+        }
+
+    val playerCoverType: Flow<Int> = dataStore.data
+        .map { preferences ->
+            // 默认值为 0，即方形封面
+            preferences[PLAYER_COVER_TYPE] ?: 0
         }
 
     // 播放器行为的设置
@@ -67,6 +74,12 @@ class SettingsDataStore(context: Context) {
     suspend fun setPlayerShowMusicTagsEnabled(isEnabled: Boolean) {
         dataStore.edit { settings ->
             settings[PLAYER_SHOW_MUSIC_TAGS_ENABLED] = isEnabled
+        }
+    }
+
+    suspend fun setPlayerCoverType(type: PlayerCoverType) {
+        dataStore.edit { settings ->
+            settings[PLAYER_COVER_TYPE] = type.ordinal
         }
     }
 

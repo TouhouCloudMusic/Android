@@ -1,0 +1,3 @@
+[submodule "thcdb-api"]
+	path = thcdb-api
+	url = https://github.com/TouhouCloudMusic/thcdb-sdk-android

@@ -2,4 +2,5 @@
 <resources>
     <string name="app_name">东方同音鉴</string>
     <string name="back_btn">返回</string>
+    <string name="title_image_crop">图片裁剪</string>
 </resources>

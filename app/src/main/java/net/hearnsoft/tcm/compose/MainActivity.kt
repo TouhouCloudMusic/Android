@@ -12,6 +12,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.UnstableApi
 import net.hearnsoft.tcm.compose.ui.theme.TouhouCloudMusicTheme
 import net.hearnsoft.tcm.compose.ui.views.AppRootView
+import net.hearnsoft.tcm.compose.utils.BitmapUtils
 
 @UnstableSaltUiApi
 @ExperimentalMaterial3Api
@@ -30,5 +31,11 @@ class MainActivity : ComponentActivity() {
                 )
             }
         }
+    }
+
+    override fun onDestroy() {
+        // 应用结束时，清理所有临时文件
+        BitmapUtils.cleanupTempFiles(this)
+        super.onDestroy()
     }
 }

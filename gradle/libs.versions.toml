@@ -1,7 +1,9 @@
 [versions]
 agp = "8.12.0"
 coilCompose = "3.2.0"
+cropKit = "1.1.0"
 datastorePreferences = "1.1.7"
+gson = "2.13.2"
 hiltCompiler = "2.57"
 hiltNavigationCompose = "1.2.0"
 kotlin = "2.2.10"
@@ -20,6 +22,7 @@ lyricsUi = "1.0.6"
 navigationCompose = "2.9.0"
 navigationComposeAndroid = "2.9.0"
 renderscripToolkit = "1.0.2"
+retrofit = "2.11.0"
 roomRuntime = "2.7.2"
 saltUi = "2.5.2"
 media3 = "1.8.0"
@@ -44,6 +47,8 @@ androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRunt
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coilCompose" }
+crop-kit = { module = "com.github.Tanish-Ranjan:crop-kit", version.ref = "cropKit" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltCompiler" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltCompiler" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -70,6 +75,7 @@ lazycolumnscrollbar = { module = "com.github.nanihadesuka:LazyColumnScrollbar", 
 lyrics-core = { module = "com.mocharealm.accompanist:lyrics-core", version.ref = "lyricsCore" }
 lyrics-ui = { module = "com.mocharealm.accompanist:lyrics-ui", version.ref = "lyricsUi" }
 renderscrip-toolkit = { module = "io.github.limuyang2:renderscrip-toolkit", version.ref = "renderscripToolkit" }
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 salt-ui = { module = "io.github.moriafly:salt-ui", version.ref = "saltUi" }
 salt-core = { module = "io.github.moriafly:salt-core", version.ref = "saltUi" }
 arrow-core = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
@@ -87,4 +93,5 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+android-library = { id = "com.android.library", version.ref = "agp" }
 

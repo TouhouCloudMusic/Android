@@ -73,6 +73,7 @@ import net.hearnsoft.tcm.compose.ui.utils.appBarScrollBehavior
 import net.hearnsoft.tcm.compose.ui.utils.canGoBack
 import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
 import net.hearnsoft.tcm.compose.ui.viewmodel.SearchViewModel
+import net.hearnsoft.tcm.compose.ui.viewmodel.UserViewModel
 
 @OptIn(androidx.media3.common.util.UnstableApi::class)
 @SuppressLint("UnusedBoxWithConstraintsScope")
@@ -89,6 +90,7 @@ fun AppRootView(
     // 使用 Hilt 注入的 ViewModel
     val playerViewModel: PlayerViewModel = hiltViewModel()
     val searchViewModel: SearchViewModel = hiltViewModel()
+    val userViewModel: UserViewModel = hiltViewModel()
     
     BoxWithConstraints(
         modifier = modifier
@@ -170,6 +172,8 @@ fun AppRootView(
             currentRoute == ScreenRoute.Settings.route -> "设置"
             currentRoute == ScreenRoute.Scan.route -> "扫描媒体"
             currentRoute == ScreenRoute.SearchPage.route -> "搜索"
+            currentRoute == ScreenRoute.LoginPage.route -> "登录"
+            currentRoute == ScreenRoute.RegisterPage.route -> "注册"
             else -> stringResource(R.string.app_name)
         }
 
@@ -252,7 +256,8 @@ fun AppRootView(
                         navController,
                         topAppBarScrollBehavior,
                         playerViewModel,
-                        searchViewModel
+                        searchViewModel,
+                        userViewModel
                     )
                 }
             }

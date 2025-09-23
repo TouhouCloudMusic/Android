@@ -17,6 +17,19 @@ sealed class ScreenRoute(open val route: String) {
 
     object SearchPage : ScreenRoute("searchPage")
 
+    object LoginPage : ScreenRoute("loginPage")
+    object RegisterPage : ScreenRoute("registerPage")
+
+    // 自己的用户资料页面
+    object MyProfile : ScreenRoute("profile/me")
+    // 编辑资料页面
+    object EditProfile : ScreenRoute("profile/edit")
+
+    // 其他用户的资料页面
+    object UserProfile : ScreenRoute("profile/{username}") {
+        fun createRoute(username: String): String = "profile/$username"
+    }
+
     companion object {
         val MainScreens = listOf(
             Explore,

@@ -34,7 +34,7 @@ fun FlowingLightBackground(
     var processedBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
     var isValidImage by remember { mutableStateOf(false) }
 
-    // 使用 Animatable 实现无缝、永不重置的连续动画
+    /*// 使用 Animatable 实现无缝、永不重置的连续动画
     val rotation1 = remember { Animatable(0f) }
     val rotation2 = remember { Animatable(0f) }
     val rotation3 = remember { Animatable(0f) }
@@ -64,7 +64,33 @@ fun FlowingLightBackground(
     // 在 graphicsLayer 中直接使用 Animatable 的值
     val rotation1Value = rotation1.value
     val rotation2Value = rotation2.value
-    val rotation3Value = rotation3.value
+    val rotation3Value = rotation3.value*/
+
+    val infiniteTransition1 = remember { Animatable(0f) }
+    val infiniteTransition2 = remember { Animatable(0f) }
+    LaunchedEffect(Unit) {
+        launch {
+            infiniteTransition1.animateTo(
+                targetValue = infiniteTransition1.value + 360f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(durationMillis = 50000, easing = LinearEasing),
+                    repeatMode = RepeatMode.Restart
+                )
+            )
+        }
+        launch {
+            infiniteTransition2.animateTo(
+                targetValue = infiniteTransition2.value - 360f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(durationMillis = 50000, easing = LinearEasing),
+                    repeatMode = RepeatMode.Restart
+                )
+            )
+        }
+    }
+    val rotation1Value = infiniteTransition1.value
+    val rotation2Value = infiniteTransition2.value
+
 
     // 加载和处理图片
     LaunchedEffect(imageUrl) {
@@ -100,7 +126,8 @@ fun FlowingLightBackground(
         val colorFilter = ColorFilter.tint(Color.Black.copy(alpha = 0.1f), BlendMode.Darken)
 
         val boxModifier = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            modifier.graphicsLayer { clip = true }
+            modifier
+                .graphicsLayer { clip = true }
                 .blur(radius = 20.dp, edgeTreatment = BlurredEdgeTreatment.Rectangle)
         } else {
             // 在 Android 12 以下，为避免性能问题，不应用容器模糊
@@ -109,72 +136,75 @@ fun FlowingLightBackground(
         }
 
         Box(
-            modifier = modifier.fillMaxSize()
+            modifier = modifier
+                .fillMaxSize()
                 .graphicsLayer(clip = true)
         ) {
             val baseModifier = Modifier.scale(3f)
 
-            // 第一层
             CompatBlurImage(
                 bitmap = processedBitmap!!,
                 contentDescription = null,
                 colorFilter = colorFilter,
                 modifier = baseModifier
+                    .scale(0.9f)
                     .align(Alignment.TopStart)
                     .graphicsLayer {
-                        rotationZ = rotation1Value * 0.3f
-                        translationX = -100f
-                        translationY = -100f
+                        rotationZ = rotation1Value
                     },
-                blurRadius = 50.dp
+                blurRadius = 60.dp
             )
 
-            // 第二层
             CompatBlurImage(
                 bitmap = processedBitmap!!,
                 contentDescription = null,
                 colorFilter = colorFilter,
                 modifier = baseModifier
-                    .scale(1.2f) // 额外放大
+                    .scale(0.9f)
+                    .align(Alignment.TopEnd)
+                    .graphicsLayer {
+                        rotationZ = rotation1Value
+                    },
+                blurRadius = 60.dp
+            )
+
+            CompatBlurImage(
+                bitmap = processedBitmap!!,
+                contentDescription = null,
+                colorFilter = colorFilter,
+                modifier = baseModifier
+                    .scale(0.9f)
+                    .align(Alignment.BottomEnd)
+                    .graphicsLayer {
+                        rotationZ = rotation2Value
+                    },
+                blurRadius = 60.dp
+            )
+
+            CompatBlurImage(
+                bitmap = processedBitmap!!,
+                contentDescription = null,
+                colorFilter = colorFilter,
+                modifier = baseModifier
+                    .scale(0.9f)
+                    .align(Alignment.BottomStart)
+                    .graphicsLayer {
+                        rotationZ = rotation1Value
+                    },
+                blurRadius = 60.dp
+            )
+
+            CompatBlurImage(
+                bitmap = processedBitmap!!,
+                contentDescription = null,
+                colorFilter = colorFilter,
+                modifier = baseModifier
+                    .scale(0.7f)
                     .align(Alignment.Center)
                     .graphicsLayer {
-                        rotationZ = rotation2Value * 0.25f
-                        translationX = 30f
-                        translationY = -50f
+                        rotationZ = rotation2Value
                     },
-                blurRadius = 50.dp
-            )
-
-            // 第三层
-            CompatBlurImage(
-                bitmap = processedBitmap!!,
-                contentDescription = null,
-                colorFilter = colorFilter,
-                modifier = baseModifier
-                    .align(Alignment.BottomEnd)
-                    .scale(1.5f) // 额外放大
-                    .graphicsLayer {
-                        rotationZ = rotation3Value * 0.3f
-                        translationX = 80f
-                        translationY = 60f
-                    },
-                blurRadius = 50.dp
-            )
-
-            // 第四层 - 左下角，轻微旋转
-            CompatBlurImage(
-                bitmap = processedBitmap!!,
-                contentDescription = null,
-                colorFilter = colorFilter,
-                modifier = baseModifier
-                    .align(Alignment.BottomStart)
-                    .scale(0.9f)
-                    .graphicsLayer {
-                        rotationZ = rotation1Value * -0.2f
-                        translationX = -50f
-                        translationY = 40f
-                    },
-                blurRadius = 50.dp
+                blurRadius = 60.dp
             )
 
             // 覆盖一层深色的半透明前景，提升对比度

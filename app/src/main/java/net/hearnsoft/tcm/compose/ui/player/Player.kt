@@ -284,7 +284,8 @@ fun BottomSheetPlayer(
                                 .fillMaxSize()
                                 .weight(1f)
                                 .sizeIn(maxHeight = 600.dp, maxWidth = 600.dp)
-                                .align(Alignment.CenterHorizontally)
+                                .align(Alignment.CenterHorizontally),
+                            beyondViewportPageCount = 1
                         ) { page ->
                             when (page) {
                                 0 -> LyricsPager(playerViewModel = playerViewModel)

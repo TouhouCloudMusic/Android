@@ -43,6 +43,7 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import coil3.request.placeholder
+import com.moriafly.salt.ui.Button
 import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.Text
 import com.moriafly.salt.ui.UnstableSaltUiApi
@@ -125,7 +126,12 @@ fun AlbumScreen(
                     modifier = modifier.fillMaxSize().padding(horizontal = 8.dp)
                 ) {
                     item {
-                        AlbumHeader(album = albumEntity)
+                        AlbumHeader(
+                            album = albumEntity,
+                            onPlayAllClick = {
+                                playerViewModel.setAndPlayPlaylist(albumSongs, 0)
+                            }
+                        )
                     }
 
                     if (hasMultipleDiscs) {
@@ -203,7 +209,10 @@ fun DiscHeader(discNumber: Int?) {
 
 
 @Composable
-fun AlbumHeader(album: AlbumEntity) {
+fun AlbumHeader(
+    album: AlbumEntity,
+    onPlayAllClick: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -255,7 +264,17 @@ fun AlbumHeader(album: AlbumEntity) {
                 style = SaltTheme.textStyles.sub,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                color = SaltTheme.colors.subText
+                color = SaltTheme.colors.subText,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
+            Button(
+                text = "播放全部",
+                onClick = {
+                    onPlayAllClick()
+                },
+                modifier = Modifier
+                    .align(Alignment.Start)
             )
         }
     }

@@ -17,11 +17,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.util.UnstableApi
+import com.moriafly.salt.ui.Button
+import com.moriafly.salt.ui.ButtonType
 import com.moriafly.salt.ui.Item
 import com.moriafly.salt.ui.ItemArrowType
 import com.moriafly.salt.ui.ItemOuterTip
 import com.moriafly.salt.ui.RoundedColumn
-import com.moriafly.salt.ui.TextButton
 import com.moriafly.salt.ui.UnstableSaltUiApi
 import com.moriafly.salt.ui.dialog.BasicDialog
 import com.moriafly.salt.ui.dialog.DialogTitle
@@ -43,31 +44,36 @@ fun MusicScanScreen(
     val scanProgress by playerViewModel.scanProgress.collectAsState()
     val scanCompleted by playerViewModel.scanCompleted.collectAsState()
 
+    var showDialog by remember { mutableStateOf(false) }
+
     LaunchedEffect(scanCompleted) {
-        if (scanCompleted) {
-            delay(3000) // 延时3秒
+        if (scanCompleted && showDialog) {
+            delay(1000)
             playerViewModel.resetScanCompleted()
         }
     }
 
     Column(modifier.fillMaxSize()) {
-        var showDialog by remember { mutableStateOf(false) }
 
         if (showDialog) {
+            val dialogContent = when {
+                scanProgress == null && !scanCompleted -> "正在准备扫描音乐库，请稍候..."
+                scanProgress != null -> scanProgress!!
+                else -> "扫描完成！"
+            }
+
             ScanDialog(
                 title = "正在扫描音乐",
-                content = if (scanProgress == null && !scanCompleted) {
-                    "正在准备扫描音乐库，请稍候..."
-                } else if (scanProgress != null) {
-                    scanProgress!!
-                } else run {
-                    "扫描完成！"
-                },
+                content = dialogContent,
                 confirmText = "确定",
-                onDismissRequest = { showDialog = false },
-                properties = DialogProperties(
-                    dismissOnClickOutside = false
-                )
+                onDismissRequest = {
+                    showDialog = false
+                    // 只在对话框关闭时重置扫描状态
+                    if (scanCompleted) {
+                        playerViewModel.resetScanCompleted()
+                    }
+                },
+                dialogButtonEnabled = scanCompleted,
             )
         }
 
@@ -92,7 +98,6 @@ fun MusicScanScreen(
 @Composable
 private fun ScanDialog(
     onDismissRequest: () -> Unit,
-    properties: DialogProperties = DialogProperties(),
     title: String,
     content: String,
     confirmText: String,
@@ -100,19 +105,23 @@ private fun ScanDialog(
 ) {
     BasicDialog(
         onDismissRequest = onDismissRequest,
-        properties = properties
+        properties = DialogProperties(
+            dismissOnBackPress = dialogButtonEnabled,
+            dismissOnClickOutside = dialogButtonEnabled
+        )
     ) {
         DialogTitle(text = title)
         ItemOuterTip(text = content)
-        TextButton(
-            enabled = dialogButtonEnabled,
-            onClick = {
-                onDismissRequest()
-            },
+        Button(onClick = {
+            onDismissRequest()
+        },
+            text = confirmText,
             modifier = Modifier
                 .fillMaxWidth()
                 .outerPadding(),
-            text = confirmText
+            enabled = dialogButtonEnabled,
+            type = if (dialogButtonEnabled)
+                ButtonType.Highlight else ButtonType.Sub
         )
     }
 }

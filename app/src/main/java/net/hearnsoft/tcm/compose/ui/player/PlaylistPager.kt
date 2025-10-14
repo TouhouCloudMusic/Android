@@ -7,8 +7,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
@@ -28,7 +30,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.media3.common.util.UnstableApi
 import com.moriafly.salt.ui.Icon
 import com.moriafly.salt.ui.RoundedColumn
@@ -74,12 +78,13 @@ fun PlaylistPager(
         }
     }
 
-    if (showClearPlaylist) {
+    if (showClearPlaylist && playlist.isNotEmpty()) {
         YesNoDialog(
             title = "清空播放列表",
             content = "是否要清空当前播放列表？",
             onConfirm = {
                 playerViewModel.clearPlaylist()
+                showClearPlaylist = false
             },
             onDismissRequest = {
                 showClearPlaylist = false
@@ -95,29 +100,51 @@ fun PlaylistPager(
             .padding(horizontal = PlayerHorizontalPadding, vertical = PlayerCoverVerticalPadding)
             .sizeIn(maxHeight = 600.dp, maxWidth = 600.dp)
     ) {
-        RoundedColumn(
-            modifier = Modifier
-                .fillMaxSize(),
-            color = Color.Transparent
-        ) {
-            Row {
+        Column {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val currentPlayingIndex = playlist.indexOf(currentPlaying) + 1
+
+                    Text(
+                        text = if (currentPlayingIndex > 0) {
+                            "${currentPlayingIndex}/${playlist.size}"
+                        } else {
+                            "${playlist.size}"
+                        },
+                        style = SaltTheme.textStyles.sub,
+                        fontSize = 12.sp,
+                        textAlign = TextAlign.Start,
+                        color = uiColor
+                    )
+                }
+
                 Text(
                     text = "播放列表",
                     style = SaltTheme.textStyles.main,
+                    fontSize = 16.sp,
                     modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .weight(1f)
-                        .align(Alignment.CenterVertically),
+                        .align(Alignment.Center),
+                    textAlign = TextAlign.Center,
                     color = uiColor
                 )
+
                 IconButton(
                     onClick = {
                         showClearPlaylist = true
                     },
-                    modifier = modifier
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                         .size(16.dp)
-                        .align(Alignment.CenterVertically)
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_close_24px),
@@ -126,52 +153,57 @@ fun PlaylistPager(
                     )
                 }
             }
-
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-                state = listState,
+            RoundedColumn(
+                modifier = Modifier
+                    .fillMaxSize(),
+                color = Color.Transparent
             ) {
-                if (playlist.isEmpty()) {
-                    item {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(32.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    state = listState,
+                ) {
+                    if (playlist.isEmpty()) {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(32.dp),
+                                contentAlignment = Alignment.Center
                             ) {
-                                Text(
-                                    text = "暂无音乐",
-                                    style = SaltTheme.textStyles.main,
-                                    color = uiColor
-                                )
-                                Text(
-                                    text = "添加媒体文件到播放列表",
-                                    style = SaltTheme.textStyles.sub,
-                                    modifier = Modifier.padding(top = 8.dp),
-                                    color = uiColor
-                                )
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    Text(
+                                        text = "暂无音乐",
+                                        style = SaltTheme.textStyles.main,
+                                        color = uiColor
+                                    )
+                                    Text(
+                                        text = "添加媒体文件到播放列表",
+                                        style = SaltTheme.textStyles.sub,
+                                        modifier = Modifier.padding(top = 8.dp),
+                                        color = uiColor
+                                    )
+                                }
                             }
                         }
-                    }
-                } else {
-                    items(
-                        items = playlist,
-                        key = { it.mediaId }
-                    ) {playlistItem ->
-                        PlaylistItem(
-                            currentPlaying = currentPlaying,
-                            mediaItem = playlistItem,
-                            onClick = { playerViewModel.playSong(playlistItem) },
-                            onRemoveClick = {
-                                playerViewModel.removeFromPlaylist(it)
-                            },
-                            textColor = uiColor
-                        )
+                    } else {
+                        items(
+                            items = playlist,
+                            key = { it.mediaId }
+                        ) {playlistItem ->
+                            PlaylistItem(
+                                currentPlaying = currentPlaying,
+                                mediaItem = playlistItem,
+                                onClick = { playerViewModel.playSong(playlistItem) },
+                                onRemoveClick = {
+                                    playerViewModel.removeFromPlaylist(it)
+                                },
+                                textColor = uiColor
+                            )
+                        }
                     }
                 }
             }

@@ -424,6 +424,15 @@ class PlayerViewModel @Inject constructor(
     }
 
     /**
+     * 清空播放列表
+     */
+    fun clearPlaylist() {
+        _currentPlaylist.value = emptyList()
+        playerController.clearPlaylist()
+        Logger.debug(TAG, "播放列表已清空")
+    }
+
+    /**
      * 设置并播放指定的播放列表
      * @param songs 要播放的歌曲列表
      * @param startIndex 从列表中的哪个位置开始播放

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -23,12 +24,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.util.UnstableApi
 import com.moriafly.salt.ui.Item
 import com.moriafly.salt.ui.ItemOuterTitle
+import com.moriafly.salt.ui.ItemTitle
 import com.moriafly.salt.ui.RoundedColumn
 import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.Text
@@ -167,7 +170,6 @@ fun SearchScreen(
                 // 本地音乐结果
                 groupedResults[SearchResultType.LOCAL_MUSIC]?.let { localResults ->
                     item {
-                        Spacer(modifier = Modifier.height(4.dp))
                         SearchResultSection(
                             title = "本地音乐",
                             results = localResults,
@@ -204,10 +206,10 @@ private fun SearchResultSection(
     playerViewModel: PlayerViewModel
 ) {
     // 分组标题
-    ItemOuterTitle(
+    ItemSectionTitle(
         text = "$title (${results.size})"
     )
-    RoundedColumn {
+    Column {
         // 搜索结果列表
         results.forEach { result ->
             SearchResultItem(
@@ -268,4 +270,24 @@ private fun handleSearchResultClick(
             // 可以打开浏览器或内置WebView
         }
     }
+}
+
+@Composable
+fun ItemSectionTitle(text: String) {
+    Text(
+        text = text,
+        modifier = Modifier
+            .fillMaxWidth()
+            .semantics(true) { }
+            .padding(
+                start = SaltTheme.dimens.padding * 2,
+                top = SaltTheme.dimens.padding * 0.5f,
+                end = SaltTheme.dimens.padding * 2,
+                bottom = (SaltTheme.dimens.subPadding - SaltTheme.dimens.padding * 0.5f).coerceAtLeast(
+                    0.dp
+                )
+            ),
+        color = SaltTheme.colors.subText,
+        style = SaltTheme.textStyles.sub
+    )
 }

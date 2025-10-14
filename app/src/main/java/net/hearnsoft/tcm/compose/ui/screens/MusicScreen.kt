@@ -378,7 +378,12 @@ fun MusicScreen(
                                                     MusicListItem(
                                                         songEntity = songEntity,
                                                         currentPlaying = currentPlaying,
-                                                        onClick = { playerViewModel.playSong(songEntity) },
+                                                        onClick = {
+                                                            val songIndex = allSongs.indexOf(songEntity)
+                                                            if (songIndex >= 0) {
+                                                                playerViewModel.setAndPlayPlaylist(allSongs, songIndex)
+                                                            }
+                                                        },
                                                         onActionClick = {
                                                             showActionDialog = true
                                                             selectedSong = songEntity

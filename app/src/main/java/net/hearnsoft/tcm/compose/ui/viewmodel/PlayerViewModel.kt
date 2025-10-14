@@ -424,6 +424,44 @@ class PlayerViewModel @Inject constructor(
     }
 
     /**
+     * 设置并播放指定的播放列表
+     * @param songs 要播放的歌曲列表
+     * @param startIndex 从列表中的哪个位置开始播放
+     */
+    fun setAndPlayPlaylist(songs: List<SongEntity>, startIndex: Int = 0) {
+        if (songs.isEmpty()) {
+            Logger.warn(TAG, "尝试设置空的播放列表")
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                //清空当前的播放列表
+                _currentPlaylist.value = emptyList()
+                playerController.clearPlaylist()
+
+                //转换歌曲实体为 MediaItem
+                val mediaItems = songs.map { convertSongEntityToMediaItem(it) }
+
+                //更新当前播放列表状态
+                _currentPlaylist.value = mediaItems
+
+                // 设置播放列表并开始播放
+                if (mediaItems.isNotEmpty() && startIndex < mediaItems.size) {
+                    playerController.setPlaylist(mediaItems, startIndex)
+                    playerController.play()
+                    Logger.debug(TAG, "设置并播放新的播放列表，包含 ${mediaItems.size} 首歌曲，从索引 $startIndex 开始播放")
+                } else {
+                    Logger.warn(TAG, "播放列表为空或起始索引无效")
+                }
+            } catch (e: Exception) {
+                Logger.err(TAG, "设置播放列表失败: ${e.message}")
+                _errorMessage.value = "设置播放列表失败: ${e.message}"
+            }
+        }
+    }
+
+    /**
      * 播放/暂停切换
      */
     fun togglePlayPause() {

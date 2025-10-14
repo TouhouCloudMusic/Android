@@ -190,6 +190,23 @@ class PlayerController @Inject constructor(
     }
 
     /**
+     * 清空播放列表
+     */
+    fun clearPlaylist() {
+        mediaController?.let { controller ->
+            try {
+                controller.stop()
+                controller.clearMediaItems()
+                Logger.debug("PlayerController", "清空播放列表")
+            } catch (e: Exception) {
+                Logger.err("PlayerController", "清空播放列表失败: ${e.message}")
+            }
+        } ?: run {
+            Logger.warn("PlayerController", "媒体控制器未连接，无法清空播放列表")
+        }
+    }
+
+    /**
      * 播放/暂停切换
      */
     fun togglePlayPause() {

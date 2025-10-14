@@ -53,6 +53,7 @@ import net.hearnsoft.tcm.compose.ui.theme.Theme
 import net.hearnsoft.tcm.compose.ui.uicomponent.sheet.SongActionSheetDialog
 import net.hearnsoft.tcm.compose.ui.viewmodel.AlbumViewModel
 import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
+import net.hearnsoft.tcm.compose.utils.Logger
 
 @UnstableApi
 @ExperimentalFoundationApi
@@ -129,7 +130,7 @@ fun AlbumScreen(
 
                     if (hasMultipleDiscs) {
                         // 显示分碟列表
-                        groupedSongs.toSortedMap(compareBy<Int?> { it ?: Int.MAX_VALUE }).forEach { (discNumber, songs) ->
+                        groupedSongs.toSortedMap(compareBy { it ?: Int.MAX_VALUE }).forEach { (discNumber, songs) ->
                             item {
                                 DiscHeader(discNumber = discNumber)
                             }
@@ -142,7 +143,11 @@ fun AlbumScreen(
                                     songEntity = song,
                                     currentPlaying = currentPlaying,
                                     onClick = {
-                                        playerViewModel.playSong(song)
+                                        Logger.debug("AlbumScreen"," play song ${song.title}, id=${song.songId}, playlist size=${albumSongs.size}")
+                                        val songIndex = albumSongs.indexOf(song)
+                                        if (songIndex >= 0) {
+                                            playerViewModel.setAndPlayPlaylist(albumSongs, songIndex)
+                                        }
                                     },
                                     onActionClick = {
                                         showActionDialog = true
@@ -161,7 +166,11 @@ fun AlbumScreen(
                                 songEntity = song,
                                 currentPlaying = currentPlaying,
                                 onClick = {
-                                    playerViewModel.playSong(song)
+                                    Logger.debug("AlbumScreen"," play song ${song.title}, id=${song.songId}, playlist size=${albumSongs.size}")
+                                    val songIndex = albumSongs.indexOf(song)
+                                    if (songIndex >= 0) {
+                                        playerViewModel.setAndPlayPlaylist(albumSongs, songIndex)
+                                    }
                                 },
                                 onActionClick = {
                                     showActionDialog = true

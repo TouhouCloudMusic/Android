@@ -203,12 +203,11 @@ private fun SearchResultSection(
     results: List<SearchResult>,
     playerViewModel: PlayerViewModel
 ) {
+    // 分组标题
+    ItemOuterTitle(
+        text = "$title (${results.size})"
+    )
     RoundedColumn {
-        // 分组标题
-        ItemOuterTitle(
-            text = "$title (${results.size})"
-        )
-
         // 搜索结果列表
         results.forEach { result ->
             SearchResultItem(

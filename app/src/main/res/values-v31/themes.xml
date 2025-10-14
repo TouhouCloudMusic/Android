@@ -4,8 +4,6 @@
     <style name="Theme.TouhouCloudMusic" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="android:windowMinWidthMinor">100%</item>
-        <item name="android:windowMinWidthMajor">100%</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowBackground">#ffffff</item>
         <item name="android:enforceNavigationBarContrast" tools:ignore="NewApi">false</item>

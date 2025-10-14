@@ -233,6 +233,7 @@ fun BottomSheetPlayer(
         backgroundContent = {
             // 流光溢彩背景
             FlowingLightBackground(
+                isPlaying = isPlaying,
                 imageUrl = artworkUri,
                 modifier = Modifier.fillMaxSize(),
                 onImageLoadResult = { result ->

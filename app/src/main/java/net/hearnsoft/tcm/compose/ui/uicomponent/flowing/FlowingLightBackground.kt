@@ -25,6 +25,7 @@ import net.hearnsoft.tcm.compose.ui.uicomponent.CompatBlurImage
 
 @Composable
 fun FlowingLightBackground(
+    isPlaying: Boolean,
     imageUrl: Uri?,
     modifier: Modifier = Modifier,
     onImageLoadResult: ((Boolean) -> Unit)? = null
@@ -34,58 +35,37 @@ fun FlowingLightBackground(
     var processedBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
     var isValidImage by remember { mutableStateOf(false) }
 
-    /*// 使用 Animatable 实现无缝、永不重置的连续动画
-    val rotation1 = remember { Animatable(0f) }
-    val rotation2 = remember { Animatable(0f) }
-    val rotation3 = remember { Animatable(0f) }
-
-    LaunchedEffect(Unit) {
-        // 启动三个独立的、持续进行的动画
-        launch {
-            rotation1.animateTo(
-                targetValue = 360f * 1000, // 一个非常大的目标值
-                animationSpec = tween(durationMillis = 25000 * 1000, easing = LinearEasing)
-            )
-        }
-        launch {
-            rotation2.animateTo(
-                targetValue = -360f * 1000, // 反向旋转
-                animationSpec = tween(durationMillis = 30000 * 1000, easing = LinearEasing)
-            )
-        }
-        launch {
-            rotation3.animateTo(
-                targetValue = 360f * 1000,
-                animationSpec = tween(durationMillis = 35000 * 1000, easing = LinearEasing)
-            )
-        }
-    }
-
-    // 在 graphicsLayer 中直接使用 Animatable 的值
-    val rotation1Value = rotation1.value
-    val rotation2Value = rotation2.value
-    val rotation3Value = rotation3.value*/
-
     val infiniteTransition1 = remember { Animatable(0f) }
     val infiniteTransition2 = remember { Animatable(0f) }
+
+    val shouldAnimate = imageUrl != null || isPlaying
+
     LaunchedEffect(Unit) {
-        launch {
-            infiniteTransition1.animateTo(
-                targetValue = infiniteTransition1.value + 360f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(durationMillis = 50000, easing = LinearEasing),
-                    repeatMode = RepeatMode.Restart
+        if (shouldAnimate) {
+            launch {
+                infiniteTransition1.animateTo(
+                    targetValue = infiniteTransition1.value + 360f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(durationMillis = 50000, easing = LinearEasing),
+                        repeatMode = RepeatMode.Restart
+                    )
                 )
-            )
-        }
-        launch {
-            infiniteTransition2.animateTo(
-                targetValue = infiniteTransition2.value - 360f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(durationMillis = 50000, easing = LinearEasing),
-                    repeatMode = RepeatMode.Restart
+            }
+            launch {
+                infiniteTransition2.animateTo(
+                    targetValue = infiniteTransition2.value - 360f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(durationMillis = 50000, easing = LinearEasing),
+                        repeatMode = RepeatMode.Restart
+                    )
                 )
-            )
+            }
+        } else {
+            // 停止动画,重置到初始状态
+            infiniteTransition1.stop()
+            infiniteTransition2.stop()
+            infiniteTransition1.snapTo(0f)
+            infiniteTransition2.snapTo(0f)
         }
     }
     val rotation1Value = infiniteTransition1.value

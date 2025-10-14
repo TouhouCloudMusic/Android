@@ -28,6 +28,14 @@ android {
         buildConfig = true
     }
 
+    packaging {
+        resources {
+            excludes += setOf(
+                "**/sf_pro.ttf",
+            )
+        }
+    }
+
     buildTypes {
         configureEach {
             val serverPropsFile = rootProject.file("server.properties")

@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,13 +44,6 @@ fun MusicScanScreen(
     val scanCompleted by playerViewModel.scanCompleted.collectAsState()
 
     var showDialog by remember { mutableStateOf(false) }
-
-    LaunchedEffect(scanCompleted) {
-        if (scanCompleted && showDialog) {
-            delay(1000)
-            playerViewModel.resetScanCompleted()
-        }
-    }
 
     Column(modifier.fillMaxSize()) {
 

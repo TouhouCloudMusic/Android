@@ -3,6 +3,7 @@ package net.hearnsoft.tcm.compose.ui.player
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.view.Window
+import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -36,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -43,6 +45,7 @@ import androidx.core.view.WindowCompat
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
+import com.moriafly.salt.ui.Button
 import com.moriafly.salt.ui.Icon
 import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.Surface
@@ -58,6 +61,7 @@ import net.hearnsoft.tcm.compose.constants.PlayerHorizontalPadding
 import net.hearnsoft.tcm.compose.pref.PlayerCoverType
 import net.hearnsoft.tcm.compose.pref.SettingsDataStore
 import net.hearnsoft.tcm.compose.ui.uicomponent.HashTag
+import net.hearnsoft.tcm.compose.ui.uicomponent.RatingDialog
 import net.hearnsoft.tcm.compose.ui.uicomponent.ResizableIconButton
 import net.hearnsoft.tcm.compose.ui.uicomponent.flowing.FlowingLightBackground
 import net.hearnsoft.tcm.compose.ui.utils.LocalPlayerUIColor
@@ -106,6 +110,7 @@ fun BottomSheetPlayer(
     val repeatMode = playerViewModel.repeatMode.collectAsState().value
     val shuffleModeEnabled = playerViewModel.shuffleModeEnabled.collectAsState().value
 
+    // 系统主题
     val isSystemInDarkTheme = isSystemInDarkTheme()
 
     // 设置数据存储
@@ -114,6 +119,26 @@ fun BottomSheetPlayer(
     val isPlayerSquigglyWaveEnabled by settingsDataStore.isPlayerSquigglyWaveEnabled.collectAsState(initial = true)
     val isPlayerShowMusicTagsEnabled by settingsDataStore.isPlayerShowMusicTagsEnabled.collectAsState(initial = true)
     val playerCoverType by settingsDataStore.playerCoverType.collectAsState(initial = PlayerCoverType.DEFAULT.ordinal)
+
+    // 评分对话框显示控制
+    var showRatingDialog by remember { mutableStateOf(false) }
+
+    // 显示评分对话框
+    if (showRatingDialog) {
+        RatingDialog(
+            onDismissRequest = {
+                showRatingDialog = false
+            },
+            onConfirm = { rating ->
+                if (rating < 0.5f) {
+                    Toast.makeText(context, "评分不能为空哦", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(context, "感谢你的评分: $rating 星", Toast.LENGTH_SHORT).show()
+                }
+                showRatingDialog = false
+            }
+        )
+    }
 
     // Pager状态
     val pagerState = rememberPagerState(
@@ -336,6 +361,20 @@ fun BottomSheetPlayer(
                                     modifier = Modifier
                                         .align(Alignment.CenterVertically)
                                 ) {
+                                    // 评分按钮
+                                    IconButton(
+                                        onClick = {
+                                            showRatingDialog = true
+                                        },
+                                        modifier = Modifier.padding(4.dp)
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.ic_star_24px),
+                                            contentDescription = "评分",
+                                            tint = LocalPlayerUIColor.current,
+                                            modifier = Modifier.size(36.dp)
+                                        )
+                                    }
                                     // 收藏按钮
                                     IconButton(
                                         onClick = {

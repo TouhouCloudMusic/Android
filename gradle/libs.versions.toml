@@ -1,6 +1,7 @@
 [versions]
 agp = "8.12.0"
 coilCompose = "3.2.0"
+composeRatingbar = "1.3.12"
 cropKit = "1.1.0"
 datastorePreferences = "1.1.7"
 gson = "2.13.2"
@@ -47,6 +48,7 @@ androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRunt
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coilCompose" }
+compose-ratingbar = { module = "com.github.a914-gowtham:compose-ratingbar", version.ref = "composeRatingbar" }
 crop-kit = { module = "com.github.Tanish-Ranjan:crop-kit", version.ref = "cropKit" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltCompiler" }

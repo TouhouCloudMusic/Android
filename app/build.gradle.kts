@@ -206,6 +206,9 @@ dependencies {
     // Crop kit
     implementation(libs.crop.kit)
 
+    // Compose Rating bar
+    implementation(libs.compose.ratingbar)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -1,9 +1,6 @@
 package net.hearnsoft.tcm.compose.ui.screens.account
 
 import android.app.Activity
-import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.ImageDecoder
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult

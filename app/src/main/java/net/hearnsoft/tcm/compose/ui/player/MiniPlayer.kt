@@ -71,7 +71,7 @@ fun MiniPlayer(
         // 封面图片容器和背景
         Card(
             modifier = Modifier
-                .size(50.dp)
+                .size(58.dp)
                 .padding(4.dp)
                 .align(Alignment.CenterVertically),
             shape = RoundedCornerShape(8.dp),
@@ -82,7 +82,9 @@ fun MiniPlayer(
                     .crossfade(true)
                     .crossfade(1000)
                     .build(),
-                modifier = Modifier.size(50.dp),
+                modifier = Modifier
+                    .size(58.dp)
+                    .align(Alignment.CenterHorizontally),
                 contentDescription = "Cover art",
                 alignment = Alignment.Center,
                 contentScale = ContentScale.Crop

@@ -166,6 +166,7 @@ fun MusicScreen(
                 onDismissRequest = {
                     showActionDialog = false
                 },
+                playerViewModel = playerViewModel,
                 songEntity = it,
                 navController = navController
             )

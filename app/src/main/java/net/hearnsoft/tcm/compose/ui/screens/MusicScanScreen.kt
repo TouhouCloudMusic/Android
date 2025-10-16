@@ -1,5 +1,7 @@
 package net.hearnsoft.tcm.compose.ui.screens
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,10 +14,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.util.UnstableApi
+import com.hjq.permissions.OnPermissionCallback
+import com.hjq.permissions.XXPermissions
+import com.hjq.permissions.permission.PermissionLists
+import com.hjq.permissions.permission.base.IPermission
 import com.moriafly.salt.ui.Button
 import com.moriafly.salt.ui.ButtonType
 import com.moriafly.salt.ui.Item
@@ -39,6 +46,8 @@ fun MusicScanScreen(
     modifier: Modifier = Modifier,
     playerViewModel: PlayerViewModel = hiltViewModel()
 ) {
+
+    val context = LocalContext.current
 
     val scanProgress by playerViewModel.scanProgress.collectAsState()
     val scanCompleted by playerViewModel.scanCompleted.collectAsState()
@@ -74,8 +83,26 @@ fun MusicScanScreen(
             Item(
                 text = "扫描音乐",
                 onClick = {
-                    showDialog = true
-                    playerViewModel.scanAndUpdateMusicLibrary()
+                    if (checkHasPermission(context)) {
+                        showDialog = true
+                        playerViewModel.scanAndUpdateMusicLibrary()
+                    } else {
+                        grantScanPermission(
+                            context = context,
+                            onGranted = {
+                                showDialog = true
+                                playerViewModel.scanAndUpdateMusicLibrary()
+                            },
+                            onDenied = {
+                                Toast.makeText(
+                                    context,
+                                    "未授予存储权限，无法扫描音乐",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                goToAppPermissionSettings(context)
+                            }
+                        )
+                    }
                 },
                 arrowType = ItemArrowType.None,
                 iconPainter = painterResource(R.drawable.ic_sync_24px),
@@ -116,4 +143,31 @@ private fun ScanDialog(
                 ButtonType.Highlight else ButtonType.Sub
         )
     }
+}
+
+private fun checkHasPermission(context: Context) : Boolean {
+    return XXPermissions.isGrantedPermission(
+        context,
+        PermissionLists.getReadMediaAudioPermission()
+    )
+}
+
+private fun grantScanPermission(
+    context: Context,
+    onGranted: () -> Unit,
+    onDenied: () -> Unit
+) {
+    XXPermissions.with(context)
+        .permission(PermissionLists.getReadMediaAudioPermission())
+        .request { _, deniedList ->
+            if (deniedList.isNotEmpty()) {
+                onDenied()
+            } else {
+                onGranted()
+            }
+        }
+}
+
+private fun goToAppPermissionSettings(context: Context) {
+    XXPermissions.startPermissionActivity(context, PermissionLists.getReadMediaAudioPermission())
 }

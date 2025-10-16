@@ -404,6 +404,30 @@ class PlayerViewModel @Inject constructor(
     }
 
     /**
+     * 添加歌曲到当前播放列表中正在播放的下一个位置
+     * @param songEntity 要添加的歌曲实体
+     */
+    fun addToPlayNext(songEntity: SongEntity) {
+        val mediaItem = convertSongEntityToMediaItem(songEntity)
+        val currentPlaylist = _currentPlaylist.value.toMutableList()
+        val currentIndex = currentPlaylist.indexOfFirst {
+            it.mediaId == playerController.currentMediaItem.value?.mediaId
+        }
+
+        // 如果歌曲已经在列表的当前播放位置的下一个，跳过添加。
+        if (currentIndex >= 0 && currentIndex + 1 < currentPlaylist.size &&
+            currentPlaylist[currentIndex + 1].mediaId == mediaItem.mediaId) {
+            Logger.debug(TAG, "歌曲已经在下一首位置，无需添加: ${mediaItem.mediaId}")
+            return
+        }
+
+        val insertIndex = if (currentIndex >= 0) currentIndex + 1 else currentPlaylist.size
+        currentPlaylist.add(insertIndex, mediaItem)
+        _currentPlaylist.value = currentPlaylist
+        Logger.debug(TAG, "添加歌曲到下一首播放: ${mediaItem.mediaId}")
+    }
+
+    /**
      * 从播放列表移除指定歌曲
      */
     fun removeFromPlaylist(mediaItem: MediaItem) {

@@ -1,22 +1,17 @@
 package net.hearnsoft.tcm.compose.ui.uicomponent.sheet
 
-import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.UiMode
 import androidx.compose.ui.unit.dp
-import com.moriafly.salt.ui.Button
 import com.moriafly.salt.ui.SaltTheme
 import kotlinx.coroutines.launch
 
@@ -78,30 +73,6 @@ fun BottomSheetDialog(
             }
             // 将 dismiss 方法传递给 content
             content(handleDismiss)
-        }
-    }
-}
-
-@ExperimentalMaterial3Api
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-fun BottomSheetDialogPreview() {
-    BottomSheetDialog(
-        onDismissRequest = { /* 预览中不需要处理 */ },
-        title = "foo"
-    ) { dismiss ->
-        // 示例内容
-        Column(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(
-                text = "这是一个示例内容",
-                style = SaltTheme.textStyles.main
-            )
-            Button(
-                onClick = { dismiss() },
-                text = "关闭"
-            )
         }
     }
 }

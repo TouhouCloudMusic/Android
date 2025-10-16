@@ -1,6 +1,8 @@
 package net.hearnsoft.tcm.compose.ui.uicomponent.sheet
 
 import android.net.Uri
+import android.widget.Toast
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,8 +19,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
@@ -33,35 +34,19 @@ import com.moriafly.salt.ui.UnstableSaltUiApi
 import net.hearnsoft.tcm.compose.R
 import net.hearnsoft.tcm.compose.data.database.entities.SongEntity
 import net.hearnsoft.tcm.compose.ui.screens.ScreenRoute
-import java.util.concurrent.TimeUnit
+import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
+import net.hearnsoft.tcm.compose.utils.IntentUtils
 
 
-val sampleData = SongEntity(
-    songId = 1L,
-    mediaStoreId = 101L,
-    title = "晴天",
-    artistId = 201L,
-    albumId = 301L,
-    artistName = "周杰伦",
-    albumName = "叶惠美",
-    duration = TimeUnit.MINUTES.toMillis(4) + TimeUnit.SECONDS.toMillis(29), // 4:29
-    filePath = "/storage/emulated/0/Music/周杰伦 - 晴天.mp3",
-    artworkUri = Uri.parse("content://media/external/audio/albumart/301"),
-    contentUri = Uri.parse("content://media/external/audio/media/101"),
-    dateAdded = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(30), // 30天前添加
-    dateModified = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(5), // 5天前修改
-    playCount = 58,
-    lastPlayed = System.currentTimeMillis() - TimeUnit.HOURS.toMillis(2), // 2小时前播放
-    isFavorite = true
-)
-
-
+@ExperimentalFoundationApi
+@UnstableApi
 @Composable
 @UnstableSaltUiApi
 @ExperimentalMaterial3Api
 fun SongActionSheetDialog(
     modifier: Modifier = Modifier,
     onDismissRequest: () -> Unit = {},
+    playerViewModel: PlayerViewModel,
     songEntity: SongEntity,
     navController: NavController? = null
 ) {
@@ -76,6 +61,7 @@ fun SongActionSheetDialog(
         Spacer(modifier = Modifier.size(8.dp))
 
         SongActionSheetContent(
+            playerViewModel = playerViewModel,
             songEntity = songEntity,
             navController = navController,
             onDismissRequest = onDismissRequest
@@ -136,14 +122,29 @@ fun SongActionHeader(
 
 }
 
-@UnstableSaltUiApi
+@ExperimentalFoundationApi
+@UnstableApi
 @Composable
+@UnstableSaltUiApi
+@ExperimentalMaterial3Api
 fun SongActionSheetContent(
+    playerViewModel: PlayerViewModel,
     songEntity: SongEntity,
     navController: NavController? = null,
     onDismissRequest: () -> Unit = {}
 ) {
+    val context = LocalContext.current
+
     RoundedColumn {
+        Item(
+            onClick = {
+                playerViewModel.addToPlayNext(songEntity)
+                onDismissRequest()
+            },
+            text = "添加到下一首播放",
+            iconPainter = painterResource(R.drawable.ic_playlist_play_24px),
+            iconColor = SaltTheme.colors.highlight,
+        )
         Item(
             onClick = {},
             text = "艺术家：${songEntity.artistName ?: "未知艺术家"}",
@@ -162,8 +163,15 @@ fun SongActionSheetContent(
             iconColor = SaltTheme.colors.highlight,
         )
         Item(
-            onClick = {},
-            text = "aa"
+            onClick = {
+                if (!IntentUtils.openMusicTagApp(context = context, musicUri = songEntity.contentUri)) {
+                    Toast.makeText(context, "未找到音乐标签应用", Toast.LENGTH_SHORT).show()
+                }
+                onDismissRequest()
+            },
+            text = "在 音乐标签 App中编辑信息...",
+            iconPainter = painterResource(R.drawable.ic_edit_24px),
+            iconColor = SaltTheme.colors.highlight,
         )
         Item(
             onClick = {},
@@ -172,31 +180,6 @@ fun SongActionSheetContent(
         Item(
             onClick = {},
             text = "aa"
-        )
-    }
-}
-
-@Composable
-@Preview
-fun SongActionHeaderPreview() {
-    Surface(
-        color = SaltTheme.colors.background,
-    ) {
-        SongActionHeader(
-            songEntity = sampleData
-        )
-    }
-}
-
-@Composable
-@UnstableSaltUiApi
-@Preview
-fun SongActionSheetContentPreview() {
-    Surface(
-        color = SaltTheme.colors.background,
-    ) {
-        SongActionSheetContent(
-            songEntity = sampleData
         )
     }
 }

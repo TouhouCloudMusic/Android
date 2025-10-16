@@ -209,6 +209,12 @@ dependencies {
     // Compose Rating bar
     implementation(libs.compose.ratingbar)
 
+    // XXPermissions
+    // 设备兼容框架：https://github.com/getActivity/DeviceCompat
+    implementation(libs.devicecompat)
+    // 权限请求框架：https://github.com/getActivity/XXPermissions
+    implementation(libs.xxpermissions)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

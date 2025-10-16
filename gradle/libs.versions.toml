@@ -4,6 +4,7 @@ coilCompose = "3.2.0"
 composeRatingbar = "1.3.12"
 cropKit = "1.1.0"
 datastorePreferences = "1.1.7"
+devicecompat = "1.0"
 gson = "2.13.2"
 hiltCompiler = "2.57"
 hiltNavigationCompose = "1.2.0"
@@ -34,6 +35,7 @@ javaxInject = "1"
 hilt = "2.57"
 annotation = "1.8.2"
 palette = "1.0.0"
+xxpermissions = "26.5"
 
 [libraries]
 androidx-animation-graphics = { module = "androidx.compose.animation:animation-graphics", version.ref = "animationGraphics" }
@@ -50,6 +52,7 @@ coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCo
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coilCompose" }
 compose-ratingbar = { module = "com.github.a914-gowtham:compose-ratingbar", version.ref = "composeRatingbar" }
 crop-kit = { module = "com.github.Tanish-Ranjan:crop-kit", version.ref = "cropKit" }
+devicecompat = { module = "com.github.getActivity:DeviceCompat", version.ref = "devicecompat" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltCompiler" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltCompiler" }
@@ -88,6 +91,7 @@ javax-inject = { group = "javax.inject", name = "javax.inject", version.ref = "j
 annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
 palette = { group = "androidx.palette", name = "palette", version.ref = "palette" }
 palette-ktx = { group = "androidx.palette", name = "palette-ktx", version.ref = "palette" }
+xxpermissions = { module = "com.github.getActivity:XXPermissions", version.ref = "xxpermissions" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

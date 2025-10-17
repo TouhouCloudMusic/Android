@@ -29,6 +29,8 @@ fun PlaylistItem(
     modifier: Modifier = Modifier,
     mediaItem: MediaItem,
     currentPlaying: MediaItem?,
+    currentPlayingIndex: Int,
+    itemIndex: Int,
     textColor: Color,
     onClick: () -> Unit = {},
     onRemoveClick: (MediaItem) -> Unit = { _ -> }
@@ -37,8 +39,8 @@ fun PlaylistItem(
     val artist = mediaItem.mediaMetadata.artist.toString() ?: "未知艺术家"
     val album = mediaItem.mediaMetadata.albumTitle.toString() ?: "未知专辑"
 
-
-    val isCurrentPlaying = currentPlaying?.mediaId == mediaItem.mediaId
+    // 比较是否是当前播放的歌曲
+    val isCurrentPlaying = currentPlaying?.mediaId == mediaItem.mediaId && currentPlayingIndex == itemIndex
 
     Row(
         modifier = modifier

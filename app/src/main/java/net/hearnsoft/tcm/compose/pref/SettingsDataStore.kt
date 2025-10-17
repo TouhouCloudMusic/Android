@@ -20,6 +20,10 @@ class SettingsDataStore(context: Context) {
     private val dataStore = context.dataStore
 
     companion object {
+        // 扫描选项
+        // 不包含60秒以下的音频文件
+        val MUSIC_SCAN_NOT_INCLUDE_60S_MEDIA = booleanPreferencesKey("music_scan_not_include_60s_media")
+
         // 用户界面
         val PLAYER_SQUIGGLY_WAVE_ENABLED = booleanPreferencesKey("player_squiggly_wave_enabled")
         val PLAYER_SHOW_MUSIC_TAGS_ENABLED = booleanPreferencesKey("player_show_music_tags_enabled")
@@ -30,6 +34,13 @@ class SettingsDataStore(context: Context) {
     }
 
     // 读取设置项目
+    // 扫描选项
+    val isMusicScanNotInclude60sMedia: Flow<Boolean> = dataStore.data
+        .map { preferences ->
+            // 默认启用
+            preferences[MUSIC_SCAN_NOT_INCLUDE_60S_MEDIA] ?: true
+        }
+
     // 用户界面的设置
     val isPlayerSquigglyWaveEnabled: Flow<Boolean> = dataStore.data
         .map { preferences ->
@@ -64,6 +75,13 @@ class SettingsDataStore(context: Context) {
 
 
     // 保存设置
+    // 扫描选项
+    suspend fun setMusicScanNotInclude60sMedia(isEnabled: Boolean) {
+        dataStore.edit { settings ->
+            settings[MUSIC_SCAN_NOT_INCLUDE_60S_MEDIA] = isEnabled
+        }
+    }
+
     // 用户界面的设置
     suspend fun setPlayerSquigglyWaveEnabled(isEnabled: Boolean) {
         dataStore.edit { settings ->

@@ -81,6 +81,12 @@ class LocalMusicRepository @Inject constructor(
                 return
             }
 
+            // 先清空现有数据库内容
+            deleteAllSongs()
+            deleteAllAlbums()
+            deleteAllArtists()
+            Logger.debug("LocalMusicRepository", "已清空现有数据库内容")
+
             // 使用 Map 来追踪已插入的艺术家和专辑，避免重复查询数据库
             val insertedArtists = mutableMapOf<String, Long>() // artistName -> artistId
             val insertedAlbums = mutableMapOf<Long, Long>() // mediaStoreAlbumId -> albumId

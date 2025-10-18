@@ -47,6 +47,7 @@ import net.hearnsoft.tcm.compose.constants.PlayerHorizontalPadding
 import net.hearnsoft.tcm.compose.ui.uicomponent.PlaylistItem
 import net.hearnsoft.tcm.compose.ui.utils.LocalPlayerUIColor
 import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
+import net.hearnsoft.tcm.compose.utils.Logger
 
 @Composable
 @UnstableApi
@@ -116,8 +117,8 @@ fun PlaylistPager(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = if (currentPlayingIndex > 0) {
-                            "${currentPlayingIndex}/${playlist.size}"
+                        text = if (currentPlayingIndex >= 0) {
+                            "${currentPlayingIndex + 1}/${playlist.size}"
                         } else {
                             "${playlist.size}"
                         },

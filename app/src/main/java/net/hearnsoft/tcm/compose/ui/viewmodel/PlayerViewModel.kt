@@ -366,18 +366,41 @@ class PlayerViewModel @Inject constructor(
     fun playSong(songEntity: SongEntity) {
         val mediaItem = convertSongEntityToMediaItem(songEntity)
         val actualPlaylist = playerController.currentPlaylist.value.toMutableList()
+        val currentIndex = playerController.getCurrentMediaItemIndex()
 
-        // 如果歌曲不在当前播放列表中，添加到开头
+        // 检查歌曲是否已在当前播放列表内
         val existingIndex = actualPlaylist.indexOfFirst { it.mediaId == mediaItem.mediaId }
-        val playIndex = if (existingIndex >= 0) {
-            existingIndex
-        } else {
-            actualPlaylist.add(0, mediaItem)
-            0
-        }
 
-        playerController.setPlaylist(actualPlaylist, playIndex)
-        playerController.play()
+        if (existingIndex >= 0) {
+            // 歌曲已存在，直接跳转到该歌曲
+            playerController.seekToMediaItem(existingIndex)
+            playerController.play()
+            Logger.debug(TAG, "歌曲已在播放列表中，跳转到索引 $existingIndex")
+        } else {
+            // 歌曲不存在，添加到当前播放歌曲的下一个位置
+            val insertIndex : Int
+
+            // 插入歌曲
+            if (actualPlaylist.isEmpty()) {
+                // 播放列表为空，直接添加
+                insertIndex = 0
+                actualPlaylist.add(mediaItem)
+            } else {
+                // 播放列表不为空，插入到当前播放位置的下一个位置
+                insertIndex = if (currentIndex >= 0) {
+                    currentIndex + 1
+                } else {
+                    0
+                }
+                actualPlaylist.add(insertIndex, mediaItem)
+            }
+
+            // 重新设置播放列表并跳转到新添加的歌曲
+            playerController.setPlaylist(actualPlaylist, insertIndex)
+            playerController.play()
+
+            Logger.debug(TAG, "插入歌曲到位置 $insertIndex 并播放: ${songEntity.title}")
+        }
         
         Logger.debug(TAG, "播放歌曲: ${songEntity.title}, 播放列表大小: ${actualPlaylist.size}")
     }
@@ -387,20 +410,41 @@ class PlayerViewModel @Inject constructor(
      */
     fun playSong(mediaItem: MediaItem) {
         val actualPlaylist = playerController.currentPlaylist.value.toMutableList()
+        val currentIndex = playerController.getCurrentMediaItemIndex()
 
-        // 如果歌曲不在当前播放列表中，添加到开头
+        // 检查歌曲是否已在播放列表中
         val existingIndex = actualPlaylist.indexOfFirst { it.mediaId == mediaItem.mediaId }
-        val playIndex = if (existingIndex >= 0) {
-            existingIndex
-        } else {
-            actualPlaylist.add(0, mediaItem)
-            0
-        }
 
-        playerController.setPlaylist(actualPlaylist, playIndex)
-        playerController.play()
-        
-        Logger.debug(TAG, "播放歌曲: ${mediaItem.mediaMetadata.title}, 播放列表大小: ${actualPlaylist.size}")
+        if (existingIndex >= 0) {
+            // 歌曲已存在，直接跳转播放
+            playerController.seekToMediaItem(existingIndex)
+            playerController.play()
+            Logger.debug(TAG, "歌曲已存在于播放列表，跳转到索引 $existingIndex 播放")
+        } else {
+            // 歌曲不存在，添加到当前播放歌曲的下一个位置
+            val insertIndex : Int
+
+            // 插入歌曲
+            if (actualPlaylist.isEmpty()) {
+                // 播放列表为空，直接添加
+                insertIndex = 0
+                actualPlaylist.add(mediaItem)
+            } else {
+                // 播放列表不为空，插入到当前播放位置的下一个位置
+                insertIndex = if (currentIndex >= 0) {
+                    currentIndex + 1
+                } else {
+                    0
+                }
+                actualPlaylist.add(insertIndex, mediaItem)
+            }
+
+            // 重新设置播放列表，并从插入的位置开始播放
+            playerController.setPlaylist(actualPlaylist, insertIndex)
+            playerController.play()
+
+            Logger.debug(TAG, "插入歌曲到位置 $insertIndex 并播放: ${mediaItem.mediaMetadata.title}")
+        }
     }
 
     /**

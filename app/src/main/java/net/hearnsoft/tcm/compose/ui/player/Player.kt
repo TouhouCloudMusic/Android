@@ -223,9 +223,9 @@ fun BottomSheetPlayer(
                 onPlaylistClick = {
                     // 先展开 BottomSheet
                     state.expandSoft()
-                    // 然后跳转到播放列表页面（第3页，index为1）
+                    // 然后跳转到播放列表页面（第1页，index为0）
                     coroutineScope.launch {
-                        pagerState.animateScrollToPage(2)
+                        pagerState.animateScrollToPage(0)
                     }
                 }
             )
@@ -314,10 +314,10 @@ fun BottomSheetPlayer(
                             beyondViewportPageCount = 1
                         ) { page ->
                             when (page) {
-                                0 -> LyricsPager(playerViewModel = playerViewModel)
+                                0 -> PlaylistPager(playerViewModel = playerViewModel)
                                 1 -> CoverPager(artworkUri = artworkUri,
                                     isPlaying = isPlaying, coverType = playerCoverType)
-                                2 -> PlaylistPager(playerViewModel = playerViewModel)
+                                2 -> LyricsPager(playerViewModel = playerViewModel)
                             }
                         }
 
@@ -592,7 +592,7 @@ fun BottomSheetPlayer(
                                             .align(Alignment.Center),
                                         onClick = {
                                             coroutineScope.launch {
-                                                pagerState.animateScrollToPage(2)
+                                                pagerState.animateScrollToPage(0)
                                             }
                                         }
                                     )

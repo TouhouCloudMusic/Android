@@ -207,8 +207,6 @@ fun UserEditProfileScreen(
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(getFullImageUrl(user?.bannerUrl))
-                    .placeholder(R.drawable.test_res1)
-                    .error(R.drawable.test_res1)
                     .crossfade(true)
                     .memoryCacheKey("banner_${user?.bannerUrl}_$bannerRefreshKey") // 强制刷新缓存
                     .diskCacheKey("banner_${user?.bannerUrl}_$bannerRefreshKey")   // 强制刷新磁盘缓存

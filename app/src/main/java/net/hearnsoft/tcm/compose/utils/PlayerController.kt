@@ -10,6 +10,7 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.asLiveData
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
+import androidx.media3.common.Timeline
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
@@ -79,13 +80,17 @@ class PlayerController @Inject constructor(
     private val _isPlaying = MutableStateFlow(false)
     val isPlaying: StateFlow<Boolean> = _isPlaying.asStateFlow()
 
-    // 当前播放位置
-    private val _currentPosition = MutableStateFlow(0L)
-    val currentPosition: StateFlow<Long> = _currentPosition.asStateFlow()
-
     // 当前媒体项
     private val _currentMediaItem = MutableStateFlow<MediaItem?>(null)
     val currentMediaItem: StateFlow<MediaItem?> = _currentMediaItem.asStateFlow()
+
+    // 当前媒体播放列表
+    private val _currentPlaylist = MutableStateFlow<List<MediaItem>>(emptyList())
+    val currentPlaylist: StateFlow<List<MediaItem>> = _currentPlaylist.asStateFlow()
+
+    // 当前媒体位置索引
+    private val _currentMediaItemIndex = MutableStateFlow(-1)
+    val currentMediaItemIndex: StateFlow<Int> = _currentMediaItemIndex.asStateFlow()
 
     // 播放模式
     private val _repeatMode = MutableStateFlow(Player.REPEAT_MODE_OFF)
@@ -106,6 +111,7 @@ class PlayerController @Inject constructor(
 
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
             _currentMediaItem.value = mediaItem
+            _currentMediaItemIndex.value = mediaController?.currentMediaItemIndex ?: -1
             PlayerLyricsBridge.clear()
         }
 
@@ -115,6 +121,12 @@ class PlayerController @Inject constructor(
 
         override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
             _shuffleModeEnabled.value = shuffleModeEnabled
+        }
+
+        override fun onTimelineChanged(timeline: Timeline, reason: Int) {
+            _currentPlaylist.value = getCurrentPlaylist()
+            _currentMediaItemIndex.value = mediaController?.currentMediaItemIndex ?: -1
+            Logger.debug("PlayerController", "播放列表已更新: ${_currentPlaylist.value.size} 首歌曲")
         }
     }
 
@@ -180,6 +192,7 @@ class PlayerController @Inject constructor(
             try {
                 controller.setMediaItems(mediaItems, startIndex, 0L)
                 controller.prepare()
+                _currentPlaylist.value = mediaItems
                 Logger.debug("PlayerController", "设置播放列表: ${mediaItems.size} 首歌曲，起始索引: $startIndex")
             } catch (e: Exception) {
                 Logger.err("PlayerController", "设置播放列表失败: ${e.message}")
@@ -190,6 +203,35 @@ class PlayerController @Inject constructor(
     }
 
     /**
+     * 添加媒体项到播放列表
+     * @param mediaItem 要添加的媒体项
+     * @param index 插入位置，如果为 -1 则添加到末尾
+     * @return 添加后的完整播放列表
+     */
+    fun addMediaItemToPlaylist(mediaItem: MediaItem, index: Int = -1): List<MediaItem> {
+        mediaController?.let { controller ->
+            try {
+                if (index >= 0 && index <= controller.mediaItemCount) {
+                    controller.addMediaItem(index, mediaItem)
+                    Logger.debug("PlayerController", "在位置 $index 添加歌曲: ${mediaItem.mediaMetadata.title}")
+                } else {
+                    controller.addMediaItem(mediaItem)
+                    Logger.debug("PlayerController", "在末尾添加歌曲: ${mediaItem.mediaMetadata.title}")
+                }
+
+                // 返回更新后的播放列表
+                return getCurrentPlaylist()
+            } catch (e: Exception) {
+                Logger.err("PlayerController", "添加歌曲失败: ${e.message}")
+            }
+        } ?: run {
+            Logger.warn("PlayerController", "媒体控制器未连接，无法添加歌曲")
+        }
+
+        return emptyList()
+    }
+
+    /**
      * 清空播放列表
      */
     fun clearPlaylist() {
@@ -197,6 +239,7 @@ class PlayerController @Inject constructor(
             try {
                 controller.stop()
                 controller.clearMediaItems()
+                _currentPlaylist.value = emptyList()
                 Logger.debug("PlayerController", "清空播放列表")
             } catch (e: Exception) {
                 Logger.err("PlayerController", "清空播放列表失败: ${e.message}")

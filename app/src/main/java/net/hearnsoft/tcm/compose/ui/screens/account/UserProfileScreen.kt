@@ -162,8 +162,6 @@ private fun UserProfileHeader(
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(getFullImageUrl(user?.bannerUrl))
-                    .placeholder(R.drawable.test_res1)
-                    .error(R.drawable.test_res1)
                     .crossfade(true)
                     .build(),
                 contentDescription = "User Banner",

@@ -56,8 +56,8 @@ class PlayerViewModel @Inject constructor(
     private val _allSongs = MutableStateFlow<List<SongEntity>>(emptyList())
     val allSongs: StateFlow<List<SongEntity>> = _allSongs.asStateFlow()
 
-    private val _currentPlaylist = MutableStateFlow<List<MediaItem>>(emptyList())
-    val currentPlaylist: StateFlow<List<MediaItem>> = _currentPlaylist.asStateFlow()
+    // 当前播放列表
+    val currentPlaylist: StateFlow<List<MediaItem>> = playerController.currentPlaylist
 
     // === 专辑数据 ===
     private val _rawAlbums = MutableStateFlow<List<AlbumEntity>>(emptyList())
@@ -83,6 +83,7 @@ class PlayerViewModel @Inject constructor(
     val isConnected = playerController.isConnected
     val isPlaying = playerController.isPlaying
     val currentMediaItem = playerController.currentMediaItem
+    val currentMediaItemIndex = playerController.currentMediaItemIndex
     val repeatMode = playerController.repeatMode
     val shuffleModeEnabled = playerController.shuffleModeEnabled
 
@@ -198,9 +199,6 @@ class PlayerViewModel @Inject constructor(
 
                 // 更新状态
                 _allSongs.value = sortedSongs
-                _currentPlaylist.value = sortedSongs.map {
-                    convertSongEntityToMediaItem(it)
-                }
 
                 Logger.debug(TAG, "应用排序: ${sortedSongs.size} 首歌曲")
             } catch (e: Exception) {
@@ -355,7 +353,7 @@ class PlayerViewModel @Inject constructor(
      * 播放当前播放列表
      */
     fun playCurrentPlaylist(startIndex: Int = 0) {
-        val playlist = _currentPlaylist.value
+        val playlist = playerController.currentPlaylist.value
         if (playlist.isNotEmpty()) {
             playerController.setPlaylist(playlist, startIndex)
             playerController.play()
@@ -367,40 +365,117 @@ class PlayerViewModel @Inject constructor(
      */
     fun playSong(songEntity: SongEntity) {
         val mediaItem = convertSongEntityToMediaItem(songEntity)
-        val currentPlaylist = _currentPlaylist.value.toMutableList()
+        val actualPlaylist = playerController.currentPlaylist.value.toMutableList()
+        val currentIndex = playerController.getCurrentMediaItemIndex()
 
-        // 如果歌曲不在当前播放列表中，添加它
-        val existingIndex = currentPlaylist.indexOfFirst { it.mediaId == mediaItem.mediaId }
-        val playIndex = if (existingIndex >= 0) {
-            existingIndex
+        // 检查歌曲是否已在当前播放列表内
+        val existingIndex = actualPlaylist.indexOfFirst { it.mediaId == mediaItem.mediaId }
+
+        if (existingIndex >= 0) {
+            // 歌曲已存在，直接跳转到该歌曲
+            playerController.seekToMediaItem(existingIndex)
+            playerController.play()
+            Logger.debug(TAG, "歌曲已在播放列表中，跳转到索引 $existingIndex")
         } else {
-            currentPlaylist.add(0, mediaItem)
-            _currentPlaylist.value = currentPlaylist
-            0
-        }
+            // 歌曲不存在，添加到当前播放歌曲的下一个位置
+            val insertIndex : Int
 
-        playerController.setPlaylist(currentPlaylist, playIndex)
-        playerController.play()
+            // 插入歌曲
+            if (actualPlaylist.isEmpty()) {
+                // 播放列表为空，直接添加
+                insertIndex = 0
+                actualPlaylist.add(mediaItem)
+            } else {
+                // 播放列表不为空，插入到当前播放位置的下一个位置
+                insertIndex = if (currentIndex >= 0) {
+                    currentIndex + 1
+                } else {
+                    0
+                }
+                actualPlaylist.add(insertIndex, mediaItem)
+            }
+
+            // 重新设置播放列表并跳转到新添加的歌曲
+            playerController.setPlaylist(actualPlaylist, insertIndex)
+            playerController.play()
+
+            Logger.debug(TAG, "插入歌曲到位置 $insertIndex 并播放: ${songEntity.title}")
+        }
+        
+        Logger.debug(TAG, "播放歌曲: ${songEntity.title}, 播放列表大小: ${actualPlaylist.size}")
     }
 
     /**
-     * 播放特定歌曲
+     * 播放特定歌曲（MediaItem 版本）
      */
     fun playSong(mediaItem: MediaItem) {
-        val currentPlaylist = _currentPlaylist.value.toMutableList()
+        val actualPlaylist = playerController.currentPlaylist.value.toMutableList()
+        val currentIndex = playerController.getCurrentMediaItemIndex()
 
-        // 如果歌曲不在当前播放列表中，添加它
-        val existingIndex = currentPlaylist.indexOfFirst { it.mediaId == mediaItem.mediaId }
-        val playIndex = if (existingIndex >= 0) {
-            existingIndex
+        // 检查歌曲是否已在播放列表中
+        val existingIndex = actualPlaylist.indexOfFirst { it.mediaId == mediaItem.mediaId }
+
+        if (existingIndex >= 0) {
+            // 歌曲已存在，直接跳转播放
+            playerController.seekToMediaItem(existingIndex)
+            playerController.play()
+            Logger.debug(TAG, "歌曲已存在于播放列表，跳转到索引 $existingIndex 播放")
         } else {
-            currentPlaylist.add(0, mediaItem)
-            _currentPlaylist.value = currentPlaylist
-            0
+            // 歌曲不存在，添加到当前播放歌曲的下一个位置
+            val insertIndex : Int
+
+            // 插入歌曲
+            if (actualPlaylist.isEmpty()) {
+                // 播放列表为空，直接添加
+                insertIndex = 0
+                actualPlaylist.add(mediaItem)
+            } else {
+                // 播放列表不为空，插入到当前播放位置的下一个位置
+                insertIndex = if (currentIndex >= 0) {
+                    currentIndex + 1
+                } else {
+                    0
+                }
+                actualPlaylist.add(insertIndex, mediaItem)
+            }
+
+            // 重新设置播放列表，并从插入的位置开始播放
+            playerController.setPlaylist(actualPlaylist, insertIndex)
+            playerController.play()
+
+            Logger.debug(TAG, "插入歌曲到位置 $insertIndex 并播放: ${mediaItem.mediaMetadata.title}")
+        }
+    }
+
+    /**
+     * 播放指定索引的歌曲
+     */
+    fun playAtIndex(index: Int) {
+        playerController.seekToMediaItem(index)
+        playerController.play()
+        Logger.debug(TAG, "播放索引 $index 的歌曲")
+    }
+
+    /**
+     * 添加歌曲到当前播放列表中正在播放的下一个位置（无缝添加）
+     * @param songEntity 要添加的歌曲实体
+     */
+    fun addToPlayNext(songEntity: SongEntity) {
+        val mediaItem = convertSongEntityToMediaItem(songEntity)
+        val currentIndex = playerController.getCurrentMediaItemIndex()
+
+        if (currentIndex < 0) {
+            // 没有正在播放的歌曲，添加到末尾
+            Logger.debug(TAG, "没有正在播放的歌曲，添加到播放列表末尾")
+            playerController.addMediaItemToPlaylist(mediaItem, -1)
+            return
         }
 
-        playerController.setPlaylist(currentPlaylist, playIndex)
-        playerController.play()
+        val insertIndex = currentIndex + 1
+
+        playerController.addMediaItemToPlaylist(mediaItem, insertIndex)
+
+        Logger.debug(TAG, "添加歌曲到下一首播放（位置 $insertIndex）: ${mediaItem.mediaMetadata.title}")
     }
 
     /**
@@ -431,17 +506,34 @@ class PlayerViewModel @Inject constructor(
      * 从播放列表移除指定歌曲
      */
     fun removeFromPlaylist(mediaItem: MediaItem) {
-        val currentPlaylist = _currentPlaylist.value.toMutableList()
-        val indexToRemove = currentPlaylist.indexOfFirst { it.mediaId == mediaItem.mediaId }
+        val actualPlaylist = playerController.currentPlaylist.value.toMutableList()
+        val indexToRemove = actualPlaylist.indexOfFirst { it.mediaId == mediaItem.mediaId }
 
         if (indexToRemove >= 0) {
-            currentPlaylist.removeAt(indexToRemove)
-            _currentPlaylist.value = currentPlaylist
-
-            // 如果当前播放的歌曲被移除，尝试播放下一首
-            if (playerController.currentMediaItem.value?.mediaId == mediaItem.mediaId) {
+            // 检查是否正在播放要移除的歌曲
+            val isCurrentlyPlaying = playerController.currentMediaItem.value?.mediaId == mediaItem.mediaId
+            
+            if (isCurrentlyPlaying) {
+                // 如果移除的是当前播放的歌曲，先跳到下一首
                 playerController.skipToNext()
             }
+            
+            // 移除歌曲
+            actualPlaylist.removeAt(indexToRemove)
+            
+            // 重新计算播放索引
+            val currentIndex = playerController.getCurrentMediaItemIndex()
+            val newIndex = if (isCurrentlyPlaying) {
+                currentIndex
+            } else if (indexToRemove < currentIndex) {
+                currentIndex - 1
+            } else {
+                currentIndex
+            }
+            
+            playerController.setPlaylist(actualPlaylist, newIndex.coerceAtLeast(0))
+            
+            Logger.debug(TAG, "移除歌曲（位置 $indexToRemove），播放列表大小: ${actualPlaylist.size}")
         } else {
             Logger.warn(TAG, "尝试移除不存在的歌曲: ${mediaItem.mediaId}")
         }
@@ -451,7 +543,6 @@ class PlayerViewModel @Inject constructor(
      * 清空播放列表
      */
     fun clearPlaylist() {
-        _currentPlaylist.value = emptyList()
         playerController.clearPlaylist()
         Logger.debug(TAG, "播放列表已清空")
     }
@@ -469,23 +560,15 @@ class PlayerViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                //清空当前的播放列表
-                _currentPlaylist.value = emptyList()
-                playerController.clearPlaylist()
-
-                //转换歌曲实体为 MediaItem
+                // 转换歌曲实体为 MediaItem
                 val mediaItems = songs.map { convertSongEntityToMediaItem(it) }
 
-                //更新当前播放列表状态
-                _currentPlaylist.value = mediaItems
-
-                // 设置播放列表并开始播放
-                if (mediaItems.isNotEmpty() && startIndex < mediaItems.size) {
+                if (startIndex < mediaItems.size) {
                     playerController.setPlaylist(mediaItems, startIndex)
                     playerController.play()
                     Logger.debug(TAG, "设置并播放新的播放列表，包含 ${mediaItems.size} 首歌曲，从索引 $startIndex 开始播放")
                 } else {
-                    Logger.warn(TAG, "播放列表为空或起始索引无效")
+                    Logger.warn(TAG, "起始索引无效: $startIndex >= ${mediaItems.size}")
                 }
             } catch (e: Exception) {
                 Logger.err(TAG, "设置播放列表失败: ${e.message}")

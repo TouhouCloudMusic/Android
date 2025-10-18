@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
@@ -46,6 +47,7 @@ import net.hearnsoft.tcm.compose.constants.PlayerHorizontalPadding
 import net.hearnsoft.tcm.compose.ui.uicomponent.PlaylistItem
 import net.hearnsoft.tcm.compose.ui.utils.LocalPlayerUIColor
 import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
+import net.hearnsoft.tcm.compose.utils.Logger
 
 @Composable
 @UnstableApi
@@ -63,6 +65,8 @@ fun PlaylistPager(
     val playlist = playerViewModel.currentPlaylist.collectAsState().value
     // 当前播放的媒体
     val currentPlaying = playerViewModel.currentMediaItem.collectAsState().value
+    // 获取当前播放的索引
+    val currentPlayingIndex = playerViewModel.currentMediaItemIndex.collectAsState().value
 
     val listState = rememberLazyListState()
     val targetIndex = remember(playlist) {
@@ -112,11 +116,9 @@ fun PlaylistPager(
                         .padding(horizontal = 16.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    val currentPlayingIndex = playlist.indexOf(currentPlaying) + 1
-
                     Text(
-                        text = if (currentPlayingIndex > 0) {
-                            "${currentPlayingIndex}/${playlist.size}"
+                        text = if (currentPlayingIndex >= 0) {
+                            "${currentPlayingIndex + 1}/${playlist.size}"
                         } else {
                             "${playlist.size}"
                         },
@@ -190,14 +192,18 @@ fun PlaylistPager(
                             }
                         }
                     } else {
-                        items(
+                        itemsIndexed(
                             items = playlist,
-                            key = { it.mediaId }
-                        ) {playlistItem ->
+                            key = { index, _ -> index }
+                        ) { index, playlistItem ->
                             PlaylistItem(
                                 currentPlaying = currentPlaying,
+                                currentPlayingIndex = currentPlayingIndex,
+                                itemIndex = index,
                                 mediaItem = playlistItem,
-                                onClick = { playerViewModel.playSong(playlistItem) },
+                                onClick = {
+                                    playerViewModel.playAtIndex(index)
+                                },
                                 onRemoveClick = {
                                     playerViewModel.removeFromPlaylist(it)
                                 },

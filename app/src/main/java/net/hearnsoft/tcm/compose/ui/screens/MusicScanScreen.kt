@@ -12,6 +12,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -28,13 +29,17 @@ import com.moriafly.salt.ui.ButtonType
 import com.moriafly.salt.ui.Item
 import com.moriafly.salt.ui.ItemArrowType
 import com.moriafly.salt.ui.ItemOuterTip
+import com.moriafly.salt.ui.ItemOuterTitle
+import com.moriafly.salt.ui.ItemSwitcher
 import com.moriafly.salt.ui.RoundedColumn
 import com.moriafly.salt.ui.UnstableSaltUiApi
 import com.moriafly.salt.ui.dialog.BasicDialog
 import com.moriafly.salt.ui.dialog.DialogTitle
 import com.moriafly.salt.ui.outerPadding
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import net.hearnsoft.tcm.compose.R
+import net.hearnsoft.tcm.compose.pref.SettingsDataStore
 import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
 
 @ExperimentalMaterial3Api
@@ -48,9 +53,14 @@ fun MusicScanScreen(
 ) {
 
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
     val scanProgress by playerViewModel.scanProgress.collectAsState()
     val scanCompleted by playerViewModel.scanCompleted.collectAsState()
+
+    // 设置项目读取
+    val settingsDataStore = remember { SettingsDataStore(context) }
+    val musicScanNotInclude60sMedia by settingsDataStore.isMusicScanNotInclude60sMedia.collectAsState(initial = false)
 
     var showDialog by remember { mutableStateOf(false) }
 
@@ -110,6 +120,18 @@ fun MusicScanScreen(
             )
         }
 
+        ItemOuterTitle("扫描选项")
+        RoundedColumn {
+            ItemSwitcher(
+                text = "不扫描60秒以下的媒体文件",
+                state = musicScanNotInclude60sMedia,
+                onChange = { checked ->
+                    coroutineScope.launch {
+                        settingsDataStore.setMusicScanNotInclude60sMedia(checked)
+                    }
+                }
+            )
+        }
     }
 
 }

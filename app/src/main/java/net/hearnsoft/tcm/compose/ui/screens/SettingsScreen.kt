@@ -36,7 +36,8 @@ fun SettingsScreen(
     val settingsDataStore = remember { SettingsDataStore(context) }
     val isPlayerSquigglyWaveEnabled by settingsDataStore.isPlayerSquigglyWaveEnabled.collectAsState(initial = true)
     val isPlayerShowMusicTagsEnabled by settingsDataStore.isPlayerShowMusicTagsEnabled.collectAsState(initial = true)
-    val playerCoverType by settingsDataStore.playerCoverType.collectAsState(initial = 0)
+    val playerCoverType by settingsDataStore.playerCoverType
+        .collectAsState(initial = PlayerCoverType.DEFAULT.ordinal)
 
     val playerCoverTypeLabels = listOf(
         "方形封面",
@@ -52,8 +53,6 @@ fun SettingsScreen(
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize()) {
             val popupState = rememberPopupState()
-            val currentCoverType by settingsDataStore.playerCoverType
-                .collectAsState(initial = PlayerCoverType.DEFAULT.ordinal)
             ItemOuterTitle(text = "用户界面")
             RoundedColumn {
                 ItemSwitcher(
@@ -77,12 +76,12 @@ fun SettingsScreen(
                 ItemPopup(
                     state = popupState,
                     text = "播放器封面类型",
-                    sub = playerCoverTypeLabels[currentCoverType]
+                    sub = playerCoverTypeLabels[playerCoverType]
                 ) {
                     playerCoverTypeLabels.forEachIndexed { index, label ->
                         PopupMenuItem(
                             text = label,
-                            selected = currentCoverType == index,
+                            selected = playerCoverType == index,
                             onClick = {
                                 coroutineScope.launch {
                                     settingsDataStore.setPlayerCoverType(

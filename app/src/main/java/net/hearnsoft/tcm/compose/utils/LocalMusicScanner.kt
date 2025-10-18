@@ -4,11 +4,16 @@ import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import androidx.compose.runtime.collectAsState
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
 import net.hearnsoft.tcm.compose.domain.model.song.SongSortingRule
 import androidx.core.net.toUri
+import androidx.lifecycle.asLiveData
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
+import net.hearnsoft.tcm.compose.pref.SettingsDataStore
 
 /**
  * 本地歌曲扫描工具类
@@ -26,6 +31,13 @@ object LocalMusicScanner {
     fun scanDeviceMusic(context: Context): List<MediaItem> {
         val musicItems = mutableListOf<MediaItem>()
 
+        val settingsDataStore = SettingsDataStore(context)
+        val musicScanNotInclude60sMedia = runCatching {
+            runBlocking {
+                settingsDataStore.isMusicScanNotInclude60sMedia.first()
+            }
+        }.getOrDefault(true) // 默认启用过滤60秒以下的音乐文件
+
         // 定义媒体存储投影
         val projection = arrayOf(
             MediaStore.Audio.Media._ID,
@@ -38,7 +50,7 @@ object LocalMusicScanner {
             MediaStore.Audio.Media.DURATION,
             MediaStore.Audio.Media.DATA,
             MediaStore.Audio.Media.TRACK,
-            MediaStore.Audio.Media.CD_TRACK_NUMBER
+            MediaStore.Audio.Media.CD_TRACK_NUMBER,
         )
 
         // 过滤只包含音乐文件
@@ -75,6 +87,13 @@ object LocalMusicScanner {
                     val albumId = cursor.getLong(albumIdColumn)
                     val duration = cursor.getLong(durationColumn)
                     val year = cursor.getInt(yearColumn)
+
+                    // 如果启用了过滤60秒以下的音乐文件选项，则跳过这些文件
+                    if (musicScanNotInclude60sMedia && duration < 60_000) {
+                        Logger.debug(TAG, "跳过短音乐文件: $title - $artist, 时长: ${duration}ms")
+                        continue
+                    }
+
                     // 获取音轨号和碟号
                     val trackInfo = if (trackColumn >= 0) {
                         val value = cursor.getInt(trackColumn)

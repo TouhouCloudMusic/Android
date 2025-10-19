@@ -13,7 +13,7 @@ interface SongDao {
     @Query("SELECT * FROM songs WHERE song_id = :songId")
     suspend fun getSongById(songId: Long): SongEntity?
 
-    @Query("SELECT * FROM songs WHERE media_store_id = :mediaStoreId")
+    @Query("SELECT * FROM songs WHERE media_store_id = :mediaStoreId LIMIT 1")
     suspend fun getSongByMediaStoreId(mediaStoreId: Long): SongEntity?
 
     @Query("SELECT * FROM songs WHERE album_id = :albumId ORDER BY title ASC")

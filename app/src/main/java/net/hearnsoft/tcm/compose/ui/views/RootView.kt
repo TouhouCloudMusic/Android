@@ -27,6 +27,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -259,6 +260,15 @@ fun AppRootView(
                         searchViewModel,
                         userViewModel
                     )
+                }
+
+                // 监听导航变化以折叠播放器
+                LaunchedEffect(navBackStackEntry) {
+                    navBackStackEntry?.let {
+                        if (playerBottomSheetState.isExpanded) {
+                            playerBottomSheetState.collapseSoft()
+                        }
+                    }
                 }
             }
 

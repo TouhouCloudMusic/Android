@@ -1,6 +1,5 @@
 package net.hearnsoft.tcm.compose.ui.uicomponent.sheet
 
-import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
@@ -146,7 +145,12 @@ fun SongActionSheetContent(
             iconColor = SaltTheme.colors.highlight,
         )
         Item(
-            onClick = {},
+            onClick = {
+                songEntity.artistId.let { artistId ->
+                    /*navController?.navigate(ScreenRoute.Artist.createRoute(artistId))*/
+                    onDismissRequest()
+                }
+            },
             text = "艺术家：${songEntity.artistName ?: "未知艺术家"}",
             iconPainter = painterResource(R.drawable.ic_artist_24px),
             iconColor = SaltTheme.colors.highlight,

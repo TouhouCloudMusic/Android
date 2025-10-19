@@ -59,6 +59,9 @@ class PlayerViewModel @Inject constructor(
     // 当前播放列表
     val currentPlaylist: StateFlow<List<MediaItem>> = playerController.currentPlaylist
 
+    // 当前播放的SongEntity对象
+    val currentPlayingSongEntity: StateFlow<SongEntity?> = MutableStateFlow(null)
+
     // === 专辑数据 ===
     private val _rawAlbums = MutableStateFlow<List<AlbumEntity>>(emptyList())
     private val _allAlbums = MutableStateFlow<List<AlbumEntity>>(emptyList())
@@ -663,6 +666,27 @@ class PlayerViewModel @Inject constructor(
                     .build()
             )
             .build()
+    }
+
+    /**
+     * 根据 MediaItem 查找对应的 SongEntity
+     * @param mediaItem 媒体项
+     * @return 对应的歌曲实体，如果未找到返回 null
+     */
+    suspend fun getSongEntityByMediaItem(mediaItem: MediaItem) : SongEntity? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val mediaId = mediaItem.mediaId.toLongOrNull()
+                if (mediaId == null) {
+                    Logger.err(TAG, "无效的 MediaItem ID: ${mediaItem.mediaId}")
+                    return@withContext null
+                }
+                musicRepository.getSongByMediaStoreId(mediaId)
+            } catch (e: Exception) {
+                Logger.err(TAG, "查询歌曲实体失败: ${e.message}")
+                null
+            }
+        }
     }
 
     /**

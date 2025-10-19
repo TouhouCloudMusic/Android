@@ -42,6 +42,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
+import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
@@ -58,16 +60,19 @@ import kotlinx.coroutines.withContext
 import me.saket.squiggles.SquigglySlider
 import net.hearnsoft.tcm.compose.R
 import net.hearnsoft.tcm.compose.constants.PlayerHorizontalPadding
+import net.hearnsoft.tcm.compose.data.database.entities.SongEntity
 import net.hearnsoft.tcm.compose.pref.PlayerCoverType
 import net.hearnsoft.tcm.compose.pref.SettingsDataStore
 import net.hearnsoft.tcm.compose.ui.uicomponent.HashTag
 import net.hearnsoft.tcm.compose.ui.uicomponent.RatingDialog
 import net.hearnsoft.tcm.compose.ui.uicomponent.ResizableIconButton
 import net.hearnsoft.tcm.compose.ui.uicomponent.flowing.FlowingLightBackground
+import net.hearnsoft.tcm.compose.ui.uicomponent.sheet.SongActionSheetDialog
 import net.hearnsoft.tcm.compose.ui.utils.LocalPlayerUIColor
 import net.hearnsoft.tcm.compose.ui.utils.PlayerForegroundColorLight
 import net.hearnsoft.tcm.compose.ui.utils.getPlayerUIColor
 import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
+import net.hearnsoft.tcm.compose.utils.IntentUtils
 import net.hearnsoft.tcm.compose.utils.Logger
 import net.hearnsoft.tcm.compose.utils.SystemMediaDialogUtils
 import net.hearnsoft.tcm.compose.utils.formatTimeString
@@ -122,6 +127,9 @@ fun BottomSheetPlayer(
 
     // 评分对话框显示控制
     var showRatingDialog by remember { mutableStateOf(false) }
+    // 选中的歌曲，用于显示操作对话框
+    var selectedSong by remember { mutableStateOf<SongEntity?>(null) }
+    var showActionDialog by remember { mutableStateOf(false) }
 
     // 显示评分对话框
     if (showRatingDialog) {
@@ -138,6 +146,19 @@ fun BottomSheetPlayer(
                 showRatingDialog = false
             }
         )
+    }
+
+    if (showActionDialog) {
+        selectedSong?.let {
+            SongActionSheetDialog(
+                onDismissRequest = {
+                    showActionDialog = false
+                },
+                playerViewModel = playerViewModel,
+                songEntity = it,
+                navController = navController
+            )
+        }
     }
 
     // Pager状态
@@ -595,6 +616,57 @@ fun BottomSheetPlayer(
                                                 pagerState.animateScrollToPage(0)
                                             }
                                         }
+                                    )
+                                }
+                            }
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                IconButton(
+                                    onClick = {
+                                        IntentUtils.openSystemEqualizer(context) ?: Toast.makeText(
+                                            context,
+                                            "未检测到系统均衡器应用",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_equalizer_24px),
+                                        contentDescription = "打开均衡器",
+                                        tint = LocalPlayerUIColor.current,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+
+                                IconButton(
+                                    onClick = {
+                                        coroutineScope.launch {
+                                            currentPlaying?.let { mediaItem ->
+                                                val songEntity = playerViewModel.getSongEntityByMediaItem(mediaItem)
+                                                if (songEntity != null) {
+                                                    selectedSong = songEntity
+                                                    showActionDialog = true
+                                                } else {
+                                                    Toast.makeText(
+                                                        context,
+                                                        "无法获取当前歌曲信息",
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
+                                                }
+                                            }
+                                        }
+                                    }
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_more_horiz_24px),
+                                        contentDescription = "媒体详细信息对话框按钮" ,
+                                        tint = LocalPlayerUIColor.current,
+                                        modifier = Modifier.size(24.dp)
                                     )
                                 }
                             }

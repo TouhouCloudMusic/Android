@@ -16,11 +16,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.input.pointer.util.addPointerInputChange
 import androidx.compose.ui.unit.IntOffset
 import com.moriafly.salt.ui.SaltTheme
+import com.moriafly.salt.ui.thenIf
 
 /**
  * 底部弹出面板组件
@@ -40,6 +42,10 @@ fun BottomSheet(
     backgroundContent: @Composable BoxScope.() -> Unit = {},
     content: @Composable BoxScope.() -> Unit,
 ) {
+    val nestedScrollConnection = remember(state) {
+        state.consumeSwipeNestedScrollConnection
+    }
+
     // 主容器，通过偏移实现底部面板的滑动效果
     Box(
         modifier = modifier
@@ -97,6 +103,7 @@ fun BottomSheet(
             BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxSize()
+                    .nestedScroll(nestedScrollConnection)
                     .graphicsLayer {
                         // 根据展开进度计算透明度，实现渐显效果
                         // 当进度超过0.25时开始显示，完全展开时透明度为1

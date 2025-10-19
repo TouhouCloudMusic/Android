@@ -41,6 +41,10 @@ class BottomSheetState(
     val collapsedBound: Dp,
     val expandedBound: Dp,
 ) : DraggableState by draggableState {
+    companion object {
+        private const val VELOCITY_THRESHOLD = 400f  // 阈值
+        private const val POSITION_THRESHOLD_RATIO = 0.5f  // 位置阈值比例
+    }
 
     val value by animatable.asState()
 
@@ -85,37 +89,51 @@ class BottomSheetState(
     }
 
     fun performFling(velocity: Float) {
-        if (velocity > 250) {
-            expand()
-        } else if (velocity < -250) {
-            collapse()
-        } else {
-            val midPoint = (expandedBound + collapsedBound) / 2
-            if (value > midPoint) {
-                expand()
-            } else {
-                collapse()
+        val threshold = VELOCITY_THRESHOLD
+
+        when {
+            // 快速向上滑动
+            velocity > threshold -> expand()
+            // 快速向下滑动
+            velocity < -threshold -> collapse()
+            // 速度不够,根据位置判断
+            else -> {
+                val totalDistance = expandedBound - collapsedBound
+                val currentProgress = (value - collapsedBound) / totalDistance
+
+                if (currentProgress > POSITION_THRESHOLD_RATIO) {
+                    expand()
+                } else {
+                    collapse()
+                }
             }
         }
     }
 
-    val preUpPostDownNestedScrollConnection
+    val consumeSwipeNestedScrollConnection
         get() = object : NestedScrollConnection {
-            var isTopReached = false
+            private var isTopReached = false
 
             override fun onPreScroll(
                 available: Offset,
                 source: NestedScrollSource,
             ): Offset {
-                if (isExpanded && available.y < 0) {
-                    isTopReached = false
-                }
+                // 只在用户手势输入时处理
+                if (source != NestedScrollSource.UserInput) return Offset.Zero
 
-                return if (isTopReached && available.y < 0 && source == NestedScrollSource.Drag) {
-                    dispatchRawDelta(available.y)
-                    available
-                } else {
-                    Offset.Zero
+                val delta = available.y
+                return when {
+                    // 如果已经展开且正在往上拖，则允许里面的内容滚动
+                    isExpanded && delta < 0 -> {
+                        isTopReached = false
+                        Offset.Zero
+                    }
+                    // 如果没完全展开且往上拖，优先展开BottomSheet
+                    !isExpanded && delta < 0 -> {
+                        dispatchRawDelta(delta)
+                        available // 消费所有的滚动
+                    }
+                    else -> Offset.Zero
                 }
             }
 
@@ -124,33 +142,55 @@ class BottomSheetState(
                 available: Offset,
                 source: NestedScrollSource,
             ): Offset {
-                if (!isTopReached) {
-                    isTopReached = consumed.y == 0f && available.y > 0
+                if (source != NestedScrollSource.UserInput) return Offset.Zero
+
+                val delta = available.y
+
+                // 检测是否到达顶部
+                if (!isTopReached && delta > 0) {
+                    isTopReached = consumed.y == 0f
                 }
 
-                return if (isTopReached && source == NestedScrollSource.Drag) {
-                    dispatchRawDelta(available.y)
-                    available
+                // 向下拖拽且到达顶部时,折叠 BottomSheet
+                return if (isTopReached && delta > 0) {
+                    dispatchRawDelta(delta)
+                    available  // 消费剩余滚动
                 } else {
                     Offset.Zero
                 }
             }
 
-            override suspend fun onPreFling(available: Velocity): Velocity =
-                if (isTopReached) {
-                    val velocity = -available.y
-                    performFling(velocity)
-                    available
-                } else {
-                    Velocity.Zero
+            override suspend fun onPreFling(available: Velocity): Velocity {
+                val velocity = -available.y
+
+                return when {
+                    // 向上快速滑动且未完全展开
+                    velocity > 0 && !isExpanded -> {
+                        performFling(velocity)
+                        available  // 消费所有速度
+                    }
+                    // 向下快速滑动且到达顶部
+                    velocity < 0 && isTopReached -> {
+                        performFling(velocity)
+                        available
+                    }
+                    else -> Velocity.Zero
                 }
+            }
 
             override suspend fun onPostFling(
                 consumed: Velocity,
                 available: Velocity,
             ): Velocity {
                 isTopReached = false
-                return Velocity.Zero
+
+                // 如果有剩余速度,尝试让 BottomSheet 处理
+                return if (available.y != 0f) {
+                    performFling(-available.y)
+                    available
+                } else {
+                    Velocity.Zero
+                }
             }
         }
 }

@@ -2,6 +2,7 @@ package net.hearnsoft.tcm.compose.ui.player
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -15,9 +16,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -29,14 +30,23 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
+import coil3.request.placeholder
 import com.moriafly.salt.ui.Icon
-import com.moriafly.salt.ui.RoundedColumn
+import com.moriafly.salt.ui.ItemDivider
 import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.Text
 import com.moriafly.salt.ui.UnstableSaltUiApi
@@ -44,10 +54,10 @@ import com.moriafly.salt.ui.dialog.YesNoDialog
 import net.hearnsoft.tcm.compose.R
 import net.hearnsoft.tcm.compose.constants.PlayerCoverVerticalPadding
 import net.hearnsoft.tcm.compose.constants.PlayerHorizontalPadding
+import net.hearnsoft.tcm.compose.data.database.entities.SongEntity
 import net.hearnsoft.tcm.compose.ui.uicomponent.PlaylistItem
 import net.hearnsoft.tcm.compose.ui.utils.LocalPlayerUIColor
 import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
-import net.hearnsoft.tcm.compose.utils.Logger
 
 @Composable
 @UnstableApi
@@ -58,6 +68,7 @@ import net.hearnsoft.tcm.compose.utils.Logger
 fun PlaylistPager(
     modifier: Modifier = Modifier,
     playerViewModel: PlayerViewModel,
+    onCollapseTextClick: () -> Unit = {},
 ) {
     val uiColor = LocalPlayerUIColor.current
 
@@ -102,9 +113,38 @@ fun PlaylistPager(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = PlayerHorizontalPadding, vertical = PlayerCoverVerticalPadding)
-            .sizeIn(maxHeight = 600.dp, maxWidth = 600.dp)
     ) {
         Column {
+            Row(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(24.dp))
+                    .clickable(onClick = {
+                        onCollapseTextClick()
+                    })
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = "下滑或点击此处返回播放页面",
+                    textAlign = TextAlign.Center,
+                    style = SaltTheme.textStyles.sub,
+                    fontSize = 12.sp,
+                    color = uiColor,
+                    modifier = Modifier.weight(1f)
+                        .fillMaxWidth()
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+            if (currentPlaying != null) {
+                PlaylistNowPlayingHeader(
+                    mediaItem = currentPlaying,
+                    color = uiColor,
+                    onClick = {
+                        onCollapseTextClick()
+                    }
+                )
+            }
+            Spacer(Modifier.height(8.dp))
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -125,7 +165,7 @@ fun PlaylistPager(
                         style = SaltTheme.textStyles.sub,
                         fontSize = 12.sp,
                         textAlign = TextAlign.Start,
-                        color = uiColor
+                        color = uiColor.copy(0.7f)
                     )
                 }
 
@@ -151,68 +191,134 @@ fun PlaylistPager(
                     Icon(
                         painter = painterResource(R.drawable.ic_close_24px),
                         contentDescription = "clear playlist",
-                        tint = uiColor
+                        tint = uiColor.copy(0.7f)
                     )
                 }
             }
-            RoundedColumn(
-                modifier = Modifier
-                    .fillMaxSize(),
-                color = Color.Transparent
+            ItemDivider(
+                modifier = Modifier.fillMaxWidth(),
+                color = uiColor.copy(alpha = 0.8f),
+                startIndent = 0.dp
+            )
+            LazyColumn(
+                modifier = Modifier.fillMaxSize().weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                state = listState,
             ) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    state = listState,
-                ) {
-                    if (playlist.isEmpty()) {
-                        item {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(32.dp),
-                                contentAlignment = Alignment.Center
+                if (playlist.isEmpty()) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(32.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
                             ) {
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.Center
-                                ) {
-                                    Text(
-                                        text = "暂无音乐",
-                                        style = SaltTheme.textStyles.main,
-                                        color = uiColor
-                                    )
-                                    Text(
-                                        text = "添加媒体文件到播放列表",
-                                        style = SaltTheme.textStyles.sub,
-                                        modifier = Modifier.padding(top = 8.dp),
-                                        color = uiColor
-                                    )
-                                }
+                                Text(
+                                    text = "暂无音乐",
+                                    style = SaltTheme.textStyles.main,
+                                    color = uiColor
+                                )
+                                Text(
+                                    text = "添加媒体文件到播放列表",
+                                    style = SaltTheme.textStyles.sub,
+                                    modifier = Modifier.padding(top = 8.dp),
+                                    color = uiColor.copy(0.7f)
+                                )
                             }
                         }
-                    } else {
-                        itemsIndexed(
-                            items = playlist,
-                            key = { index, _ -> index }
-                        ) { index, playlistItem ->
-                            PlaylistItem(
-                                currentPlaying = currentPlaying,
-                                currentPlayingIndex = currentPlayingIndex,
-                                itemIndex = index,
-                                mediaItem = playlistItem,
-                                onClick = {
-                                    playerViewModel.playAtIndex(index)
-                                },
-                                onRemoveClick = {
-                                    playerViewModel.removeFromPlaylist(it)
-                                },
-                                textColor = uiColor
-                            )
-                        }
+                    }
+                } else {
+                    itemsIndexed(
+                        items = playlist,
+                        key = { index, _ -> index }
+                    ) { index, playlistItem ->
+                        PlaylistItem(
+                            currentPlaying = currentPlaying,
+                            currentPlayingIndex = currentPlayingIndex,
+                            itemIndex = index,
+                            mediaItem = playlistItem,
+                            onClick = {
+                                playerViewModel.playAtIndex(index)
+                            },
+                            onRemoveClick = {
+                                playerViewModel.removeFromPlaylist(it)
+                            },
+                            textColor = uiColor
+                        )
                     }
                 }
             }
+            Spacer(Modifier.height(1.dp))
+            ItemDivider(
+                modifier = Modifier.fillMaxWidth(),
+                color = uiColor.copy(alpha = 0.8f),
+                startIndent = 0.dp
+            )
+            Spacer(Modifier.height(1.dp))
         }
     }
+}
+
+@Composable
+private fun PlaylistNowPlayingHeader(
+    mediaItem: MediaItem?,
+    color: Color,
+    onClick: () -> Unit = { }
+) {
+    Row(
+        modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
+            .clickable(onClick = {
+                onClick()
+            })
+            .fillMaxWidth()
+            .padding(horizontal = 6.dp, vertical = 8.dp)
+    ) {
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(mediaItem?.mediaMetadata?.artworkUri)
+                .crossfade(true)
+                .placeholder(R.drawable.ic_nav_music)
+                .build(),
+            modifier = Modifier
+                .padding(horizontal = 8.dp)
+                .size(50.dp)
+                .clip(RoundedCornerShape(4.dp))
+                .align(Alignment.CenterVertically),
+            contentDescription = "Album Art",
+            contentScale = ContentScale.Crop
+        )
+
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 4.dp, vertical = 2.dp)
+                .weight(1f)
+                .align(Alignment.CenterVertically)
+        ) {
+            Text(
+                text = mediaItem?.mediaMetadata?.title.toString(),
+                style = SaltTheme.textStyles.main,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                color = color
+            )
+
+            val artist = mediaItem?.mediaMetadata?.artist.toString()
+            val album = mediaItem?.mediaMetadata?.albumTitle.toString()
+
+            val subTitle = "$artist - $album"
+            Text(
+                text = subTitle,
+                style = SaltTheme.textStyles.sub,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                color = color.copy(alpha = 0.5f)
+            )
+        }
+    }
+
 }

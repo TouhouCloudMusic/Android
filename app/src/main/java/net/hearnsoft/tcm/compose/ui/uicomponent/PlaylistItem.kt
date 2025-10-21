@@ -48,7 +48,7 @@ fun PlaylistItem(
             .clip(RoundedCornerShape(8.dp))
             .clickable(onClick = onClick)
             .background(if (isCurrentPlaying) Theme.colors.alphaStroke else Color.Transparent)
-            .padding(8.dp)
+            .padding(vertical = 4.dp, horizontal = 8.dp)
     ) {
         Column(
             modifier = modifier
@@ -71,12 +71,12 @@ fun PlaylistItem(
                 style = SaltTheme.textStyles.sub,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                color = textColor
+                color = textColor.copy(alpha = 0.5f)
             )
         }
         IconButton(
             modifier = Modifier
-                .padding(horizontal = 8.dp)
+                .padding(horizontal = 4.dp)
                 .align(Alignment.CenterVertically),
             onClick = {
                 onRemoveClick(mediaItem)

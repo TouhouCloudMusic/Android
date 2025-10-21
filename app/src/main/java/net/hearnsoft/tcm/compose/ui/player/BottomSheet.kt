@@ -93,11 +93,6 @@ fun BottomSheet(
                 )
             }.background(SaltTheme.colors.subBackground) // 设置背景色,
     ) {
-        // 当面板未完全折叠且未被关闭时，启用返回按钮处理
-        if (!state.isCollapsed && state.progress > 0.1f) {
-            BackHandler(onBack = state::collapseSoft)
-        }
-
         // 展开状态下的内容显示
         if (!state.isCollapsed) {
             BoxWithConstraints(

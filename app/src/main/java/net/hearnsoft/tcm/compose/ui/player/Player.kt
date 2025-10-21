@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.view.Window
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -166,9 +167,13 @@ fun BottomSheetPlayer(
     }
 
     // Pager状态
-    val pagerState = rememberPagerState(
+    val horizontalPagerState = rememberPagerState(
         pageCount = { 3 },
         initialPage = 1
+    )
+    val verticalPagerState = rememberPagerState(
+        pageCount = { 2 },
+        initialPage = 0
     )
 
     // 进度条位置
@@ -238,6 +243,19 @@ fun BottomSheetPlayer(
         }
     }
 
+    // 处理返回键逻辑
+    BackHandler(enabled = state.isExpanded) {
+        if (verticalPagerState.currentPage == 1) {
+            // 如果是播放列表页，返回时先切回主要视图页
+            coroutineScope.launch {
+                verticalPagerState.animateScrollToPage(0)
+            }
+        } else {
+            // 否则，折叠 BottomSheet
+            state.collapseSoft()
+        }
+    }
+
     BottomSheet(
         state = state,
         modifier = modifier,
@@ -250,7 +268,7 @@ fun BottomSheetPlayer(
                     state.expandSoft()
                     // 然后跳转到播放列表页面（第1页，index为0）
                     coroutineScope.launch {
-                        pagerState.animateScrollToPage(0)
+                        verticalPagerState.animateScrollToPage(1)
                     }
                 }
             )
@@ -278,11 +296,11 @@ fun BottomSheetPlayer(
                 Box(
                     modifier = modifier.safeMainPadding()
                 ) {
+                    // 根视图的分页
                     VerticalPager(
-                        state = rememberPagerState(
-                            pageCount = { 2 },
-                            initialPage = 0
-                        )
+                        state = verticalPagerState,
+                        beyondViewportPageCount = 1,
+                        modifier = Modifier.fillMaxSize(),
                     ) { page ->
                         when (page) {
                             0 -> {
@@ -338,7 +356,7 @@ fun BottomSheetPlayer(
 
                                     // 横向Pager
                                     HorizontalPager(
-                                        state = pagerState,
+                                        state = horizontalPagerState,
                                         modifier = Modifier
                                             .fillMaxSize()
                                             .weight(1f)
@@ -347,7 +365,7 @@ fun BottomSheetPlayer(
                                         beyondViewportPageCount = 1
                                     ) { page ->
                                         when (page) {
-                                            0 -> PlaylistPager(playerViewModel = playerViewModel)
+                                            0 -> Box(Modifier.fillMaxSize())
                                             1 -> CoverPager(artworkUri = artworkUri,
                                                 isPlaying = isPlaying, coverType = playerCoverType)
                                             2 -> LyricsPager(playerViewModel = playerViewModel)
@@ -625,7 +643,7 @@ fun BottomSheetPlayer(
                                                         .align(Alignment.Center),
                                                     onClick = {
                                                         coroutineScope.launch {
-                                                            pagerState.animateScrollToPage(0)
+                                                            verticalPagerState.animateScrollToPage(1)
                                                         }
                                                     }
                                                 )
@@ -686,15 +704,14 @@ fun BottomSheetPlayer(
                                 }
                             }
                             1 -> {
-                                LazyColumn(Modifier.fillMaxSize()) {
-                                    items(50) {
-                                        Text(
-                                            text = "Item $it",
-                                            modifier = Modifier
-                                                .outerPadding()
-                                        )
+                                PlaylistPager(
+                                    playerViewModel = playerViewModel,
+                                    onCollapseTextClick = {
+                                        coroutineScope.launch {
+                                            verticalPagerState.animateScrollToPage(0)
+                                        }
                                     }
-                                }
+                                )
                             }
                         }
                     }

@@ -232,6 +232,23 @@ class PlayerController @Inject constructor(
     }
 
     /**
+     * 从播放列表中移除媒体项
+     * @param index 要移除的媒体项索引
+     */
+    fun removeMediaItemFromPlaylist(index: Int) {
+        mediaController?.let { controller ->
+            try {
+                controller.removeMediaItem(index)
+                Logger.debug("PlayerController", "移除播放列表中索引 $index 的歌曲")
+            } catch (e: Exception) {
+                Logger.err("PlayerController", "移除歌曲失败: ${e.message}")
+            }
+        } ?: run {
+            Logger.warn("PlayerController", "媒体控制器未连接，无法移除歌曲")
+        }
+    }
+
+    /**
      * 清空播放列表
      */
     fun clearPlaylist() {

@@ -522,20 +522,7 @@ class PlayerViewModel @Inject constructor(
             }
             
             // 移除歌曲
-            actualPlaylist.removeAt(indexToRemove)
-            
-            // 重新计算播放索引
-            val currentIndex = playerController.getCurrentMediaItemIndex()
-            val newIndex = if (isCurrentlyPlaying) {
-                currentIndex
-            } else if (indexToRemove < currentIndex) {
-                currentIndex - 1
-            } else {
-                currentIndex
-            }
-            
-            playerController.setPlaylist(actualPlaylist, newIndex.coerceAtLeast(0))
-            
+            playerController.removeMediaItemFromPlaylist(indexToRemove)
             Logger.debug(TAG, "移除歌曲（位置 $indexToRemove），播放列表大小: ${actualPlaylist.size}")
         } else {
             Logger.warn(TAG, "尝试移除不存在的歌曲: ${mediaItem.mediaId}")

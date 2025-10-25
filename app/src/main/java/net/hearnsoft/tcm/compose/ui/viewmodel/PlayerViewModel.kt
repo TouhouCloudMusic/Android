@@ -89,6 +89,9 @@ class PlayerViewModel @Inject constructor(
     val currentMediaItemIndex = playerController.currentMediaItemIndex
     val repeatMode = playerController.repeatMode
     val shuffleModeEnabled = playerController.shuffleModeEnabled
+    // 播放器音高和速度
+    val playbackSpeed = playerController.playbackSpeed
+    val pitch = playerController.pitch
 
     // 歌词
     val lyrics = playerController.lyrics
@@ -633,6 +636,26 @@ class PlayerViewModel @Inject constructor(
             }
         }
     }
+
+    // === 播放器播放状态方法 ===
+    /**
+     * 设置播放器音高
+     * @param pitch 音高值，1.0 为正常音高
+     */
+    fun setPlayerPitch(pitch: Float) {
+        playerController.setPitch(pitch)
+        Logger.debug(TAG, "设置播放器音高: $pitch")
+    }
+
+    /**
+     * 设置播放器播放速度
+     * @param speed 播放速度，1.0 为正常速度
+     */
+    fun setPlayerSpeed(speed: Float) {
+        playerController.setPlaybackSpeed(speed)
+        Logger.debug(TAG, "设置播放器播放速度: $speed")
+    }
+
 
     // === 辅助方法 ===
 

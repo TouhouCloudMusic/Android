@@ -72,6 +72,7 @@ import net.hearnsoft.tcm.compose.ui.uicomponent.HashTag
 import net.hearnsoft.tcm.compose.ui.uicomponent.RatingDialog
 import net.hearnsoft.tcm.compose.ui.uicomponent.ResizableIconButton
 import net.hearnsoft.tcm.compose.ui.uicomponent.flowing.FlowingLightBackground
+import net.hearnsoft.tcm.compose.ui.uicomponent.sheet.MusicFXSheetDialog
 import net.hearnsoft.tcm.compose.ui.uicomponent.sheet.SongActionSheetDialog
 import net.hearnsoft.tcm.compose.ui.utils.LocalPlayerUIColor
 import net.hearnsoft.tcm.compose.ui.utils.PlayerForegroundColorLight
@@ -135,6 +136,18 @@ fun BottomSheetPlayer(
     // 选中的歌曲，用于显示操作对话框
     var selectedSong by remember { mutableStateOf<SongEntity?>(null) }
     var showActionDialog by remember { mutableStateOf(false) }
+    // 均衡器对话框显示控制
+    var showEqualizerDialog by remember { mutableStateOf(false) }
+
+    // 显示均衡器对话框
+    if (showEqualizerDialog) {
+        MusicFXSheetDialog(
+            playerViewModel = playerViewModel,
+            onDismissRequest = {
+                showEqualizerDialog = false
+            }
+        )
+    }
 
     // 显示评分对话框
     if (showRatingDialog) {
@@ -153,6 +166,7 @@ fun BottomSheetPlayer(
         )
     }
 
+    // 显示歌曲操作对话框
     if (showActionDialog) {
         selectedSong?.let {
             SongActionSheetDialog(
@@ -658,16 +672,12 @@ fun BottomSheetPlayer(
                                         ) {
                                             IconButton(
                                                 onClick = {
-                                                    IntentUtils.openSystemEqualizer(context) ?: Toast.makeText(
-                                                        context,
-                                                        "未检测到系统均衡器应用",
-                                                        Toast.LENGTH_SHORT
-                                                    ).show()
+                                                    showEqualizerDialog = true
                                                 }
                                             ) {
                                                 Icon(
                                                     painter = painterResource(R.drawable.ic_equalizer_24px),
-                                                    contentDescription = "打开均衡器",
+                                                    contentDescription = "均衡器对话框",
                                                     tint = LocalPlayerUIColor.current,
                                                     modifier = Modifier.size(24.dp)
                                                 )

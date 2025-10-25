@@ -20,6 +20,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
@@ -104,6 +105,13 @@ class PlayerController @Inject constructor(
     val lyrics: StateFlow<String?> = PlayerLyricsBridge.lyrics
     val lyricsFormat: StateFlow<LyricsFormat> = PlayerLyricsBridge.lyricsFormat
 
+    // === 播放速度与音高 ===
+    private val _playbackSpeed = MutableStateFlow(1.0f)
+    val playbackSpeed: StateFlow<Float> = _playbackSpeed.asStateFlow()
+    
+    private val _pitch = MutableStateFlow(1.0f)
+    val pitch: StateFlow<Float> = _pitch.asStateFlow()
+
     private val playerListener = object : Player.Listener {
         override fun onIsPlayingChanged(isPlaying: Boolean) {
             _isPlaying.value = isPlaying
@@ -151,6 +159,8 @@ class PlayerController @Inject constructor(
                         _currentMediaItem.value = controller.currentMediaItem
                         _repeatMode.value = controller.repeatMode
                         _shuffleModeEnabled.value = controller.shuffleModeEnabled
+                        _playbackSpeed.value = controller.playbackParameters.speed
+                        _pitch.value = controller.playbackParameters.pitch
                     }
 
                     Logger.debug("PlayerController", "成功连接到媒体控制器")
@@ -449,5 +459,35 @@ class PlayerController @Inject constructor(
      */
     fun isPlayerAvailable(): Boolean {
         return mediaController != null && _isConnected.value
+    }
+
+    // 额外播放器功能设置
+
+    /**
+     * 设置播放器播放速度
+     * @param speed 播放速度，范围通常为 0.5 到 2.0
+     */
+    fun setPlaybackSpeed(speed: Float) {
+        mediaController?.let { controller ->
+            val params = controller.playbackParameters
+            controller.playbackParameters = params.withSpeed(speed)
+            _playbackSpeed.value = speed
+        } ?: run {
+            Logger.warn("PlayerController", "媒体控制器未连接，无法设置播放速度")
+        }
+    }
+
+    /**
+     * 设置播放器音高
+     * @param pitch 音高值，范围通常为 0.5 到 2.0
+     */
+    fun setPitch(pitch: Float) {
+        mediaController?.let { controller ->
+            val params = controller.playbackParameters
+            controller.playbackParameters = params.withPitch(pitch)
+            _pitch.value = pitch
+        } ?: run {
+            Logger.warn("PlayerController", "媒体控制器未连接，无法设置音高")
+        }
     }
 }

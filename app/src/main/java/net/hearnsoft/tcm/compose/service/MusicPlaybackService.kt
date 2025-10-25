@@ -56,12 +56,6 @@ class MusicPlaybackService : MediaLibraryService(), AnalyticsListener {
         initializePlayer()
         initializeSession()
 
-        // 添加播放器监听器
-        player?.addListener(object : Player.Listener {
-            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-
-            }
-        })
         player?.addAnalyticsListener(this)
     }
 
@@ -96,7 +90,7 @@ class MusicPlaybackService : MediaLibraryService(), AnalyticsListener {
 
         val provider : DefaultMediaNotificationProvider = DefaultMediaNotificationProvider.Builder(this)
             .build()
-        provider.setSmallIcon(R.drawable.ic_launcher_foreground)
+        provider.setSmallIcon(R.drawable.ic_app_logo)
         setMediaNotificationProvider(provider)
     }
 

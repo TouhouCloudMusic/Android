@@ -258,15 +258,15 @@ fun BottomSheetPlayer(
     }
 
     // 处理返回键逻辑
-    BackHandler(enabled = state.isExpanded) {
-        if (verticalPagerState.currentPage == 1) {
-            // 如果是播放列表页，返回时先切回主要视图页
+    BackHandler(enabled = !state.isCollapsed && state.progress > 0.1f) {
+        if (verticalPagerState.currentPage == 0) {
+            // 如果是默认的主要视图页，直接折叠 BottomSheet
+            state.collapseSoft()
+        } else {
+            // 否则回到主要视图页
             coroutineScope.launch {
                 verticalPagerState.animateScrollToPage(0)
             }
-        } else {
-            // 否则，折叠 BottomSheet
-            state.collapseSoft()
         }
     }
 

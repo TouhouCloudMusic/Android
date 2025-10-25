@@ -136,7 +136,7 @@ class PlayerViewModel @Inject constructor(
 
     private fun observeDataChanges() {
         // 歌曲过滤监听
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.Default) {
             combine(
                 _rawSongs,
                 _currentSongSortingRule
@@ -147,7 +147,7 @@ class PlayerViewModel @Inject constructor(
             }
         }
         // 专辑数据监听
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.Default) {
             combine(
                 _rawAlbums,
                 _currentAlbumSortingRule
@@ -256,7 +256,7 @@ class PlayerViewModel @Inject constructor(
 
     // 专辑数据加载方法
     fun loadAllAlbums() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             musicRepository.getAllAlbums()
                 .catch { e ->
                     Logger.err(TAG, "加载专辑失败: ${e.message}")
@@ -293,7 +293,7 @@ class PlayerViewModel @Inject constructor(
      * 加载所有歌曲
      */
     fun loadAllSongs() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _isLoading.value = true
             musicRepository.getAllSongs()
                 .catch { e ->

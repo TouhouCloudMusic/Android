@@ -53,17 +53,24 @@ fun MusicFXSheetDialog(
             ItemSlider(
                 text = "播放速度",
                 value = playbackSpeed?:1.0f,
-                valueRange = 0.1f..4.0f,
-                steps = 40,
-                onValueChange = { playerViewModel.setPlayerSpeed(it) },
+                valueRange = 0.2f..2.0f,
+                steps = 35,
+                onValueChange = { 
+                    // 舍入到最接近的 0.05 的倍数
+                    val roundedValue = (it * 20).toInt() / 20f
+                    playerViewModel.setPlayerSpeed(roundedValue)
+                 },
                 sub = String.format("%.2fx", playbackSpeed)
             )
             ItemSlider(
                 text = "音高调整",
                 value = pitch?:1.0f,
-                valueRange = 0.1f..2f,
-                steps = 20,
-                onValueChange = { playerViewModel.setPlayerPitch(it) },
+                valueRange = 0.1f..2.0f,
+                steps = 18,
+                onValueChange = { 
+                    val roundedValue = (it * 10).toInt() / 10f
+                    playerViewModel.setPlayerPitch(roundedValue)
+                 },
                 sub = String.format("%.2f", pitch)
             )
         }

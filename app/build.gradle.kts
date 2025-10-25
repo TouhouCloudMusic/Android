@@ -61,11 +61,16 @@ android {
         }
 
         release {
-            isMinifyEnabled = false
+            multiDexEnabled = true
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            dexOptions {
+                preDexLibraries = true
+                dexInProcess = true
+            }
         }
     }
     compileOptions {

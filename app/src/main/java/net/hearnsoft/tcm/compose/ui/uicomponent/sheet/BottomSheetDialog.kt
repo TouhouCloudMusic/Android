@@ -1,9 +1,9 @@
 package net.hearnsoft.tcm.compose.ui.uicomponent.sheet
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -22,7 +22,7 @@ fun BottomSheetDialog(
     onDismissRequest: () -> Unit = {},
     title: String = "",
     skipPartiallyExpanded: Boolean = false,
-    showDragHandle: Boolean = true,
+    showDragHandle: Boolean = false,
     content: @Composable (dismiss: () -> Unit) -> Unit
 ) {
 
@@ -42,7 +42,7 @@ fun BottomSheetDialog(
 
     ModalBottomSheet(
         dragHandle = if (showDragHandle) {
-            { /* 默认拖拽手柄 */ }
+            { BottomSheetDefaults.DragHandle() }
         } else {
             { /* 空内容，不显示拖拽手柄 */ }
         },
@@ -52,14 +52,13 @@ fun BottomSheetDialog(
         },
         sheetState = sheetState,
         modifier = modifier,
-        contentColor = SaltTheme.colors.subBackground,
-        containerColor = SaltTheme.colors.subBackground,
+        contentColor = SaltTheme.colors.background,
+        containerColor = SaltTheme.colors.background,
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp, vertical = 8.dp)
-                .background(SaltTheme.colors.subBackground)
         ) {
             if (title.isNotEmpty()) {
                 Text(
@@ -68,7 +67,7 @@ fun BottomSheetDialog(
                     color = SaltTheme.colors.text,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp, horizontal = 8.dp)
+                        .padding(vertical = 16.dp, horizontal = 20.dp)
                 )
             }
             // 将 dismiss 方法传递给 content

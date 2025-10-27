@@ -247,27 +247,5 @@ class MusicPlaybackService : MediaLibraryService(), AnalyticsListener {
             }
             return super.onCustomCommand(session, controller, customCommand, args)
         }
-
-        @UnstableApi
-        override fun onPlaybackResumption(
-            mediaSession: MediaSession,
-            controller: MediaSession.ControllerInfo
-        ): ListenableFuture<MediaItemsWithStartPosition> {
-            return super.onPlaybackResumption(mediaSession, controller)
-        }
-
-        override fun onGetItem(
-            session: MediaLibrarySession,
-            browser: MediaSession.ControllerInfo,
-            mediaId: String
-        ): ListenableFuture<LibraryResult<MediaItem>> {
-            // 根据ID查找媒体项
-            for (item in playlist) {
-                if (mediaId == item.mediaId) {
-                    return Futures.immediateFuture(LibraryResult.ofItem(item, null))
-                }
-            }
-            return super.onGetItem(session, browser, mediaId)
-        }
     }
 }

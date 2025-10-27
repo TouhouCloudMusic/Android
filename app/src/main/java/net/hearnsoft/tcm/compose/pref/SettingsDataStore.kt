@@ -25,6 +25,7 @@ class SettingsDataStore(context: Context) {
         val MUSIC_SCAN_NOT_INCLUDE_60S_MEDIA = booleanPreferencesKey("music_scan_not_include_60s_media")
 
         // 用户界面
+        val APP_DYNAMIC_COLOR_ENABLED = booleanPreferencesKey("app_dynamic_color_enabled")
         val PLAYER_SQUIGGLY_WAVE_ENABLED = booleanPreferencesKey("player_squiggly_wave_enabled")
         val PLAYER_SHOW_MUSIC_TAGS_ENABLED = booleanPreferencesKey("player_show_music_tags_enabled")
         val PLAYER_COVER_TYPE = intPreferencesKey("player_cover_type")
@@ -42,6 +43,12 @@ class SettingsDataStore(context: Context) {
         }
 
     // 用户界面的设置
+    val appDynamicColorEnabled: Flow<Boolean> = dataStore.data
+        .map { preferences ->
+            // 默认禁用
+            preferences[APP_DYNAMIC_COLOR_ENABLED] ?: false
+        }
+
     val isPlayerSquigglyWaveEnabled: Flow<Boolean> = dataStore.data
         .map { preferences ->
             // 默认启用
@@ -83,6 +90,12 @@ class SettingsDataStore(context: Context) {
     }
 
     // 用户界面的设置
+    suspend fun setAppDynamicColorEnabled(isEnabled: Boolean) {
+        dataStore.edit { settings ->
+            settings[APP_DYNAMIC_COLOR_ENABLED] = isEnabled
+        }
+    }
+
     suspend fun setPlayerSquigglyWaveEnabled(isEnabled: Boolean) {
         dataStore.edit { settings ->
             settings[PLAYER_SQUIGGLY_WAVE_ENABLED] = isEnabled

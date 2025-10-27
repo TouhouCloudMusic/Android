@@ -179,9 +179,6 @@ dependencies {
     // Hilt Navigation Compose
     implementation (libs.androidx.hilt.navigation.compose)
 
-    // Material Color Utilities
-    implementation(project(":material-color-utilities"))
-
     // Palettes
     implementation(libs.palette)
     implementation(libs.palette.ktx)

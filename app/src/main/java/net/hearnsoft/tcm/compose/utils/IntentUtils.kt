@@ -17,7 +17,7 @@ object IntentUtils {
                     MUSIC_TAG_APP_PACKAGE,
                     MUSIC_TAG_APP_ACTIVITY
                 )
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
             }
             context.startActivity(intent)
         }.onFailure {

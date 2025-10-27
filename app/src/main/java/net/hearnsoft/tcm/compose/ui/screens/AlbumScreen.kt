@@ -139,7 +139,7 @@ fun AlbumScreen(
                         // 显示分碟列表
                         groupedSongs.toSortedMap(compareBy { it ?: Int.MAX_VALUE }).forEach { (discNumber, songs) ->
                             item {
-                                DiscHeader(discNumber = discNumber)
+                                DiscHeader(discNumber = discNumber, songsCount = songs.size)
                             }
 
                             items(
@@ -194,18 +194,27 @@ fun AlbumScreen(
 
 @Composable
 @UnstableSaltUiApi
-fun DiscHeader(discNumber: Int?) {
+fun DiscHeader(discNumber: Int?, songsCount: Int?) {
     val discText = when (discNumber) {
         null -> "未定义碟号"
         else -> "Disc $discNumber"
     }
 
-    Text(
-        text = discText,
-        style = SaltTheme.textStyles.main,
-        color = SaltTheme.colors.highlight,
-        modifier = Modifier.padding(vertical = 8.dp, horizontal = 8.dp)
-    )
+    Row(Modifier.padding(vertical = 8.dp, horizontal = 8.dp)) {
+        Text(
+            text = discText,
+            style = SaltTheme.textStyles.main,
+            color = SaltTheme.colors.highlight,
+            modifier = Modifier.weight(1f).align(Alignment.CenterVertically)
+        )
+
+        Text(
+            text = "${songsCount ?: 0} 首歌曲",
+            style = SaltTheme.textStyles.sub,
+            color = SaltTheme.colors.subText,
+            modifier = Modifier.align(Alignment.CenterVertically)
+        )
+    }
 }
 
 

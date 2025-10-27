@@ -132,7 +132,7 @@ fun FlowingLightBackground(
                     .graphicsLayer {
                         rotationZ = rotation1Value
                     },
-                blurRadius = 60.dp
+                blurRadius = 80.dp
             )
 
             CompatBlurImage(
@@ -145,7 +145,7 @@ fun FlowingLightBackground(
                     .graphicsLayer {
                         rotationZ = rotation1Value
                     },
-                blurRadius = 60.dp
+                blurRadius = 80.dp
             )
 
             CompatBlurImage(
@@ -158,7 +158,7 @@ fun FlowingLightBackground(
                     .graphicsLayer {
                         rotationZ = rotation2Value
                     },
-                blurRadius = 60.dp
+                blurRadius = 80.dp
             )
 
             CompatBlurImage(
@@ -171,7 +171,7 @@ fun FlowingLightBackground(
                     .graphicsLayer {
                         rotationZ = rotation1Value
                     },
-                blurRadius = 60.dp
+                blurRadius = 80.dp
             )
 
             CompatBlurImage(
@@ -184,7 +184,7 @@ fun FlowingLightBackground(
                     .graphicsLayer {
                         rotationZ = rotation2Value
                     },
-                blurRadius = 60.dp
+                blurRadius = 80.dp
             )
 
             // 覆盖一层深色的半透明前景，提升对比度

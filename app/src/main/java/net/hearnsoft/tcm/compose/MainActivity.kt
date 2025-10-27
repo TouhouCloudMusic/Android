@@ -11,6 +11,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.annotation.OptIn
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.core.view.WindowCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.hjq.permissions.XXPermissions
@@ -18,6 +20,7 @@ import com.hjq.permissions.permission.PermissionLists
 import com.moriafly.salt.ui.UnstableSaltUiApi
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.UnstableApi
+import net.hearnsoft.tcm.compose.pref.SettingsDataStore
 import net.hearnsoft.tcm.compose.service.MusicPlaybackService
 import net.hearnsoft.tcm.compose.ui.theme.TouhouCloudMusicTheme
 import net.hearnsoft.tcm.compose.ui.views.AppRootView
@@ -40,6 +43,9 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private val context: Context
+        get() = this@MainActivity
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -53,7 +59,16 @@ class MainActivity : ComponentActivity() {
             .registerReceiver(appExitReceiver, filter)
 
         setContent {
-            TouhouCloudMusicTheme {
+            // 设置项目读取
+            val settingsDataStore = remember { SettingsDataStore(context) }
+            // 是否启用动态颜色
+            val useDynamicColor = settingsDataStore.appDynamicColorEnabled.collectAsState(
+                initial = false
+            ).value
+
+            TouhouCloudMusicTheme(
+                useDynamicColor = useDynamicColor
+            ) {
                 AppRootView(
                     context = this@MainActivity
                 )

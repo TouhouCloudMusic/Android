@@ -1,5 +1,6 @@
 package net.hearnsoft.tcm.compose.ui.screens
 
+import android.os.Build
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,6 +35,7 @@ fun SettingsScreen(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val settingsDataStore = remember { SettingsDataStore(context) }
+    val isAppDynamicColorEnabled by settingsDataStore.appDynamicColorEnabled.collectAsState(initial = false)
     val isPlayerSquigglyWaveEnabled by settingsDataStore.isPlayerSquigglyWaveEnabled.collectAsState(initial = true)
     val isPlayerShowMusicTagsEnabled by settingsDataStore.isPlayerShowMusicTagsEnabled.collectAsState(initial = true)
     val playerCoverType by settingsDataStore.playerCoverType
@@ -53,8 +55,19 @@ fun SettingsScreen(
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize()) {
             val popupState = rememberPopupState()
+            val isAndroid12OrAbove = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
             ItemOuterTitle(text = "用户界面")
             RoundedColumn {
+                ItemSwitcher(
+                    text = "动态颜色主题（Android 12+）",
+                    state = isAppDynamicColorEnabled,
+                    enabled = isAndroid12OrAbove,
+                    onChange = { state ->
+                        coroutineScope.launch {
+                            settingsDataStore.setAppDynamicColorEnabled(state)
+                        }
+                    }
+                )
                 ItemSwitcher(
                     text = "启用播放器进度条波形动画",
                     state = isPlayerSquigglyWaveEnabled,

@@ -85,10 +85,10 @@ private fun ColorScheme.toSaltColors(): SaltColors = SaltColors(
     text = this.onBackground, // 主要文字颜色
     subText = this.onSurfaceVariant, // 次要文字颜色
     background = this.background, // 主背景色
-    subBackground = this.surface, // 次要背景色
-    popup = this.surfaceContainer, // 弹窗背景色
-    stroke = this.outline, // 描边颜色
-    onHighlight = this.primary // 高亮色上的文字颜色
+    subBackground = this.surfaceContainerLow, // 使用更低对比度的surface
+    popup = this.surfaceContainerHigh, // 弹窗使用更高对比度的surface
+    stroke = this.outlineVariant, // 使用更柔和的outline变体
+    onHighlight = this.onPrimary // 使用onPrimary确保在高亮色上的文字有足够对比度
 )
 
 // 定义主题颜色

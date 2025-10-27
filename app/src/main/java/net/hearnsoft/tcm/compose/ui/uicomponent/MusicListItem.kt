@@ -87,7 +87,7 @@ fun MusicListItem(
                 style = SaltTheme.textStyles.main,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                color = if (isCurrentPlaying) Theme.colors.primary else SaltTheme.colors.text
+                color = if (isCurrentPlaying) SaltTheme.colors.highlight else SaltTheme.colors.text
             )
 
             val artist = songEntity.artistName ?: "未知艺术家"
@@ -99,7 +99,7 @@ fun MusicListItem(
                 style = SaltTheme.textStyles.sub,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                color = if (isCurrentPlaying) Theme.colors.primary else SaltTheme.colors.subText
+                color = if (isCurrentPlaying) SaltTheme.colors.highlight else SaltTheme.colors.subText
             )
         }
 

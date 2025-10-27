@@ -16,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.moriafly.salt.ui.Button
 import com.moriafly.salt.ui.ItemButton
@@ -24,6 +25,7 @@ import com.moriafly.salt.ui.ItemEditPassword
 import com.moriafly.salt.ui.RoundedColumn
 import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.UnstableSaltUiApi
+import net.hearnsoft.tcm.compose.R
 import net.hearnsoft.tcm.compose.domain.model.auth.AuthState
 import net.hearnsoft.tcm.compose.domain.model.auth.LoginCredential
 import net.hearnsoft.tcm.compose.ui.screens.ScreenRoute
@@ -48,12 +50,12 @@ fun LoginScreen(
             is AuthState.Authenticated -> {
                 // 登录成功，返回上一个界面
                 navController.popBackStack()
-                Toast.makeText(context, "欢迎回来，${authState.user.name}！", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, context.getString(R.string.welcome_back, authState.user.name), Toast.LENGTH_LONG).show()
             }
             is AuthState.Error -> {
                 // 登录失败，显示错误信息
                 Logger.err("LoginScreen", "登录失败: ${authState.message}")
-                Toast.makeText(context, "登录失败: ${authState.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, context.getString(R.string.login_failed, authState.message), Toast.LENGTH_LONG).show()
                 userViewModel.clearAuthError()
             }
             else -> {
@@ -69,14 +71,14 @@ fun LoginScreen(
                 onChange = {
                     username = it
                 },
-                hint = "用户名",
+                hint = stringResource(R.string.username_hint),
             )
             ItemEditPassword(
                 text = password,
                 onChange = {
                     password = it
                 },
-                hint = "密码",
+                hint = stringResource(R.string.password_hint),
             )
         }
 
@@ -87,7 +89,7 @@ fun LoginScreen(
                     horizontal = SaltTheme.dimens.padding,
                     vertical = SaltTheme.dimens.padding * 0.5f
                 ),
-            text = "登录",
+            text = stringResource(R.string.login_button),
             onClick = {
                 userViewModel.signIn(
                     LoginCredential(
@@ -102,13 +104,13 @@ fun LoginScreen(
 
         RoundedColumn {
             ItemButton(
-                text = "注册账号",
+                text = stringResource(R.string.register_account),
                 onClick = {
                     navController.navigate(ScreenRoute.RegisterPage.route)
                 }
             )
             ItemButton(
-                text = "忘记密码？",
+                text = stringResource(R.string.forgot_password),
                 onClick = {
                     Logger.debug("LoginScreen", "忘记密码")
                 }

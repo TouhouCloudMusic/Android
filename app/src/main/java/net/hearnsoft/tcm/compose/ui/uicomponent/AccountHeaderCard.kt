@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -111,7 +112,7 @@ fun AccountHeaderCard(
                     Row(Modifier.padding(vertical = 8.dp)
                         .align(Alignment.CenterHorizontally)) {
                         Text(
-                            text = user?.name ?: "未登录",
+                            text = user?.name ?: stringResource(R.string.not_logged_in_account),
                             style = SaltTheme.textStyles.main,
                             maxLines = 1,
                             color = Color.White,
@@ -147,10 +148,10 @@ fun AccountHeaderCard(
                             if (!user.bio.isNullOrBlank()) {
                                 user.bio
                             } else {
-                                "这个人很懒，什么都没留下"
+                                stringResource(R.string.bio_empty)
                             }
                         } else {
-                            "点击登录"
+                            stringResource(R.string.click_to_login)
                         },
                         maxLines = 1,
                         style = SaltTheme.textStyles.sub,

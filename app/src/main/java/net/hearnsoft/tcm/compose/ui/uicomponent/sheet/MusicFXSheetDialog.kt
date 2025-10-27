@@ -7,12 +7,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.media3.common.util.UnstableApi
 import com.moriafly.salt.ui.Item
 import com.moriafly.salt.ui.ItemOuterTitle
 import com.moriafly.salt.ui.ItemSlider
 import com.moriafly.salt.ui.RoundedColumn
 import com.moriafly.salt.ui.UnstableSaltUiApi
+import net.hearnsoft.tcm.compose.R
 import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
 import net.hearnsoft.tcm.compose.utils.IntentUtils
 
@@ -32,26 +34,26 @@ fun MusicFXSheetDialog(
     val pitch = playerViewModel.pitch.collectAsState().value
 
     BottomSheetDialog(
-        title = "音乐效果",
+        title = stringResource(R.string.music_effects),
         modifier = modifier,
         onDismissRequest = onDismissRequest,
     ) {
         RoundedColumn {
             Item(
-                text = "系统均衡器",
+                text = stringResource(R.string.system_equalizer),
                 onClick = {
                     IntentUtils.openSystemEqualizer(context) ?: Toast.makeText(
                         context,
-                        "未检测到系统均衡器应用",
+                        context.getString(R.string.equalizer_not_found),
                         Toast.LENGTH_SHORT
                     ).show()
                 }
             )
         }
-        ItemOuterTitle("速度和音高调整")
+        ItemOuterTitle(stringResource(R.string.speed_and_pitch))
         RoundedColumn {
             ItemSlider(
-                text = "播放速度",
+                text = stringResource(R.string.playback_speed),
                 value = playbackSpeed?:1.0f,
                 valueRange = 0.2f..2.0f,
                 steps = 35,
@@ -63,7 +65,7 @@ fun MusicFXSheetDialog(
                 sub = String.format("%.2fx", playbackSpeed)
             )
             ItemSlider(
-                text = "音高调整",
+                text = stringResource(R.string.pitch_adjustment),
                 value = pitch?:1.0f,
                 valueRange = 0.1f..2.0f,
                 steps = 18,

@@ -73,12 +73,11 @@ class LocalMusicRepository @Inject constructor(
     // === 数据同步操作 ===
     override suspend fun scanAndUpdateLibrary(onProgress: ((String) -> Unit)?) {
         try {
-            onProgress?.invoke("正在扫描文件并更新数据库内容...")
             val scannedItems = LocalMusicScanner.scanDeviceMusic(context)
             Logger.debug("LocalMusicRepository", "扫描到 ${scannedItems.size} 首歌曲")
 
             if (scannedItems.isEmpty()) {
-                onProgress?.invoke("未发现音频文件")
+                onProgress?.invoke("No media files found.")
                 return
             }
 
@@ -163,12 +162,8 @@ class LocalMusicRepository @Inject constructor(
                 Logger.debug("LocalMusicRepository", "插入歌曲: ${finalSongEntity.title}")
 
                 processedCount++
-                if (processedCount % 10 == 0 || processedCount == scannedItems.size) {
-                    onProgress?.invoke("正在更新数据库内容... ($processedCount/${scannedItems.size})")
-                }
+                onProgress?.invoke("${songEntity.title}\n($processedCount/${scannedItems.size})")
             }
-
-            onProgress?.invoke("音乐库更新完成！共处理 ${scannedItems.size} 首歌曲")
             Logger.debug("LocalMusicRepository", "音乐库更新完成，共处理 ${scannedItems.size} 首歌曲")
         } catch (e: Exception) {
             Logger.err("LocalMusicRepository", "更新音乐库时出错: ${e.message}")

@@ -164,17 +164,17 @@ fun AppRootView(
 
         // 根据当前路由设置标题
         val title = when {
-            currentRoute?.startsWith("album/") == true -> "专辑"
-            currentRoute == ScreenRoute.Explore.route -> "发现"
-            currentRoute == ScreenRoute.Library.route -> "曲库"
-            currentRoute == ScreenRoute.Statistics.route -> "统计"
-            currentRoute == ScreenRoute.Music.route -> "音乐"
-            currentRoute == ScreenRoute.Account.route -> "个人"
-            currentRoute == ScreenRoute.Settings.route -> "设置"
-            currentRoute == ScreenRoute.Scan.route -> "扫描媒体"
-            currentRoute == ScreenRoute.SearchPage.route -> "搜索"
-            currentRoute == ScreenRoute.LoginPage.route -> "登录"
-            currentRoute == ScreenRoute.RegisterPage.route -> "注册"
+            currentRoute?.startsWith("album/") == true -> stringResource(R.string.title_album)
+            currentRoute == ScreenRoute.Explore.route -> stringResource(R.string.title_explore)
+            currentRoute == ScreenRoute.Library.route -> stringResource(R.string.title_library)
+            currentRoute == ScreenRoute.Statistics.route -> stringResource(R.string.title_statistics)
+            currentRoute == ScreenRoute.Music.route -> stringResource(R.string.title_music)
+            currentRoute == ScreenRoute.Account.route -> stringResource(R.string.title_account)
+            currentRoute == ScreenRoute.Settings.route -> stringResource(R.string.drawer_settings)
+            currentRoute == ScreenRoute.Scan.route -> stringResource(R.string.title_scan)
+            currentRoute == ScreenRoute.SearchPage.route -> stringResource(R.string.title_search)
+            currentRoute == ScreenRoute.LoginPage.route -> stringResource(R.string.title_login)
+            currentRoute == ScreenRoute.RegisterPage.route -> stringResource(R.string.title_register)
             else -> stringResource(R.string.app_name)
         }
 
@@ -326,11 +326,11 @@ fun MainBottomBar(
         ScreenRoute.MainScreens.forEach { screen ->
             BottomBarItem(
                 text = when (screen) {
-                    ScreenRoute.Explore -> "发现"
-                    ScreenRoute.Library -> "曲库"
-                    ScreenRoute.Statistics -> "统计"
-                    ScreenRoute.Music -> "音乐"
-                    ScreenRoute.Account -> "个人"
+                    ScreenRoute.Explore -> stringResource(R.string.title_explore)
+                    ScreenRoute.Library -> stringResource(R.string.title_library)
+                    ScreenRoute.Statistics -> stringResource(R.string.title_statistics)
+                    ScreenRoute.Music -> stringResource(R.string.title_music)
+                    ScreenRoute.Account -> stringResource(R.string.title_account)
                     else -> ""
                 },
                 onClick = {

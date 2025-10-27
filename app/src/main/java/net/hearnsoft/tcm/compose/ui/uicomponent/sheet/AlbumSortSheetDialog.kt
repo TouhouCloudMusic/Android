@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.moriafly.salt.ui.Icon
@@ -34,18 +35,18 @@ fun AlbumSortSheetDialog(
 ) {
 
     val sortRulesOptions = listOf(
-        "标题" to AlbumSortingStrategy.AlbumName,
-        "年份" to AlbumSortingStrategy.AlbumYear,
-        "数量" to AlbumSortingStrategy.SongCount,
+        R.string.sort_by_title to AlbumSortingStrategy.AlbumName,
+        R.string.sort_by_year to AlbumSortingStrategy.AlbumYear,
+        R.string.sort_by_count to AlbumSortingStrategy.SongCount,
     )
 
     BottomSheetDialog(
         modifier = modifier,
         onDismissRequest = onDismissRequest,
-        title = "专辑排序规则",
+        title = stringResource(R.string.album_sort_rule),
     ) { dismiss ->
         RoundedColumn(modifier.selectableGroup()) {
-            sortRulesOptions.forEach { (optionText, strategy) ->
+            sortRulesOptions.forEach { (stringResId, strategy) ->
                 val isSelected = currentRule.strategy == strategy
                 val arrow = if (isSelected) {
                     if (currentRule.reverse)
@@ -81,7 +82,7 @@ fun AlbumSortSheetDialog(
                         modifier = Modifier.align(Alignment.CenterVertically)
                     )
                     Text(
-                        text = optionText,
+                        text = stringResource(stringResId),
                         style = SaltTheme.textStyles.main,
                         color = if (isSelected) SaltTheme.colors.highlight else SaltTheme.colors.text,
                         modifier = Modifier

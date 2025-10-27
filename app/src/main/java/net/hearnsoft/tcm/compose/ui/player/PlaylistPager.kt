@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -95,8 +96,8 @@ fun PlaylistPager(
 
     if (showClearPlaylist && playlist.isNotEmpty()) {
         YesNoDialog(
-            title = "清空播放列表",
-            content = "是否要清空当前播放列表？",
+            title = stringResource(R.string.clear_playlist),
+            content = stringResource(R.string.clear_playlist_confirm),
             onConfirm = {
                 playerViewModel.clearPlaylist()
                 showClearPlaylist = false
@@ -104,8 +105,8 @@ fun PlaylistPager(
             onDismissRequest = {
                 showClearPlaylist = false
             },
-            confirmText = "确定",
-            cancelText = "取消"
+            confirmText = stringResource(R.string.confirm),
+            cancelText = stringResource(R.string.cancel)
         )
     }
 
@@ -125,7 +126,7 @@ fun PlaylistPager(
                     .padding(horizontal = 4.dp, vertical = 4.dp)
             ) {
                 Text(
-                    text = "下滑或点击此处返回播放页面",
+                    text = stringResource(R.string.collapse_player_hint),
                     textAlign = TextAlign.Center,
                     style = SaltTheme.textStyles.sub,
                     fontSize = 12.sp,
@@ -170,7 +171,7 @@ fun PlaylistPager(
                 }
 
                 Text(
-                    text = "播放列表",
+                    text = stringResource(R.string.playlist_title),
                     style = SaltTheme.textStyles.main,
                     fontSize = 16.sp,
                     modifier = Modifier
@@ -218,12 +219,12 @@ fun PlaylistPager(
                                 verticalArrangement = Arrangement.Center
                             ) {
                                 Text(
-                                    text = "暂无音乐",
+                                    text = stringResource(R.string.empty_playlist),
                                     style = SaltTheme.textStyles.main,
                                     color = uiColor
                                 )
                                 Text(
-                                    text = "添加媒体文件到播放列表",
+                                    text = stringResource(R.string.empty_playlist_description),
                                     style = SaltTheme.textStyles.sub,
                                     modifier = Modifier.padding(top = 8.dp),
                                     color = uiColor.copy(0.7f)

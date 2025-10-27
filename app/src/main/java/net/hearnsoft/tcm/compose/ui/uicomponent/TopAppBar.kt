@@ -109,7 +109,7 @@ fun MainTopAppBar(
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_menu_24px),
-                contentDescription = "侧边栏抽屉"
+                contentDescription = stringResource(R.string.cd_drawer)
             )
         }
         Text(
@@ -126,7 +126,7 @@ fun MainTopAppBar(
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_search_24px),
-                contentDescription = "搜索"
+                contentDescription = stringResource(R.string.cd_search)
             )
         }
     }

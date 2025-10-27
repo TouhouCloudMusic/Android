@@ -43,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
@@ -106,9 +107,9 @@ fun BottomSheetPlayer(
     // 封面
     val artworkUri = currentPlaying?.mediaMetadata?.artworkUri
     // 标题
-    val title = currentPlaying?.mediaMetadata?.title ?: "未知歌曲"
+    val title = currentPlaying?.mediaMetadata?.title ?: stringResource(R.string.unknown_song)
     // 艺术家
-    val artist = currentPlaying?.mediaMetadata?.artist ?: "未知艺术家"
+    val artist = currentPlaying?.mediaMetadata?.artist ?: stringResource(R.string.unknown_artist)
 
     // 进度
     val currentPosition = playerViewModel.currentPosition.collectAsState().value
@@ -157,9 +158,9 @@ fun BottomSheetPlayer(
             },
             onConfirm = { rating ->
                 if (rating < 0.5f) {
-                    Toast.makeText(context, "评分不能为空哦", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.rating_empty_error), Toast.LENGTH_SHORT).show()
                 } else {
-                    Toast.makeText(context, "感谢你的评分: $rating 星", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.rating_thanks, "$rating"), Toast.LENGTH_SHORT).show()
                 }
                 showRatingDialog = false
             }

@@ -324,14 +324,11 @@ class PlayerViewModel @Inject constructor(
             try {
                 _isLoading.value = true
                 _scanCompleted.value = false
-                _scanProgress.value = "开始扫描设备音乐文件..."
 
                 // 调用仓库层方法，传入进度回调
                 musicRepository.scanAndUpdateLibrary { progress ->
                     _scanProgress.value = progress
                 }
-
-                _scanProgress.value = "应用排序中..."
                 Logger.debug(TAG, "音乐库扫描更新完成")
 
                 _scanProgress.value = null

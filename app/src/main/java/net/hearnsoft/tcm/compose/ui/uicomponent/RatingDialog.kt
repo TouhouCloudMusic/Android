@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.window.DialogProperties
 import com.gowtham.ratingbar.RatingBar
 import com.gowtham.ratingbar.RatingBarStyle
@@ -20,6 +21,7 @@ import com.moriafly.salt.ui.UnstableSaltUiApi
 import com.moriafly.salt.ui.dialog.BasicDialog
 import com.moriafly.salt.ui.dialog.DialogTitle
 import com.moriafly.salt.ui.outerPadding
+import net.hearnsoft.tcm.compose.R
 
 @UnstableSaltUiApi
 @Composable
@@ -34,7 +36,7 @@ fun RatingDialog(
         onDismissRequest = onDismissRequest,
         properties = DialogProperties()
     ) {
-        DialogTitle(text = "来打个分吧")
+        DialogTitle(text = stringResource(R.string.rate_dialog_title))
         RatingBar(
             modifier = Modifier.outerPadding(),
             value = rating,
@@ -55,7 +57,7 @@ fun RatingDialog(
                 },
                 modifier = Modifier
                     .weight(1f),
-                text = "取消",
+                text = stringResource(R.string.cancel),
                 textColor = SaltTheme.colors.subText,
                 backgroundColor = SaltTheme.colors.subBackground
             )
@@ -66,7 +68,7 @@ fun RatingDialog(
                 },
                 modifier = Modifier
                     .weight(1f),
-                text = "提交"
+                text = stringResource(R.string.submit)
             )
         }
     }

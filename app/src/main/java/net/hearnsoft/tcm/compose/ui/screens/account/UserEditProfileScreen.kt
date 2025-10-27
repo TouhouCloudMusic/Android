@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
@@ -52,6 +53,7 @@ import com.moriafly.salt.ui.dialog.InputDialog
 import com.moriafly.salt.ui.dialog.YesNoDialog
 import net.hearnsoft.tcm.compose.ui.crop.ImageCropActivity
 import net.hearnsoft.tcm.compose.R
+import net.hearnsoft.tcm.compose.domain.model.user.UserOperationState
 import net.hearnsoft.tcm.compose.ui.screens.ScreenRoute
 import net.hearnsoft.tcm.compose.ui.utils.getFullImageUrl
 import net.hearnsoft.tcm.compose.ui.viewmodel.UserViewModel
@@ -68,9 +70,7 @@ fun UserEditProfileScreen(
     val context = LocalContext.current
 
     val user = userViewModel.user.collectAsState().value
-    val successMsg = userViewModel.successMessage.collectAsState().value
-    val errorMsg = userViewModel.error.collectAsState().value
-    val isLoading = userViewModel.isLoading.collectAsState().value
+    val operationState = userViewModel.operationState.collectAsState().value
 
     val bioText = remember { mutableStateOf(user?.bio ?: "") }
     val showBioDialog = remember { mutableStateOf(false) }
@@ -135,6 +135,39 @@ fun UserEditProfileScreen(
         }
     }
 
+    // 监听操作状态
+    LaunchedEffect(operationState) {
+        when (operationState) {
+            is UserOperationState.Success.AvatarUploaded -> {
+                Toast.makeText(context, context.getString(R.string.avatar_uploaded_success), Toast.LENGTH_SHORT).show()
+                userViewModel.clearOperationState()
+            }
+            is UserOperationState.Success.BannerUploaded -> {
+                Toast.makeText(context, context.getString(R.string.banner_uploaded_success), Toast.LENGTH_SHORT).show()
+                userViewModel.clearOperationState()
+            }
+            is UserOperationState.Success.BioUpdated -> {
+                Toast.makeText(context, context.getString(R.string.bio_updated_success), Toast.LENGTH_SHORT).show()
+                userViewModel.clearOperationState()
+            }
+            is UserOperationState.Success.ProfileUpdated -> {
+                // 静默更新，不显示Toast
+                userViewModel.clearOperationState()
+            }
+            is UserOperationState.Success.LoggedOut -> {
+                Toast.makeText(context, context.getString(R.string.logout_success), Toast.LENGTH_SHORT).show()
+                userViewModel.clearOperationState()
+            }
+            is UserOperationState.Error -> {
+                val errorMsg = operationState.throwable.message ?: context.getString(R.string.unknown_error)
+                Logger.err("UserEditProfileScreen", "Error: $errorMsg")
+                Toast.makeText(context, errorMsg, Toast.LENGTH_LONG).show()
+                userViewModel.clearOperationState()
+            }
+            else -> { /* Idle or Loading */ }
+        }
+    }
+
     LaunchedEffect(user) {
         if (user == null) {
             // 用户未登录，导航回账户主界面
@@ -145,29 +178,15 @@ fun UserEditProfileScreen(
         }
     }
 
-    LaunchedEffect(successMsg) {
-        successMsg?.let { msg ->
-            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
-            userViewModel.clearSuccessMessage()
-        }
-    }
-
-    LaunchedEffect(errorMsg) {
-        errorMsg?.let { msg ->
-            Logger.err("UserEditProfileScreen", "Error: $msg")
-            Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
-            userViewModel.clearError()
-        }
-    }
-
-    // 监听用户信息变化，更新简介文本
     LaunchedEffect(user?.bio) {
         bioText.value = user?.bio ?: ""
     }
 
+    val isLoading = operationState is UserOperationState.Loading
+
     if (showBioDialog.value) {
         InputDialog(
-            title = "编辑简介",
+            title = stringResource(R.string.edit_bio),
             text = bioText.value,
             onDismissRequest = {
                 showBioDialog.value = false
@@ -179,15 +198,15 @@ fun UserEditProfileScreen(
             onChange = { text ->
                 bioText.value = text
             },
-            confirmText = "保存",
-            cancelText = "取消",
+            confirmText = stringResource(R.string.save),
+            cancelText = stringResource(R.string.cancel),
         )
     }
 
     if (showLogoutDialog.value) {
         YesNoDialog(
-            title = "确认退出登录？",
-            content = "退出后将使用访客身份浏览内容",
+            title = stringResource(R.string.logout_confirm_title),
+            content = stringResource(R.string.logout_confirm_message),
             onDismissRequest = {
                 showLogoutDialog.value = false
             },
@@ -195,8 +214,8 @@ fun UserEditProfileScreen(
                 userViewModel.signOut()
                 showLogoutDialog.value = false
             },
-            cancelText = "取消",
-            confirmText = "确定",
+            cancelText = stringResource(R.string.cancel),
+            confirmText = stringResource(R.string.confirm),
         )
     }
 
@@ -321,7 +340,7 @@ fun UserEditProfileScreen(
                     Spacer(modifier = Modifier.size(8.dp))
                 }
                 Text(
-                    text = if (isLoading && currentCropType == "banner") "上传中..." else "更换横幅图片",
+                    text = if (isLoading && currentCropType == "banner") stringResource(R.string.uploading) else stringResource(R.string.change_banner),
                     color = Color.White
                 )
             }
@@ -331,8 +350,8 @@ fun UserEditProfileScreen(
 
         Column(Modifier.fillMaxWidth()) {
             Item(
-                text = "用户名",
-                sub = user?.name ?: "未登录",
+                text = stringResource(R.string.username_label),
+                sub = user?.name ?: stringResource(R.string.not_logged_in),
                 modifier = Modifier
                     .fillMaxWidth(),
                 onClick = {
@@ -341,15 +360,15 @@ fun UserEditProfileScreen(
                 enabled = false // 用户名不可编辑
             )
             Item(
-                text = "简介",
+                text = stringResource(R.string.bio_label),
                 sub = if (user != null) {
                     if (!user.bio.isNullOrBlank()) {
                         user.bio
                     } else {
-                        "这个人很懒，什么都没留下"
+                        stringResource(R.string.bio_empty)
                     }
                 } else {
-                    "未登录"
+                    stringResource(R.string.not_logged_in)
                 },
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -379,7 +398,7 @@ fun UserEditProfileScreen(
             ),
         ) {
             Text(
-                text = "退出登录",
+                text = stringResource(R.string.logout_button),
                 color = Color.White
             )
         }

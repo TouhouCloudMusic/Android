@@ -17,6 +17,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.util.UnstableApi
@@ -73,6 +74,7 @@ fun SongActionSheetDialog(
 fun SongActionHeader(
     songEntity: SongEntity
 ) {
+    val context = LocalContext.current
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 8.dp)
     ) {
@@ -98,15 +100,15 @@ fun SongActionHeader(
                 .align(Alignment.CenterVertically)
         ) {
             Text(
-                text = songEntity.title ?: "未知歌曲",
+                text = songEntity.title ?: context.getString(R.string.unknown_song),
                 style = SaltTheme.textStyles.main,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 color = SaltTheme.colors.text
             )
 
-            val artist = songEntity.artistName ?: "未知艺术家"
-            val album = songEntity.albumName ?: "未知专辑"
+            val artist = songEntity.artistName ?: context.getString(R.string.unknown_artist)
+            val album = songEntity.albumName ?: context.getString(R.string.unknown_album)
 
             val subTitle = "$artist - $album"
             Text(
@@ -140,7 +142,7 @@ fun SongActionSheetContent(
                 playerViewModel.addToPlayNext(songEntity)
                 onDismissRequest()
             },
-            text = "添加到下一首播放",
+            text = stringResource(R.string.add_to_next),
             iconPainter = painterResource(R.drawable.ic_playlist_play_24px),
             iconColor = SaltTheme.colors.highlight,
         )
@@ -151,7 +153,7 @@ fun SongActionSheetContent(
                     onDismissRequest()
                 }
             },
-            text = "艺术家：${songEntity.artistName ?: "未知艺术家"}",
+            text = stringResource(R.string.artist_label, songEntity.artistName ?: context.getString(R.string.unknown_artist)),
             iconPainter = painterResource(R.drawable.ic_artist_24px),
             iconColor = SaltTheme.colors.highlight,
         )
@@ -162,18 +164,18 @@ fun SongActionSheetContent(
                     onDismissRequest()
                 }
             },
-            text = "专辑：${songEntity.albumName ?: "未知专辑"}",
+            text = stringResource(R.string.album_label, songEntity.albumName ?: context.getString(R.string.unknown_album)),
             iconPainter = painterResource(R.drawable.ic_album_24px),
             iconColor = SaltTheme.colors.highlight,
         )
         Item(
             onClick = {
                 if (!IntentUtils.openMusicTagApp(context = context, musicUri = songEntity.contentUri)) {
-                    Toast.makeText(context, "未找到音乐标签应用", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.music_tag_not_found), Toast.LENGTH_SHORT).show()
                 }
                 onDismissRequest()
             },
-            text = "在 音乐标签 App中编辑信息...",
+            text = stringResource(R.string.edit_in_music_tag),
             iconPainter = painterResource(R.drawable.ic_edit_24px),
             iconColor = SaltTheme.colors.highlight,
         )

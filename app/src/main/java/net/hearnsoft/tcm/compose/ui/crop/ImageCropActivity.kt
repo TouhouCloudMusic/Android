@@ -37,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import com.moriafly.salt.ui.SaltTheme
@@ -85,7 +86,7 @@ class ImageCropActivity : ComponentActivity() {
         ) {
             val config = CropConfig(
                 cropShape = CropShapeConfig.Square,
-                title = "裁剪头像",
+                title = context.getString(R.string.crop_avatar),
                 filePrefix = "avatar"
             )
             startForResult(context, imageUri, config, launcher)
@@ -101,7 +102,7 @@ class ImageCropActivity : ComponentActivity() {
         ) {
             val config = CropConfig(
                 cropShape = CropShapeConfig.Banner_3_1,
-                title = "裁剪横幅",
+                title = context.getString(R.string.crop_banner),
                 filePrefix = "banner"
             )
             startForResult(context, imageUri, config, launcher)
@@ -119,7 +120,7 @@ class ImageCropActivity : ComponentActivity() {
 
         if (imageUri == null) {
             Logger.err("ImageCropActivity", "Image URI is null")
-            Toast.makeText(this, "图片URI无效", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.invalid_image_uri), Toast.LENGTH_SHORT).show()
             setResult(RESULT_CANCELED)
             finish()
             return

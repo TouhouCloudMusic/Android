@@ -38,7 +38,7 @@ class UserRepositoryImpl @Inject constructor(
             if (response.isSuccess() && response.data != null) {
                 Result.success(response.data!!.toUser())
             } else {
-                Result.failure(Exception(response.message ?: "获取用户资料失败"))
+                Result.failure(Exception(response.message ?: "Failed to fetch user profile"))
             }
         } catch (e: HttpException) {
             Result.failure(Exception(parseErrorMessage(e)))
@@ -53,7 +53,7 @@ class UserRepositoryImpl @Inject constructor(
             if (response.isSuccess() && response.data != null) {
                 Result.success(response.data!!.toUser())
             } else {
-                Result.failure(Exception(response.message ?: "获取用户资料失败"))
+                Result.failure(Exception(response.message ?: "Failed to fetch user profile"))
             }
         } catch (e: HttpException) {
             Result.failure(Exception(parseErrorMessage(e)))
@@ -68,7 +68,7 @@ class UserRepositoryImpl @Inject constructor(
             if (response.isSuccess() && response.data != null) {
                 Result.success(response.data!!.toUser())
             } else {
-                Result.failure(Exception(response.message ?: "登录失败"))
+                Result.failure(Exception(response.message ?: "Sign in failed"))
             }
         } catch (e: HttpException) {
             Result.failure(Exception(parseErrorMessage(e)))
@@ -84,7 +84,7 @@ class UserRepositoryImpl @Inject constructor(
                 apiService.clearCookies()
                 Result.success(Unit)
             } else {
-                Result.failure(Exception(response.message ?: "登出失败"))
+                Result.failure(Exception(response.message ?: "Sign out failed"))
             }
         } catch (e: HttpException) {
             Result.failure(Exception(parseErrorMessage(e)))
@@ -99,7 +99,7 @@ class UserRepositoryImpl @Inject constructor(
             if (response.isSuccess() && response.data != null) {
                 Result.success(response.data!!.toUser())
             } else {
-                Result.failure(Exception(response.message ?: "注册失败"))
+                Result.failure(Exception(response.message ?: "Sign up failed"))
             }
         } catch (e: HttpException) {
             Result.failure(Exception(parseErrorMessage(e)))
@@ -118,7 +118,7 @@ class UserRepositoryImpl @Inject constructor(
             if (response.isSuccess()) {
                 Result.success(Unit)
             } else {
-                Result.failure(Exception(response.message ?: "上传头像失败"))
+                Result.failure(Exception(response.message ?: "Failed to upload avatar"))
             }
         } catch (e: HttpException) {
             Result.failure(Exception(parseErrorMessage(e)))
@@ -137,7 +137,7 @@ class UserRepositoryImpl @Inject constructor(
             if (response.isSuccess()) {
                 Result.success(Unit)
             } else {
-                Result.failure(Exception(response.message ?: "上传背景图失败"))
+                Result.failure(Exception(response.message ?: "Failed to upload banner"))
             }
         } catch (e: HttpException) {
             Result.failure(Exception(parseErrorMessage(e)))
@@ -153,7 +153,7 @@ class UserRepositoryImpl @Inject constructor(
             if (response.isSuccess()) {
                 Result.success(Unit)
             } else {
-                Result.failure(Exception(response.message ?: "更新简介失败"))
+                Result.failure(Exception(response.message ?: "Failed to update bio"))
             }
         } catch (e: HttpException) {
             Result.failure(Exception(parseErrorMessage(e)))
@@ -163,26 +163,32 @@ class UserRepositoryImpl @Inject constructor(
     }
 
     /**
-     * 解析HTTP异常中的错误消息
+     * Parse error message from HTTP exception.
+     * Priority: Server message > HTTP status message > Generic fallback
      */
     private fun parseErrorMessage(httpException: HttpException): String {
         return try {
-            // 尝试从错误响应中解析BaseResponse
+            // Try to parse BaseResponse from error body (server's original message)
             val errorBody = httpException.response()?.errorBody()?.string()
             if (!errorBody.isNullOrEmpty()) {
                 val errorResponse = gson.fromJson(errorBody, BaseResponse::class.java)
-                errorResponse.message ?: "请求失败"
-            } else {
-                "网络请求失败"
+                // Use server's original message if available
+                errorResponse.message?.takeIf { it.isNotBlank() }?.let { return it }
             }
+            
+            // Fallback to HTTP status message
+            httpException.message()?.takeIf { it.isNotBlank() }?.let { return it }
+            
+            // Generic fallback based on HTTP code
+            "HTTP ${httpException.code()}: ${httpException.message() ?: "Request failed"}"
         } catch (e: Exception) {
-            // 如果解析失败，返回默认错误消息
-            "网络请求失败"
+            // If parsing fails, use the original exception message
+            httpException.message() ?: "Network request failed"
         }
     }
 
     /**
-     * 从URI创建RequestBody
+     * Create RequestBody from URI for file upload
      */
     private fun createRequestBodyFromUri(uri: Uri): RequestBody {
         return object : RequestBody() {
@@ -196,13 +202,13 @@ class UserRepositoryImpl @Inject constructor(
                     while (inputStream.read(buffer).also { read = it } != -1) {
                         sink.write(buffer, 0, read)
                     }
-                } ?: throw IOException("无法打开文件流")
+                } ?: throw IOException("Cannot open file stream")
             }
         }
     }
 
     /**
-     * 从URI获取文件名
+     * Get file name from URI
      */
     @SuppressLint("Range")
     private fun getFileNameFromUri(uri: Uri): String {

@@ -30,6 +30,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.util.UnstableApi
 import coil3.compose.AsyncImage
@@ -55,8 +56,8 @@ fun MiniPlayer(
 
     val currentMediaItem = playerViewModel.currentMediaItem.collectAsState().value
     val artworkUri = currentMediaItem?.mediaMetadata?.artworkUri
-    val title = currentMediaItem?.mediaMetadata?.title ?: "未知歌曲"
-    val artist = currentMediaItem?.mediaMetadata?.artist ?: "未知艺术家"
+    val title = currentMediaItem?.mediaMetadata?.title ?: stringResource(R.string.unknown_song)
+    val artist = currentMediaItem?.mediaMetadata?.artist ?: stringResource(R.string.unknown_artist)
 
     Row(
         modifier = modifier

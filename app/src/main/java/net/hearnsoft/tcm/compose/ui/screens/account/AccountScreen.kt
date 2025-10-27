@@ -18,9 +18,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.moriafly.salt.ui.UnstableSaltUiApi
+import net.hearnsoft.tcm.compose.R
 import net.hearnsoft.tcm.compose.domain.model.auth.AuthState
 import net.hearnsoft.tcm.compose.ui.screens.ScreenRoute
 import net.hearnsoft.tcm.compose.ui.uicomponent.AccountHeaderCard
@@ -53,14 +55,14 @@ fun AccountScreen(
                 }
                 is AuthState.NetworkError -> {
                     // 网络错误，显示Toast
-                    Toast.makeText(context, "网络错误: ${authState.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.network_error, authState.message), Toast.LENGTH_SHORT).show()
                     isManualRefreshing = false
                     // 清除错误状态
                     userViewModel.clearAuthError()
                 }
                 is AuthState.Error -> {
                     // 出现错误，显示Toast并取消下拉状态
-                    Toast.makeText(context, "获取用户信息失败: ${authState.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.fetch_user_info_failed, authState.message), Toast.LENGTH_SHORT).show()
                     isManualRefreshing = false
                     // 清除错误状态
                     userViewModel.clearAuthError()

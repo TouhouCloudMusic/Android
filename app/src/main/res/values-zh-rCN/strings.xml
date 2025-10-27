@@ -3,4 +3,193 @@
     <string name="app_name">东方同音鉴</string>
     <string name="back_btn">返回</string>
     <string name="title_image_crop">图片裁剪</string>
+    
+    <!-- Common -->
+    <string name="unknown_song">未知歌曲</string>
+    <string name="unknown_artist">未知艺术家</string>
+    <string name="unknown_album">未知专辑</string>
+    <string name="confirm">确定</string>
+    <string name="cancel">取消</string>
+    
+    <!-- Search Screen -->
+    <string name="search_hint">键入关键字以搜索</string>
+    <string name="search_description">可以搜索本机音乐以及东方同音鉴站内的任何内容</string>
+    <string name="no_search_results">未找到相关内容</string>
+    <string name="try_different_keywords">尝试使用其他关键词</string>
+    <string name="searching">正在搜索…</string>
+    <string name="local_music">本地音乐</string>
+    <string name="network_content">网络内容</string>
+    <string name="match_label">匹配</string>
+    
+    <!-- Music Screen -->
+    <string name="music_type_song">歌曲</string>
+    <string name="music_type_album">专辑</string>
+    <string name="music_type_artist">艺术家</string>
+    <string name="music_type_folder">文件夹</string>
+    <string name="feature_in_development">该功能正在开发中…</string>
+    <string name="empty_music_list">暂无内容</string>
+    <string name="empty_music_description">在侧边菜单里找到 扫描媒体 来扫描设备中的音乐文件</string>
+    
+    <!-- Music Scan Screen -->
+    <string name="scan_music">扫描音乐</string>
+    <string name="scanning_music_title">正在扫描音乐</string>
+    <string name="preparing_scan">正在准备扫描音乐库，请稍候…</string>
+    <string name="scan_completed">扫描完成！</string>
+    <string name="scan_options">扫描选项</string>
+    <string name="not_include_60s">不扫描60秒以下的媒体文件</string>
+    <string name="no_storage_permission">未授予存储权限，无法扫描音乐</string>
+    
+    <!-- Player -->
+    <string name="rating_empty_error">评分不能为空哦</string>
+    <string name="rating_thanks">感谢你的评分: %s 星</string>
+    <string name="collapse_player_hint">下滑或点击此处返回播放页面</string>
+    <string name="playlist_title">播放列表</string>
+    <string name="clear_playlist">清空播放列表</string>
+    <string name="clear_playlist_confirm">是否要清空当前播放列表？</string>
+    <string name="empty_playlist">暂无音乐</string>
+    <string name="empty_playlist_description">添加媒体文件到播放列表</string>
+    <string name="no_lyrics">暂无歌词</string>
+    <string name="enjoy_pure_music">享受纯音乐的美妙时光</string>
+    
+    <!-- Album Screen -->
+    <string name="disc_undefined">未定义碟号</string>
+    <string name="disc_number">Disc %d</string>
+    <string name="song_count">%d 首歌曲</string>
+    <string name="song_count_with_year">%d年 - %d首</string>
+    <string name="play_all">播放全部</string>
+    
+    <!-- Song Actions -->
+    <string name="add_to_next">添加到下一首播放</string>
+    <string name="artist_label">艺术家：%s</string>
+    <string name="album_label">专辑：%s</string>
+    <string name="edit_in_music_tag">在 音乐标签 App中编辑信息…</string>
+    <string name="music_tag_not_found">未找到音乐标签应用</string>
+    
+    <!-- Sort Dialogs -->
+    <string name="music_sort_rule">音乐排序规则</string>
+    <string name="album_sort_rule">专辑排序规则</string>
+    <string name="sort_by_title">标题</string>
+    <string name="sort_by_artist">艺术家</string>
+    <string name="sort_by_album">专辑</string>
+    <string name="sort_by_duration">时长</string>
+    <string name="sort_by_date_added">添加时间</string>
+    <string name="sort_by_year">年份</string>
+    <string name="sort_by_count">数量</string>
+    
+    <!-- Music FX -->
+    <string name="music_effects">音乐效果</string>
+    <string name="system_equalizer">系统均衡器</string>
+    <string name="equalizer_not_found">未检测到系统均衡器应用</string>
+    <string name="speed_and_pitch">速度和音高调整</string>
+    <string name="playback_speed">播放速度</string>
+    <string name="pitch_adjustment">音高调整</string>
+    
+    <!-- Image Crop -->
+    <string name="crop_avatar">裁剪头像</string>
+    <string name="crop_banner">裁剪横幅</string>
+    <string name="invalid_image_uri">图片URI无效</string>
+    
+    <!-- Settings Screen -->
+    <string name="settings_ui_title">用户界面</string>
+    <string name="settings_dynamic_color">动态颜色主题（Android 12+）</string>
+    <string name="settings_player_wave">进度条波形动画</string>
+    <string name="settings_show_tags">播放器界面显示当前媒体标签</string>
+    <string name="settings_player_cover_type">播放器封面类型</string>
+    <string name="settings_cover_square">方形封面</string>
+    <string name="settings_cover_circle">圆形封面</string>
+    <string name="settings_player_behavior">播放器行为</string>
+    <string name="settings_seek_previous_action">上一曲行为</string>
+    <string name="settings_action_default">默认</string>
+    <string name="settings_action_previous">上一曲</string>
+    <string name="settings_action_restart">回到开头</string>
+    
+    <!-- Account Screen -->
+    <string name="network_error">网络错误: %s</string>
+    <string name="fetch_user_info_failed">获取用户信息失败: %s</string>
+    
+    <!-- Login Screen -->
+    <string name="welcome_back">欢迎回来，%s！</string>
+    <string name="login_failed">登录失败: %s</string>
+    <string name="username_hint">用户名</string>
+    <string name="password_hint">密码</string>
+    <string name="login_button">登录</string>
+    <string name="register_account">注册账号</string>
+    <string name="forgot_password">忘记密码？</string>
+    
+    <!-- Register Screen -->
+    <string name="welcome_join">%s，感谢你的加入！</string>
+    <string name="register_failed">注册失败: %s</string>
+    <string name="register_button">注册</string>
+    
+    <!-- User Profile Screen -->
+    <string name="loading">加载中…</string>
+    <string name="load_failed">加载失败</string>
+    <string name="not_logged_in">未登录</string>
+    <string name="unknown_user">未知用户</string>
+    <string name="last_login">最后登录: %s</string>
+    <string name="edit_profile">编辑资料</string>
+    <string name="following">已关注</string>
+    <string name="follow">关注</string>
+    
+    <!-- User Edit Profile Screen -->
+    <string name="user_banner">User Banner</string>
+    <string name="user_avatar">User Avatar</string>
+    <string name="change_banner">更换横幅图片</string>
+    <string name="username_label">用户名</string>
+    <string name="bio_label">简介</string>
+    <string name="bio_empty">这个人很懒，什么都没留下</string>
+    <string name="edit_bio">编辑简介</string>
+    <string name="save">保存</string>
+    <string name="logout_confirm_title">确认退出登录？</string>
+    <string name="logout_confirm_message">退出后将使用访客身份浏览内容</string>
+    <string name="logout_button">退出登录</string>
+    <string name="loading_failed_simple">加载失败</string>
+    <string name="uploading">上传中…</string>
+    <string name="rate_dialog_title">来打个分吧</string>
+    <string name="submit">提交</string>
+    <string name="total_songs">共 %d 首歌曲</string>
+    <string name="total_albums">共 %d 张专辑</string>
+    
+    <!-- Navigation titles -->
+    <string name="title_album">专辑</string>
+    <string name="title_explore">发现</string>
+    <string name="title_library">曲库</string>
+    <string name="title_statistics">统计</string>
+    <string name="title_music">音乐</string>
+    <string name="title_account">个人</string>
+    <string name="title_scan">扫描媒体</string>
+    <string name="title_search">搜索</string>
+    <string name="title_login">登录</string>
+    <string name="title_register">注册</string>
+    
+    <!-- Drawer menu -->
+    <string name="drawer_home">首页</string>
+    <string name="drawer_scan_media">扫描媒体</string>
+    <string name="drawer_settings">设置</string>
+    
+    <!-- Content descriptions -->
+    <string name="cd_drawer">侧边栏抽屉</string>
+    <string name="cd_search">搜索</string>
+    <string name="cd_clear_search">清除搜索</string>
+    <string name="cd_no_search_results">无搜索结果</string>
+    
+    <!-- Search -->
+    <string name="search_hint_topbar">在此处键入关键字以搜索</string>
+    
+    <!-- Account -->
+    <string name="not_logged_in_account">未登录</string>
+    <string name="click_to_login">点击登录</string>
+    
+    <!-- Album list -->
+    <string name="album_info_no_year">%1$d首 - %2$s</string>
+    <string name="album_info_with_year">%1$d年 %2$d首 - %3$s</string>
+    <string name="music_scan_progress_text">正在更新数据库...</string>
+    
+    <!-- User operation messages -->
+    <string name="avatar_uploaded_success">头像更新成功</string>
+    <string name="banner_uploaded_success">横幅更新成功</string>
+    <string name="bio_updated_success">简介更新成功</string>
+    <string name="profile_updated_success">资料更新成功</string>
+    <string name="logout_success">已登出</string>
+    <string name="unknown_error">发生未知错误</string>
 </resources>

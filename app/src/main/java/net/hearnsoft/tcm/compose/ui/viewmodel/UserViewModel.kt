@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import net.hearnsoft.tcm.compose.domain.model.auth.AuthState
 import net.hearnsoft.tcm.compose.domain.model.auth.LoginCredential
 import net.hearnsoft.tcm.compose.domain.model.user.User
+import net.hearnsoft.tcm.compose.domain.model.user.UserOperationState
 import net.hearnsoft.tcm.compose.domain.repository.UserRepository
 import javax.inject.Inject
 
@@ -23,14 +24,8 @@ class UserViewModel @Inject constructor(
     private val _user = MutableStateFlow<User?>(null)
     val user : StateFlow<User?> = _user.asStateFlow()
 
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading : StateFlow<Boolean> = _isLoading.asStateFlow()
-
-    private val _successMessage = MutableStateFlow<String?>(null)
-    val successMessage: StateFlow<String?> = _successMessage.asStateFlow()
-
-    private val _error = MutableStateFlow<String?>(null)
-    val error : StateFlow<String?> = _error.asStateFlow()
+    private val _operationState = MutableStateFlow<UserOperationState>(UserOperationState.Idle)
+    val operationState: StateFlow<UserOperationState> = _operationState.asStateFlow()
 
     private val _authState = MutableStateFlow<AuthState>(AuthState.Loading)
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
@@ -58,7 +53,7 @@ class UserViewModel @Inject constructor(
                     _user.value = user
                 }
                 .onFailure { exception ->
-                    _authState.value = AuthState.Error(exception.message ?: "登录失败")
+                    _authState.value = AuthState.Error(exception.message ?: "Sign in failed")
                 }
         }
     }
@@ -72,75 +67,71 @@ class UserViewModel @Inject constructor(
                     _user.value = user
                 }
                 .onFailure { exception ->
-                    _authState.value = AuthState.Error(exception.message ?: "注册失败")
+                    _authState.value = AuthState.Error(exception.message ?: "Sign up failed")
                 }
         }
     }
 
     fun signOut() {
         viewModelScope.launch {
+            _operationState.value = UserOperationState.Loading
             userRepository.signOut()
                 .onSuccess {
-                    _successMessage.value = "已登出"
+                    _operationState.value = UserOperationState.Success.LoggedOut
                     _authState.value = AuthState.NotAuthenticated
                     _user.value = null
                 }
                 .onFailure { exception ->
-                    _authState.value = AuthState.Error(exception.message ?: "登出失败")
+                    _operationState.value = UserOperationState.Error(exception)
+                    _authState.value = AuthState.Error(exception.message ?: "Logout failed")
                 }
         }
     }
 
     fun uploadAvatar(avatarUri: Uri) {
         viewModelScope.launch {
-            _isLoading.value = true
-            _error.value = null
+            _operationState.value = UserOperationState.Loading
 
             userRepository.uploadAvatar(avatarUri)
                 .onSuccess {
-                    _successMessage.value = "头像更新成功"
+                    _operationState.value = UserOperationState.Success.AvatarUploaded
                     // 成功后重新获取用户信息
                     getMyProfile()
                 }
                 .onFailure {
-                    _error.value = it.message
-                    _isLoading.value = false
+                    _operationState.value = UserOperationState.Error(it)
                 }
         }
     }
 
     fun uploadProfileBanner(bannerUri: Uri) {
         viewModelScope.launch {
-            _isLoading.value = true
-            _error.value = null
+            _operationState.value = UserOperationState.Loading
 
             userRepository.uploadProfileBanner(bannerUri)
                 .onSuccess {
-                    _successMessage.value = "横幅更新成功"
+                    _operationState.value = UserOperationState.Success.BannerUploaded
                     // 成功后重新获取用户信息
                     getMyProfile()
                 }
                 .onFailure {
-                    _error.value = it.message
-                    _isLoading.value = false
+                    _operationState.value = UserOperationState.Error(it)
                 }
         }
     }
 
     fun updateBioText(bio: String) {
         viewModelScope.launch {
-            _isLoading.value = true
-            _error.value = null
+            _operationState.value = UserOperationState.Loading
 
             userRepository.updateBio(bio)
                 .onSuccess {
-                    _successMessage.value = "简介更新成功"
+                    _operationState.value = UserOperationState.Success.BioUpdated
                     // 成功后重新获取用户信息
                     getMyProfile()
                 }
                 .onFailure {
-                    _error.value = it.message
-                    _isLoading.value = false
+                    _operationState.value = UserOperationState.Error(it)
                 }
         }
     }
@@ -155,11 +146,11 @@ class UserViewModel @Inject constructor(
 
             userRepository.getUserProfile(username)
                 .onSuccess { user ->
-                    _successMessage.value = "资料获取成功"
+                    _operationState.value = UserOperationState.Success.ProfileFetched
                     _profileUser.value = user
                 }
                 .onFailure { exception ->
-                    _profileError.value = exception.message ?: "获取用户资料失败"
+                    _profileError.value = exception.message
                 }
                 .also {
                     _profileLoading.value = false
@@ -171,15 +162,12 @@ class UserViewModel @Inject constructor(
         viewModelScope.launch {
             userRepository.getMyProfile()
                 .onSuccess { profile ->
-                    _successMessage.value = "资料更新成功"
+                    _operationState.value = UserOperationState.Success.ProfileUpdated
                     _user.value = profile
                     _authState.value = AuthState.Authenticated(profile)
                 }
                 .onFailure { throwable ->
-                    _error.value = throwable.message
-                }
-                .also {
-                    _isLoading.value = false
+                    _operationState.value = UserOperationState.Error(throwable)
                 }
         }
     }
@@ -198,7 +186,7 @@ class UserViewModel @Inject constructor(
                     when {
                         // 网络超时或连接错误，保持之前的认证状态或设为错误状态
                         isNetworkError(exception) -> {
-                            _authState.value = AuthState.NetworkError(exception.message ?: "网络连接失败")
+                            _authState.value = AuthState.NetworkError(exception.message ?: "Network connection failed")
                         }
                         // 401/403等认证错误才设为未认证
                         isAuthenticationError(exception) -> {
@@ -207,7 +195,7 @@ class UserViewModel @Inject constructor(
                         }
                         // 其他错误
                         else -> {
-                            _authState.value = AuthState.Error(exception.message ?: "检查认证状态失败")
+                            _authState.value = AuthState.Error(exception.message ?: "Failed to check auth status")
                         }
                     }
                 }
@@ -245,12 +233,11 @@ class UserViewModel @Inject constructor(
         _profileError.value = null
     }
 
-    fun clearSuccessMessage() {
-        _successMessage.value = null
-    }
-
-    fun clearError() {
-        _error.value = null
+    /**
+     * 清除操作状态
+     */
+    fun clearOperationState() {
+        _operationState.value = UserOperationState.Idle
     }
 
     /**

@@ -23,6 +23,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -83,15 +84,15 @@ fun MusicListItem(
                 .align(Alignment.CenterVertically)
         ) {
             Text(
-                text = songEntity.title ?: "未知歌曲",
+                text = songEntity.title ?: stringResource(R.string.unknown_song),
                 style = SaltTheme.textStyles.main,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 color = if (isCurrentPlaying) SaltTheme.colors.highlight else SaltTheme.colors.text
             )
 
-            val artist = songEntity.artistName ?: "未知艺术家"
-            val album = songEntity.albumName ?: "未知专辑"
+            val artist = songEntity.artistName ?: stringResource(R.string.unknown_artist)
+            val album = songEntity.albumName ?: stringResource(R.string.unknown_album)
 
             val subTitle = "$artist - $album"
             Text(

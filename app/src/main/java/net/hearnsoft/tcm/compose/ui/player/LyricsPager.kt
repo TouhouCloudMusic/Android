@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.util.UnstableApi
@@ -33,6 +34,7 @@ import com.mocharealm.accompanist.lyrics.ui.composable.lyrics.KaraokeLyricsView
 import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.UnstableSaltUiApi
 import kotlinx.coroutines.android.awaitFrame
+import net.hearnsoft.tcm.compose.R
 import net.hearnsoft.tcm.compose.constants.PlayerCoverVerticalPadding
 import net.hearnsoft.tcm.compose.constants.PlayerHorizontalPadding
 import net.hearnsoft.tcm.compose.ui.utils.LocalPlayerUIColor
@@ -153,13 +155,13 @@ private fun NoLyricsPlaceholder(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "暂无歌词",
+            text = stringResource(R.string.no_lyrics),
             style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center,
             color = uiColor,
         )
         Text(
-            text = "享受纯音乐的美妙时光",
+            text = stringResource(R.string.enjoy_pure_music),
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
             color = uiColor,

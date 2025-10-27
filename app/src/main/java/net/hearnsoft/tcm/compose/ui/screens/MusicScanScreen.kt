@@ -1,5 +1,6 @@
 package net.hearnsoft.tcm.compose.ui.screens
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -17,13 +18,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.util.UnstableApi
-import com.hjq.permissions.OnPermissionCallback
 import com.hjq.permissions.XXPermissions
 import com.hjq.permissions.permission.PermissionLists
-import com.hjq.permissions.permission.base.IPermission
 import com.moriafly.salt.ui.Button
 import com.moriafly.salt.ui.ButtonType
 import com.moriafly.salt.ui.Item
@@ -36,12 +36,12 @@ import com.moriafly.salt.ui.UnstableSaltUiApi
 import com.moriafly.salt.ui.dialog.BasicDialog
 import com.moriafly.salt.ui.dialog.DialogTitle
 import com.moriafly.salt.ui.outerPadding
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.hearnsoft.tcm.compose.R
 import net.hearnsoft.tcm.compose.pref.SettingsDataStore
 import net.hearnsoft.tcm.compose.ui.viewmodel.PlayerViewModel
 
+@SuppressLint("LocalContextGetResourceValueCall")
 @ExperimentalMaterial3Api
 @ExperimentalFoundationApi
 @UnstableSaltUiApi
@@ -68,15 +68,15 @@ fun MusicScanScreen(
 
         if (showDialog) {
             val dialogContent = when {
-                scanProgress == null && !scanCompleted -> "正在准备扫描音乐库，请稍候..."
-                scanProgress != null -> scanProgress!!
-                else -> "扫描完成！"
+                scanProgress == null && !scanCompleted -> stringResource(R.string.preparing_scan)
+                scanProgress != null -> "${stringResource(R.string.music_scan_progress_text)}\n${scanProgress!!}"
+                else -> stringResource(R.string.scan_completed)
             }
 
             ScanDialog(
-                title = "正在扫描音乐",
+                title = stringResource(R.string.scanning_music_title),
                 content = dialogContent,
-                confirmText = "确定",
+                confirmText = stringResource(R.string.confirm),
                 onDismissRequest = {
                     showDialog = false
                     // 只在对话框关闭时重置扫描状态
@@ -91,7 +91,7 @@ fun MusicScanScreen(
 
         RoundedColumn {
             Item(
-                text = "扫描音乐",
+                text = stringResource(R.string.scan_music),
                 onClick = {
                     if (checkHasPermission(context)) {
                         showDialog = true
@@ -106,7 +106,7 @@ fun MusicScanScreen(
                             onDenied = {
                                 Toast.makeText(
                                     context,
-                                    "未授予存储权限，无法扫描音乐",
+                                    context.getString(R.string.no_storage_permission),
                                     Toast.LENGTH_SHORT
                                 ).show()
                                 goToAppPermissionSettings(context)
@@ -120,10 +120,10 @@ fun MusicScanScreen(
             )
         }
 
-        ItemOuterTitle("扫描选项")
+        ItemOuterTitle(stringResource(R.string.scan_options))
         RoundedColumn {
             ItemSwitcher(
-                text = "不扫描60秒以下的媒体文件",
+                text = stringResource(R.string.not_include_60s),
                 state = musicScanNotInclude60sMedia,
                 onChange = { checked ->
                     coroutineScope.launch {

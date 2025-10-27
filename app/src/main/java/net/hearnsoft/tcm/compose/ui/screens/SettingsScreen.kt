@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import com.moriafly.salt.ui.ItemOuterTitle
 import com.moriafly.salt.ui.ItemPopup
 import com.moriafly.salt.ui.ItemSwitcher
@@ -20,6 +21,7 @@ import com.moriafly.salt.ui.UnstableSaltUiApi
 import com.moriafly.salt.ui.popup.PopupMenuItem
 import com.moriafly.salt.ui.popup.rememberPopupState
 import kotlinx.coroutines.launch
+import net.hearnsoft.tcm.compose.R
 import net.hearnsoft.tcm.compose.pref.PlayerCoverType
 import net.hearnsoft.tcm.compose.pref.PlayerSeekToPreviousAction
 import net.hearnsoft.tcm.compose.pref.SettingsDataStore
@@ -42,24 +44,24 @@ fun SettingsScreen(
         .collectAsState(initial = PlayerCoverType.DEFAULT.ordinal)
 
     val playerCoverTypeLabels = listOf(
-        "方形封面",
-        "圆形封面"
+        stringResource(R.string.settings_cover_square),
+        stringResource(R.string.settings_cover_circle)
     )
 
     val seekToPreviousActionLabels = listOf(
-        "默认",
-        "上一曲",
-        "回到开头"
+        stringResource(R.string.settings_action_default),
+        stringResource(R.string.settings_action_previous),
+        stringResource(R.string.settings_action_restart)
     )
 
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize()) {
             val popupState = rememberPopupState()
             val isAndroid12OrAbove = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-            ItemOuterTitle(text = "用户界面")
+            ItemOuterTitle(text = stringResource(R.string.settings_ui_title))
             RoundedColumn {
                 ItemSwitcher(
-                    text = "动态颜色主题（Android 12+）",
+                    text = stringResource(R.string.settings_dynamic_color),
                     state = isAppDynamicColorEnabled,
                     enabled = isAndroid12OrAbove,
                     onChange = { state ->
@@ -69,7 +71,7 @@ fun SettingsScreen(
                     }
                 )
                 ItemSwitcher(
-                    text = "启用播放器进度条波形动画",
+                    text = stringResource(R.string.settings_player_wave),
                     state = isPlayerSquigglyWaveEnabled,
                     onChange = { state ->
                         coroutineScope.launch {
@@ -78,7 +80,7 @@ fun SettingsScreen(
                     }
                 )
                 ItemSwitcher(
-                    text = "播放器界面显示当前媒体标签",
+                    text = stringResource(R.string.settings_show_tags),
                     state = isPlayerShowMusicTagsEnabled,
                     onChange = { state ->
                         coroutineScope.launch {
@@ -88,7 +90,7 @@ fun SettingsScreen(
                 )
                 ItemPopup(
                     state = popupState,
-                    text = "播放器封面类型",
+                    text = stringResource(R.string.settings_player_cover_type),
                     sub = playerCoverTypeLabels[playerCoverType]
                 ) {
                     playerCoverTypeLabels.forEachIndexed { index, label ->
@@ -107,7 +109,7 @@ fun SettingsScreen(
                     }
                 }
             }
-            ItemOuterTitle(text = "播放器行为")
+            ItemOuterTitle(text = stringResource(R.string.settings_player_behavior))
             RoundedColumn {
                 val popupState = rememberPopupState()
                 // 上一曲行为的设置
@@ -115,8 +117,8 @@ fun SettingsScreen(
                     .collectAsState(initial = PlayerSeekToPreviousAction.DEFAULT.ordinal)
                 ItemPopup(
                     state = popupState,
-                    text = "上一曲行为",
-                    sub = "点击“上一曲”按钮时进行 “${seekToPreviousActionLabels[currentAction]}” 操作"
+                    text = stringResource(R.string.settings_seek_previous_action),
+                    sub = seekToPreviousActionLabels[currentAction]
                 ) {
                     seekToPreviousActionLabels.forEachIndexed { index, label ->
                         PopupMenuItem(

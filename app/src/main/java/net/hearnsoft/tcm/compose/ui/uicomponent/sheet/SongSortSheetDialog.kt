@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.moriafly.salt.ui.Icon
@@ -32,20 +33,20 @@ fun MusicSortSheetDialog(
 ) {
 
     val sortRulesOptions = listOf(
-        "标题" to SongSortingStrategy.Title,
-        "艺术家" to SongSortingStrategy.ArtistName,
-        "专辑" to SongSortingStrategy.AlbumName,
-        "时长" to SongSortingStrategy.Duration,
-        "添加时间" to SongSortingStrategy.DateAdded
+        R.string.sort_by_title to SongSortingStrategy.Title,
+        R.string.sort_by_artist to SongSortingStrategy.ArtistName,
+        R.string.sort_by_album to SongSortingStrategy.AlbumName,
+        R.string.sort_by_duration to SongSortingStrategy.Duration,
+        R.string.sort_by_date_added to SongSortingStrategy.DateAdded
     )
 
     BottomSheetDialog(
         modifier = modifier,
         onDismissRequest = onDismissRequest,
-        title = "音乐排序规则",
+        title = stringResource(R.string.music_sort_rule),
     ) { dismiss ->
         RoundedColumn(modifier.selectableGroup()) {
-            sortRulesOptions.forEach { (optionText, strategy) ->
+            sortRulesOptions.forEach { (stringResId, strategy) ->
                 val isSelected = currentRule.strategy == strategy
                 val arrow = if (isSelected) {
                     if (currentRule.reverse)
@@ -81,7 +82,7 @@ fun MusicSortSheetDialog(
                         modifier = Modifier.align(Alignment.CenterVertically)
                     )
                     Text(
-                        text = optionText,
+                        text = stringResource(stringResId),
                         style = SaltTheme.textStyles.main,
                         color = if (isSelected) SaltTheme.colors.highlight else SaltTheme.colors.text,
                         modifier = Modifier

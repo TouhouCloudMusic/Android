@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -195,9 +196,10 @@ fun AlbumScreen(
 @Composable
 @UnstableSaltUiApi
 fun DiscHeader(discNumber: Int?, songsCount: Int?) {
+    val context = LocalContext.current
     val discText = when (discNumber) {
-        null -> "未定义碟号"
-        else -> "Disc $discNumber"
+        null -> stringResource(R.string.disc_undefined)
+        else -> stringResource(R.string.disc_number, discNumber)
     }
 
     Row(Modifier.padding(vertical = 8.dp, horizontal = 8.dp)) {
@@ -209,7 +211,7 @@ fun DiscHeader(discNumber: Int?, songsCount: Int?) {
         )
 
         Text(
-            text = "${songsCount ?: 0} 首歌曲",
+            text = context.getString(R.string.song_count, songsCount ?: 0),
             style = SaltTheme.textStyles.sub,
             color = SaltTheme.colors.subText,
             modifier = Modifier.align(Alignment.CenterVertically)
@@ -223,15 +225,16 @@ fun AlbumHeader(
     album: AlbumEntity,
     onPlayAllClick: () -> Unit
 ) {
+    val context = LocalContext.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 16.dp)
     ) {
         val subTitle = if (album.albumYear == null || album.albumYear <= 0) {
-            "${album.songCount} 首歌曲"
+            context.getString(R.string.song_count, album.songCount)
         } else {
-            "${album.albumYear}年 - ${album.songCount}首"
+            context.getString(R.string.song_count_with_year, album.albumYear, album.songCount)
         }
 
         AsyncImage(
@@ -279,7 +282,7 @@ fun AlbumHeader(
             )
 
             Button(
-                text = "播放全部",
+                text = stringResource(R.string.play_all),
                 onClick = {
                     onPlayAllClick()
                 },
@@ -299,6 +302,7 @@ fun AlbumSongItem(
     onClick: () -> Unit = {},
     onActionClick: () -> Unit = {}
 ) {
+    val context = LocalContext.current
     val isCurrentPlaying = currentPlaying?.mediaId == songEntity.mediaStoreId.toString()
 
     Row(
@@ -330,14 +334,14 @@ fun AlbumSongItem(
                 .align(Alignment.CenterVertically)
         ) {
             Text(
-                text = songEntity.title ?: "未知歌曲",
+                text = songEntity.title ?: context.getString(R.string.unknown_song),
                 style = SaltTheme.textStyles.main,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 color = if (isCurrentPlaying) SaltTheme.colors.highlight else SaltTheme.colors.text
             )
 
-            val artist = songEntity.artistName ?: "未知艺术家"
+            val artist = songEntity.artistName ?: context.getString(R.string.unknown_artist)
             Text(
                 text = artist,
                 style = SaltTheme.textStyles.sub,

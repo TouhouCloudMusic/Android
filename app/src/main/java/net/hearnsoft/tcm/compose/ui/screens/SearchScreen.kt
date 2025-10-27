@@ -23,7 +23,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -78,21 +80,21 @@ fun SearchScreen(
                 ) {
                     Image(
                         painter = painterResource(R.drawable.no_item),
-                        contentDescription = "搜索",
+                        contentDescription = stringResource(R.string.cd_search),
                         modifier = Modifier.size(200.dp)
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = "键入关键字以搜索",
+                        text = stringResource(R.string.search_hint),
                         style = SaltTheme.textStyles.main,
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier.padding(bottom = 4.dp)
                     )
 
                     Text(
-                        text = "可以搜索本机音乐以及东方同音鉴站内的任何内容",
+                        text = stringResource(R.string.search_description),
                         style = SaltTheme.textStyles.sub
                     )
                 }
@@ -114,21 +116,21 @@ fun SearchScreen(
                 ) {
                     Image(
                         painter = painterResource(R.drawable.no_item), // 无结果图标
-                        contentDescription = "无搜索结果",
+                        contentDescription = stringResource(R.string.cd_no_search_results),
                         modifier = Modifier.size(200.dp)
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = "未找到相关内容",
+                        text = stringResource(R.string.no_search_results),
                         style = SaltTheme.textStyles.main,
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier.padding(bottom = 4.dp)
                     )
 
                     Text(
-                        text = "尝试使用其他关键词",
+                        text = stringResource(R.string.try_different_keywords),
                         style = SaltTheme.textStyles.sub
                     )
                 }
@@ -151,7 +153,7 @@ fun SearchScreen(
                         modifier = Modifier.size(16.dp)
                     )
                     Text(
-                        text = "正在搜索...",
+                        text = stringResource(R.string.searching),
                         modifier = Modifier.padding(start = 12.dp)
                     )
                 }
@@ -171,7 +173,7 @@ fun SearchScreen(
                 groupedResults[SearchResultType.LOCAL_MUSIC]?.let { localResults ->
                     item {
                         SearchResultSection(
-                            title = "本地音乐",
+                            title = stringResource(R.string.local_music),
                             results = localResults,
                             playerViewModel = playerViewModel
                         )
@@ -183,7 +185,7 @@ fun SearchScreen(
                     item {
                         Spacer(modifier = Modifier.height(8.dp))
                         SearchResultSection(
-                            title = "网络内容",
+                            title = stringResource(R.string.network_content),
                             results = networkResults,
                             playerViewModel = playerViewModel
                         )
@@ -228,6 +230,7 @@ private fun SearchResultItem(
     result: SearchResult,
     onClick: () -> Unit
 ) {
+    val context = LocalContext.current
     val icon = when (result.type) {
         SearchResultType.LOCAL_MUSIC -> R.drawable.ic_nav_music
         else -> R.drawable.ic_explore
@@ -235,7 +238,7 @@ private fun SearchResultItem(
 
     val subtitle = when (result) {
         is LocalMusicSearchResult -> {
-            "${result.subtitle} • 匹配: ${result.matchedFields.joinToString(", ")}"
+            "${result.subtitle} • ${context.getString(R.string.match_label)}: ${result.matchedFields.joinToString(", ")}"
         }
         is NetworkContentSearchResult -> {
             "${result.subtitle} • ${result.source}"

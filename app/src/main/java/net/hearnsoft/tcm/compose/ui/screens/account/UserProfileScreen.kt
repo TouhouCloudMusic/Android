@@ -29,6 +29,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -94,7 +96,7 @@ fun UserProfileScreen(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "加载中...",
+                text = stringResource(R.string.loading),
                 style = SaltTheme.textStyles.main
             )
         }
@@ -109,7 +111,7 @@ fun UserProfileScreen(
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = "加载失败",
+                    text = stringResource(R.string.loading_failed_simple),
                     style = SaltTheme.textStyles.main
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -209,7 +211,7 @@ private fun UserProfileHeader(
                 Column {
                     // 用户名
                     Text(
-                        text = user?.name ?: if (isOwnProfile) "未登录" else "未知用户",
+                        text = user?.name ?: if (isOwnProfile) stringResource(R.string.not_logged_in) else stringResource(R.string.unknown_user),
                         style = SaltTheme.textStyles.main.copy(
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
@@ -277,7 +279,7 @@ private fun UserProfileHeader(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "最后登录: ${lastLogin.format(DateTimeFormatter.ofPattern("yyyy年MM月dd日"))}",
+                        text = stringResource(R.string.last_login, lastLogin.format(DateTimeFormatter.ofPattern("yyyy年MM月dd日"))),
                         style = SaltTheme.textStyles.sub.copy(fontSize = 14.sp)
                     )
                 }
@@ -289,7 +291,7 @@ private fun UserProfileHeader(
                     onClick = {
                         navController.navigate(ScreenRoute.EditProfile.route)
                     },
-                    text = "编辑资料",
+                    text = stringResource(R.string.edit_profile),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 8.dp),
@@ -300,7 +302,7 @@ private fun UserProfileHeader(
                         onClick = {
 
                         },
-                        text = if (isFollowing) "已关注" else "关注",
+                        text = if (isFollowing) stringResource(R.string.following) else stringResource(R.string.follow),
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp),

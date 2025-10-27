@@ -50,6 +50,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.util.UnstableApi
@@ -218,7 +219,7 @@ fun MusicScreen(
                                 },
                                 label = {
                                     Text(
-                                        text = type.displayName,
+                                        text = type.getDisplayName(),
                                         color = if (selectedType == type) Color.White else SaltTheme.colors.text
                                     )
                                 },
@@ -313,7 +314,7 @@ fun MusicScreen(
                     MusicType.SONG -> {
                         if (allSongs.isNotEmpty()) {
                             Text(
-                                text = "共 ${allSongs.size} 首歌曲",
+                                text = stringResource(R.string.total_songs, allSongs.size),
                                 style = SaltTheme.textStyles.sub
                             )
                         }
@@ -321,7 +322,7 @@ fun MusicScreen(
                     MusicType.ALBUM -> {
                         if (allAlbums.isNotEmpty()) {
                             Text(
-                                text = "共 ${allAlbums.size} 张专辑",
+                                text = stringResource(R.string.total_albums, allAlbums.size),
                                 style = SaltTheme.textStyles.sub
                             )
                         }
@@ -460,7 +461,7 @@ fun MusicScreen(
                                     state = lazyListState,
                                 ) {
                                     item {
-                                        Text("该功能正在开发中...")
+                                        Text(stringResource(R.string.feature_in_development))
                                     }
                                 }
                             }
@@ -500,11 +501,11 @@ fun EmptyMusicList() {
                 modifier = Modifier.size(120.dp).aspectRatio(1f)
             )
             Text(
-                text = "暂无内容",
+                text = stringResource(R.string.empty_music_list),
                 style = SaltTheme.textStyles.main
             )
             Text(
-                text = "在侧边菜单里找到 扫描媒体 来扫描设备中的音乐文件",
+                text = stringResource(R.string.empty_music_description),
                 style = SaltTheme.textStyles.sub,
                 modifier = Modifier.padding(top = 8.dp)
             )
@@ -513,8 +514,18 @@ fun EmptyMusicList() {
 }
 
 private enum class MusicType(val displayName: String) {
-    SONG("歌曲"),
-    ALBUM("专辑"),
-    ARTIST("艺术家"),
-    FOLDER("文件夹")
+    SONG("song"),
+    ALBUM("album"),
+    ARTIST("artist"),
+    FOLDER("folder")
+}
+
+@Composable
+private fun MusicType.getDisplayName(): String {
+    return when (this) {
+        MusicType.SONG -> stringResource(R.string.music_type_song)
+        MusicType.ALBUM -> stringResource(R.string.music_type_album)
+        MusicType.ARTIST -> stringResource(R.string.music_type_artist)
+        MusicType.FOLDER -> stringResource(R.string.music_type_folder)
+    }
 }

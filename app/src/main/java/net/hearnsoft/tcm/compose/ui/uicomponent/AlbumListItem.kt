@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -40,9 +41,9 @@ fun AlbumListItem(
     ) {
         val artworkUri = albumEntity.artworkUri
         val subTitle = if (albumEntity.albumYear == null || albumEntity.albumYear == 0) {
-            "${albumEntity.songCount}首 - ${albumEntity.albumArtist}"
+            stringResource(R.string.album_info_no_year, albumEntity.songCount, albumEntity.albumArtist)
         } else {
-            "${albumEntity.albumYear}年 ${albumEntity.songCount}首 - ${albumEntity.albumArtist}"
+            stringResource(R.string.album_info_with_year, albumEntity.albumYear, albumEntity.songCount, albumEntity.albumArtist)
         }
 
         AsyncImage(

@@ -1,5 +1,6 @@
 package net.hearnsoft.tcm.compose.ui.screens.account
 
+import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.moriafly.salt.ui.Button
 import com.moriafly.salt.ui.ItemEdit
@@ -21,12 +23,14 @@ import com.moriafly.salt.ui.ItemEditPassword
 import com.moriafly.salt.ui.RoundedColumn
 import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.UnstableSaltUiApi
+import net.hearnsoft.tcm.compose.R
 import net.hearnsoft.tcm.compose.domain.model.auth.AuthState
 import net.hearnsoft.tcm.compose.domain.model.auth.LoginCredential
 import net.hearnsoft.tcm.compose.ui.screens.ScreenRoute
 import net.hearnsoft.tcm.compose.ui.viewmodel.UserViewModel
 import net.hearnsoft.tcm.compose.utils.Logger
 
+@SuppressLint("LocalContextGetResourceValueCall")
 @UnstableSaltUiApi
 @Composable
 fun RegisterScreen(
@@ -51,12 +55,12 @@ fun RegisterScreen(
                     popUpTo(0) { inclusive = true }
                     launchSingleTop = true
                 }
-                Toast.makeText(context, "${authState.user.name}，感谢你的加入！", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, context.getString(R.string.welcome_join, authState.user.name), Toast.LENGTH_LONG).show()
             }
             is AuthState.Error -> {
                 // 注册失败，显示错误信息
                 Logger.err("RegisterScreen", "注册失败: ${authState.message}")
-                Toast.makeText(context, "注册失败: ${authState.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, context.getString(R.string.register_failed, authState.message), Toast.LENGTH_LONG).show()
                 userViewModel.clearAuthError()
             }
             else -> {
@@ -72,14 +76,14 @@ fun RegisterScreen(
                 onChange = {
                     username = it
                 },
-                hint = "用户名",
+                hint = stringResource(R.string.username_hint),
             )
             ItemEditPassword(
                 text = password,
                 onChange = {
                     password = it
                 },
-                hint = "密码",
+                hint = stringResource(R.string.password_hint),
             )
         }
 
@@ -90,7 +94,7 @@ fun RegisterScreen(
                     horizontal = SaltTheme.dimens.padding,
                     vertical = SaltTheme.dimens.padding * 0.5f
                 ),
-            text = "注册",
+            text = stringResource(R.string.register_button),
             enabled = !isLoading,
             onClick = {
                 userViewModel.signUp(

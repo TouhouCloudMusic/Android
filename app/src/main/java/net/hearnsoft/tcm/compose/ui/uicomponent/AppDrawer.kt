@@ -13,6 +13,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.moriafly.salt.ui.Item
@@ -21,6 +22,7 @@ import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.UnstableSaltUiApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import net.hearnsoft.tcm.compose.R
 import net.hearnsoft.tcm.compose.ui.screens.ScreenRoute
 
 // 抽取菜单项数据类
@@ -40,12 +42,16 @@ fun AppDrawer(
     navController: NavController,
     currentMainScreenRoute: MutableState<String>
 ) {
+    val drawerHome = stringResource(R.string.drawer_home)
+    val drawerScanMedia = stringResource(R.string.drawer_scan_media)
+    val drawerSettings = stringResource(R.string.drawer_settings)
+    
     // 可配置的菜单项列表
-    val drawerMenuItems = remember {
+    val drawerMenuItems = remember(drawerHome, drawerScanMedia, drawerSettings) {
         listOf(
-            DrawerMenuItem("首页", "", isMainScreen = true),
-            DrawerMenuItem("扫描媒体", ScreenRoute.Scan.route),
-            DrawerMenuItem("设置", ScreenRoute.Settings.route)
+            DrawerMenuItem(drawerHome, "", isMainScreen = true),
+            DrawerMenuItem(drawerScanMedia, ScreenRoute.Scan.route),
+            DrawerMenuItem(drawerSettings, ScreenRoute.Settings.route)
         )
     }
 

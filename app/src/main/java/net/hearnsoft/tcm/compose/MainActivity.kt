@@ -87,7 +87,8 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
-        unregisterReceiver(appExitReceiver)
+        LocalBroadcastManager.getInstance(this)
+            .unregisterReceiver(appExitReceiver)
         // 应用结束时，清理所有临时文件
         BitmapUtils.cleanupTempFiles(this)
         super.onDestroy()

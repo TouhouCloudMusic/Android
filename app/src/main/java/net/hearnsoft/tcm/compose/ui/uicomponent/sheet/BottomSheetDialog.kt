@@ -52,7 +52,6 @@ fun BottomSheetDialog(
         },
         sheetState = sheetState,
         modifier = modifier,
-        contentColor = SaltTheme.colors.background,
         containerColor = SaltTheme.colors.background,
     ) {
         Column(

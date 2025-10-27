@@ -10,6 +10,7 @@ import net.hearnsoft.tcm.compose.data.database.MusicDatabase
 import net.hearnsoft.tcm.compose.data.database.entities.AlbumEntity
 import net.hearnsoft.tcm.compose.data.database.entities.ArtistEntity
 import net.hearnsoft.tcm.compose.data.database.entities.SongEntity
+import net.hearnsoft.tcm.compose.utils.FilePathUtils
 import net.hearnsoft.tcm.compose.utils.LocalMusicScanner
 import net.hearnsoft.tcm.compose.utils.Logger
 import javax.inject.Inject
@@ -201,6 +202,9 @@ class LocalMusicRepository @Inject constructor(
             0L
         }
 
+        // 从 MediaItem 中获取真实路径
+        val filePath = FilePathUtils.getRealPathFromUri(context, mediaItem.localConfiguration?.uri ?: Uri.EMPTY) ?: ""
+
         // 创建艺术家实体
         val artistEntity = ArtistEntity(
             artistName = artistName,
@@ -228,7 +232,7 @@ class LocalMusicRepository @Inject constructor(
             artworkUri = metadata.artworkUri,
             albumName = albumName,   // 添加专辑名称
             duration = metadata.durationMs ?: 0L,
-            filePath = mediaItem.localConfiguration?.uri?.path ?: "",
+            filePath = filePath,
             contentUri = mediaItem.localConfiguration?.uri ?: Uri.EMPTY,
             trackNumber = trackNumber,
             discNumber = discNumber

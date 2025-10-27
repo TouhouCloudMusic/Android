@@ -2,9 +2,11 @@ package net.hearnsoft.tcm.compose.service
 
 import android.app.PendingIntent
 import android.content.Intent
+import android.os.Bundle
 import androidx.annotation.OptIn
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C.AUDIO_CONTENT_TYPE_MUSIC
 import androidx.media3.common.C.USAGE_MEDIA
@@ -14,11 +16,14 @@ import androidx.media3.common.Tracks
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.analytics.AnalyticsListener
+import androidx.media3.session.CommandButton
 import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.LibraryResult
 import androidx.media3.session.MediaLibraryService
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSession.MediaItemsWithStartPosition
+import androidx.media3.session.SessionCommand
+import androidx.media3.session.SessionResult
 import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
@@ -27,6 +32,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import net.hearnsoft.tcm.compose.BuildConfig
 import net.hearnsoft.tcm.compose.R
 import net.hearnsoft.tcm.compose.MainActivity
 import net.hearnsoft.tcm.compose.utils.Logger
@@ -40,6 +46,14 @@ import kotlin.math.min
 @ExperimentalMaterial3Api
 @ExperimentalFoundationApi
 class MusicPlaybackService : MediaLibraryService(), AnalyticsListener {
+
+    companion object {
+        const val CUSTOM_COMMAND_CLOSE = "${BuildConfig.APPLICATION_ID}.COMMAND_CLOSE"
+
+        // 自定义action
+        const val ACTION_EXIT_APP = "${BuildConfig.APPLICATION_ID}.ACTION_EXIT_APP"
+    }
+
     var mediaLibrarySession: MediaLibrarySession? = null
     var player: ExoPlayer? = null
     private val playlist: MutableList<MediaItem> = ArrayList()
@@ -84,7 +98,15 @@ class MusicPlaybackService : MediaLibraryService(), AnalyticsListener {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        // 创建自定义关闭命令按钮
+        val closeCommand = CommandButton.Builder(CommandButton.ICON_UNDEFINED)
+            .setDisplayName("Close")
+            .setCustomIconResId(R.drawable.ic_close_24px)
+            .setSessionCommand(SessionCommand(CUSTOM_COMMAND_CLOSE, Bundle.EMPTY))
+            .build()
+
         mediaLibrarySession = MediaLibrarySession.Builder(this, player!!, LibrarySessionCallback())
+            .setCustomLayout(ImmutableList.of(closeCommand))
             .setSessionActivity(sessionActivity)
             .build()
 
@@ -180,6 +202,52 @@ class MusicPlaybackService : MediaLibraryService(), AnalyticsListener {
     }
 
     private inner class LibrarySessionCallback : MediaLibrarySession.Callback {
+
+        override fun onConnect(
+            session: MediaSession,
+            controller: MediaSession.ControllerInfo
+        ): MediaSession.ConnectionResult {
+            val connectionResult = super.onConnect(session, controller)
+            val availableCommands = connectionResult.availableSessionCommands.buildUpon()
+                // 添加自定义关闭命令
+                .add(SessionCommand(CUSTOM_COMMAND_CLOSE, Bundle.EMPTY))
+                .build()
+            return MediaSession.ConnectionResult.accept(
+                availableCommands,
+                connectionResult.availablePlayerCommands
+            )
+        }
+
+        override fun onCustomCommand(
+            session: MediaSession,
+            controller: MediaSession.ControllerInfo,
+            customCommand: SessionCommand,
+            args: Bundle
+        ): ListenableFuture<SessionResult> {
+            Logger.debug(
+                "LibrarySessionCallback",
+                "Received custom command: ${customCommand.customAction}"
+            )
+            if (customCommand.customAction == CUSTOM_COMMAND_CLOSE) {
+                // 发送广播以退出应用
+                val exitIntent = Intent(ACTION_EXIT_APP)
+                LocalBroadcastManager.getInstance(this@MusicPlaybackService)
+                    .sendBroadcast(exitIntent)
+
+                // 停止播放和服务
+                player?.stop()
+                player?.clearMediaItems()
+
+                // 延迟停止服务
+                serviceScope.launch {
+                    kotlinx.coroutines.delay(500)
+                    stopSelf()
+                }
+                return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
+            }
+            return super.onCustomCommand(session, controller, customCommand, args)
+        }
+
         @UnstableApi
         override fun onPlaybackResumption(
             mediaSession: MediaSession,

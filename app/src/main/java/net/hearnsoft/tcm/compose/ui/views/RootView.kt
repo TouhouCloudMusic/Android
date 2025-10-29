@@ -132,9 +132,16 @@ fun AppRootView(
                 }
             )
 
+        // 计算播放器折叠状态下的边界高度
+        val animatedCollapsedBound by animateDpAsState(
+            targetValue = bottomInset + (if (shouldShowNavigationBar) NavigationBarHeight else 0.dp) + MiniPlayerHeight,
+            animationSpec = NavigationBarAnimationSpec,
+            label = "collapsedBound"
+        )
+
         val playerBottomSheetState =
             rememberBottomSheetState(
-                collapsedBound = bottomInset + (if (shouldShowNavigationBar) NavigationBarHeight else 0.dp) + MiniPlayerHeight,
+                collapsedBound = animatedCollapsedBound,
                 expandedBound = maxHeight,
                 initialAnchor = COLLAPSED_ANCHOR
             )

@@ -1,5 +1,6 @@
 package net.hearnsoft.tcm.compose.ui.screens
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -46,6 +47,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -82,11 +84,6 @@ fun MusicScreen(
     navController: NavController,
     playerViewModel: PlayerViewModel = hiltViewModel()
 ) {
-
-    // 列表状态和协程作用域
-
-    val coroutineScope = rememberCoroutineScope()
-
     // 收集 ViewModel 状态
     val allSongs by playerViewModel.allSongs.collectAsState()
     val isLoading by playerViewModel.isLoading.collectAsState()
@@ -94,9 +91,6 @@ fun MusicScreen(
     // 收集专辑数据
     val allAlbums by playerViewModel.allAlbums.collectAsState()
     val currentAlbumSortingRule = playerViewModel.currentAlbumSortingRule.collectAsState().value
-
-    // 当前播放的媒体
-    val currentPlaying = playerViewModel.currentMediaItem.collectAsState().value
 
     // 当前排序规则
     val currentSortingRule = playerViewModel.currentSongSortingRule.collectAsState().value
@@ -311,8 +305,6 @@ fun MusicScreen(
                         when (type) {
                             MusicType.SONG -> {
                                 MusicList(
-                                    currentPlaying = currentPlaying,
-                                    allSongs = allSongs,
                                     playerViewModel = playerViewModel,
                                     onActionClick = { songEntity ->
                                         showActionDialog = true
@@ -393,8 +385,6 @@ fun EmptyMusicList() {
 @Composable
 fun MusicList(
     modifier: Modifier = Modifier,
-    currentPlaying: MediaItem?,
-    allSongs: List<SongEntity>,
     playerViewModel: PlayerViewModel,
     onActionClick: (SongEntity) -> Unit = { }
 ) {
@@ -402,6 +392,11 @@ fun MusicList(
         val lazyListState = rememberLazyListState()
         val coroutineScope = rememberCoroutineScope()
         val isLoading by playerViewModel.isLoading.collectAsState()
+        val allSongs by playerViewModel.allSongs.collectAsState()
+        val currentPlaying by playerViewModel.currentMediaItem.collectAsState()
+        // 播放器连接状态
+        val isConnected by playerViewModel.isConnected.collectAsState()
+        val context = LocalContext.current
 
         // 定位到当前播放歌曲的函数
         fun scrollToCurrentPlaying() {
@@ -445,8 +440,17 @@ fun MusicList(
                             currentPlaying = currentPlaying,
                             onClick = {
                                 val songIndex = allSongs.indexOf(songEntity)
-                                if (songIndex >= 0) {
-                                    playerViewModel.setAndPlayPlaylist(allSongs, songIndex)
+                                if (isConnected) {
+                                    if (songIndex >= 0) {
+                                        playerViewModel.setAndPlayPlaylist(allSongs, songIndex)
+                                    }
+                                } else {
+                                    // 提示未连接播放器
+                                    Toast.makeText(
+                                        context,
+                                        context.getString(R.string.player_not_connected),
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                 }
                             },
                             onActionClick = {

@@ -1,5 +1,6 @@
 package net.hearnsoft.tcm.compose.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -68,11 +69,15 @@ fun AlbumScreen(
     albumViewModel: AlbumViewModel = hiltViewModel(),
     playerViewModel: PlayerViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
+
     val album by albumViewModel.currentAlbum.collectAsState()
     val albumSongs by albumViewModel.albumSongs.collectAsState()
     val isLoading by albumViewModel.isLoading.collectAsState()
 
     val currentPlaying = playerViewModel.currentMediaItem.collectAsState().value
+
+    val isConnected = playerViewModel.isConnected.collectAsState().value
 
     var showActionDialog by remember { mutableStateOf(false) }
     var selectedSong by remember { mutableStateOf<SongEntity?>(null) }
@@ -152,8 +157,17 @@ fun AlbumScreen(
                                     onClick = {
                                         Logger.debug("AlbumScreen"," play song ${song.title}, id=${song.songId}, playlist size=${albumSongs.size}")
                                         val songIndex = albumSongs.indexOf(song)
-                                        if (songIndex >= 0) {
-                                            playerViewModel.setAndPlayPlaylist(albumSongs, songIndex)
+                                        if (isConnected) {
+                                            if (songIndex >= 0) {
+                                                playerViewModel.setAndPlayPlaylist(albumSongs, songIndex)
+                                            }
+                                        } else {
+                                            // 提示未连接播放器
+                                            Toast.makeText(
+                                                context,
+                                                context.getString(R.string.player_not_connected),
+                                                Toast.LENGTH_SHORT
+                                            ).show()
                                         }
                                     },
                                     onActionClick = {

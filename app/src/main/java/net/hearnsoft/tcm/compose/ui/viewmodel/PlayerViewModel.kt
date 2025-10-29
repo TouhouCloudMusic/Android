@@ -2,7 +2,6 @@ package net.hearnsoft.tcm.compose.ui.viewmodel
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
@@ -16,10 +15,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.hearnsoft.tcm.compose.data.database.entities.AlbumEntity
@@ -29,7 +26,6 @@ import net.hearnsoft.tcm.compose.domain.model.album.AlbumSortingRule
 import net.hearnsoft.tcm.compose.domain.model.album.AlbumSortingStrategy
 import net.hearnsoft.tcm.compose.domain.model.song.SongSortingRule
 import net.hearnsoft.tcm.compose.domain.model.song.SongSortingStrategy
-import net.hearnsoft.tcm.compose.utils.LocalMusicScanner
 import net.hearnsoft.tcm.compose.utils.LocalMusicSorter
 import net.hearnsoft.tcm.compose.utils.Logger
 import net.hearnsoft.tcm.compose.utils.PlayerController
@@ -61,9 +57,6 @@ class PlayerViewModel @Inject constructor(
     // 当前播放列表
     val currentPlaylist: StateFlow<List<MediaItem>> = playerController.currentPlaylist
 
-    // 当前播放的SongEntity对象
-    val currentPlayingSongEntity: StateFlow<SongEntity?> = MutableStateFlow(null)
-
     // === 专辑数据 ===
     private val _rawAlbums = MutableStateFlow<List<AlbumEntity>>(emptyList())
     private val _allAlbums = MutableStateFlow<List<AlbumEntity>>(emptyList())
@@ -80,9 +73,6 @@ class PlayerViewModel @Inject constructor(
         AlbumSortingRule(AlbumSortingStrategy.AlbumName, false)
     )
     val currentAlbumSortingRule: StateFlow<AlbumSortingRule> = _currentAlbumSortingRule.asStateFlow()
-
-    private val _searchQuery = MutableStateFlow("")
-    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
     // === 播放器状态（从 PlayerController 获取） ===
     val isConnected = playerController.isConnected
@@ -110,9 +100,6 @@ class PlayerViewModel @Inject constructor(
     private val _scanCompleted = MutableStateFlow(false)
     val scanCompleted: StateFlow<Boolean> = _scanCompleted.asStateFlow()
 
-    private val _errorMessage = MutableStateFlow<String?>(null)
-    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
-
     // === 播放进度相关 ===
     private val _currentPosition = MutableStateFlow(0L)
     val currentPosition: StateFlow<Long> = _currentPosition.asStateFlow()
@@ -129,8 +116,8 @@ class PlayerViewModel @Inject constructor(
         // 开始位置更新
         startPositionUpdates()
 
-        // 监听数据变化并应用排序
-        observeDataChanges()
+        // 监听排序规则变化
+        observeSortingRuleChanges()
 
         // 加载所有歌曲
         loadAllSongs()
@@ -142,49 +129,24 @@ class PlayerViewModel @Inject constructor(
         observeToIncrementPlayCount()
     }
 
-    private fun observeDataChanges() {
-        // 歌曲过滤监听
+    private fun observeSortingRuleChanges() {
+        // 歌曲排序规则监听
         viewModelScope.launch(Dispatchers.Default) {
-            combine(
-                _rawSongs,
-                _currentSongSortingRule
-            ) { songs, sortingRule ->
-                Pair(songs, sortingRule)
-            }.collectLatest { (songs, sortingRule) ->
-                applySort(songs, sortingRule)
+            _currentSongSortingRule.collectLatest { sortingRule ->
+                // 每当排序规则变化时，重新应用排序和过滤
+                val currentSongs = _rawSongs.value
+                if (currentSongs.isNotEmpty()) {
+                    applySongSort(currentSongs, sortingRule)
+                }
             }
         }
-        // 专辑数据监听
-        viewModelScope.launch(Dispatchers.Default) {
-            combine(
-                _rawAlbums,
-                _currentAlbumSortingRule
-            ) { albums, sortingRule ->
-                Pair(albums, sortingRule)
-            }.collectLatest { (albums, sortingRule) ->
-                applyAlbumSort(albums, sortingRule)
-            }
-        }
-    }
 
-    /**
-     * 应用过滤逻辑
-     * @param songs 要过滤的歌曲列表
-     * @param query 搜索查询条件
-     * @return 过滤后的歌曲列表
-     */
-    private suspend fun applyFilter(
-        songs: List<SongEntity>,
-        query: String
-    ): List<SongEntity> {
-        return withContext(Dispatchers.Default) {
-            if (query.isBlank()) {
-                songs
-            } else {
-                songs.filter { song ->
-                    song.title.contains(query, ignoreCase = true) ||
-                            song.artistName.contains(query, ignoreCase = true) ||
-                            song.albumName.contains(query, ignoreCase = true)
+        // 专辑排序规则监听
+        viewModelScope.launch(Dispatchers.Default) {
+            _currentAlbumSortingRule.collectLatest { sortingRule ->
+                val currentAlbums = _rawAlbums.value
+                if (currentAlbums.isNotEmpty()) {
+                    applyAlbumSort(currentAlbums, sortingRule)
                 }
             }
         }
@@ -195,7 +157,7 @@ class PlayerViewModel @Inject constructor(
      * @param songs 要排序的歌曲列表
      * @param sortingRule 排序规则
      */
-    private fun applySort(
+    private fun applySongSort(
         songs: List<SongEntity>,
         sortingRule: SongSortingRule
     ) {
@@ -207,14 +169,11 @@ class PlayerViewModel @Inject constructor(
                     // 使用 LocalMusicSorter 的 SongEntity 版本进行排序
                     LocalMusicSorter.sortMusicList(songs, sortingRule)
                 }
-
                 // 更新状态
                 _allSongs.value = sortedSongs
-
                 Logger.debug(TAG, "应用排序: ${sortedSongs.size} 首歌曲")
             } catch (e: Exception) {
                 Logger.err(TAG, "应用排序时出错: ${e.message}")
-                _errorMessage.value = "排序失败: ${e.message}"
             } finally {
                 _isLoading.value = false // 结束时关闭加载状态
             }
@@ -262,27 +221,6 @@ class PlayerViewModel @Inject constructor(
         }
     }
 
-    // 专辑数据加载方法
-    fun loadAllAlbums() {
-        viewModelScope.launch(Dispatchers.IO) {
-            musicRepository.getAllAlbums()
-                .catch { e ->
-                    Logger.err(TAG, "加载专辑失败: ${e.message}")
-                    _errorMessage.value = "加载专辑失败: ${e.message}"
-                }
-                .collectLatest { albums ->
-                    _rawAlbums.value = albums
-                    Logger.debug(TAG, "加载了 ${albums.size} 张专辑")
-                }
-        }
-    }
-
-    // 专辑排序规则更新方法
-    fun updateAlbumSortingRule(rule: AlbumSortingRule) {
-        _currentAlbumSortingRule.value = rule
-        Logger.debug(TAG, "更新专辑排序规则: ${rule.strategy}, 倒序: ${rule.reverse}")
-    }
-
     private fun startPositionUpdates() {
         positionUpdateJob = viewModelScope.launch {
             while (true) {
@@ -290,7 +228,7 @@ class PlayerViewModel @Inject constructor(
                     _currentPosition.value = playerController.getCurrentPosition()
                     _duration.value = playerController.getDuration()
                 }
-                delay(100) // 每秒更新一次
+                delay(100) // 每100毫秒更新一次
             }
         }
     }
@@ -303,21 +241,38 @@ class PlayerViewModel @Inject constructor(
     fun loadAllSongs() {
         viewModelScope.launch(Dispatchers.IO) {
             _isLoading.value = true
-            musicRepository.getAllSongs()
-                .catch { e ->
-                    Logger.err(TAG, "加载歌曲失败: ${e.message}")
-                    _errorMessage.value = "加载歌曲失败: ${e.message}"
-                    _isLoading.value = false // 确保在出错时也更新状态
-                }
-                .collectLatest { songs ->
-                    _rawSongs.value = songs
-                    Logger.debug(TAG, "加载了 ${songs.size} 首歌曲")
+            try {
+                val songs = musicRepository.getAllSongs().first()
+                _rawSongs.value = songs
+                Logger.debug(TAG, "加载了 ${songs.size} 首歌曲")
 
-                    // 收到第一次数据后，就认为加载完成
-                    if (_isLoading.value) {
-                        _isLoading.value = false
-                    }
-                }
+                // 应用当前排序规则
+                applySongSort(songs, _currentSongSortingRule.value)
+            } catch (e: Exception) {
+                Logger.err(TAG, "加载歌曲失败: ${e.message}")
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    /**
+     * 加载所有专辑
+     */
+    fun loadAllAlbums() {
+        viewModelScope.launch(Dispatchers.IO) {
+            _isLoading.value = true
+            try {
+                val albums = musicRepository.getAllAlbums().first()
+                _rawAlbums.value = albums
+                Logger.debug(TAG, "加载了 ${albums.size} 张专辑")
+                // 应用当前专辑排序规则
+                applyAlbumSort(albums, _currentAlbumSortingRule.value)
+            } catch (e: Exception) {
+                Logger.err(TAG, "加载专辑失败: ${e.message}")
+            } finally {
+                _isLoading.value = false
+            }
         }
     }
 
@@ -338,9 +293,12 @@ class PlayerViewModel @Inject constructor(
 
                 _scanProgress.value = null
                 _scanCompleted.value = true
+
+                // 重新加载歌曲列表
+                loadAllSongs()
+                loadAllAlbums()
             } catch (e: Exception) {
                 Logger.err(TAG, "扫描音乐库失败: ${e.message}")
-                _errorMessage.value = "扫描失败: ${e.message}"
                 _scanProgress.value = null
             } finally {
                 _isLoading.value = false
@@ -543,7 +501,6 @@ class PlayerViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 Logger.err(TAG, "设置播放列表失败: ${e.message}")
-                _errorMessage.value = "设置播放列表失败: ${e.message}"
             }
         }
     }
@@ -600,13 +557,17 @@ class PlayerViewModel @Inject constructor(
         Logger.debug(TAG, "更新排序规则: ${rule.strategy}, 倒序: ${rule.reverse}")
     }
 
+    // 专辑排序规则更新方法
+    fun updateAlbumSortingRule(rule: AlbumSortingRule) {
+        _currentAlbumSortingRule.value = rule
+        Logger.debug(TAG, "更新专辑排序规则: ${rule.strategy}, 倒序: ${rule.reverse}")
+    }
+
     /**
      * 重新加载所有歌曲
      */
     fun reloadAllSongs() {
-        viewModelScope.launch {
-            loadAllSongs()
-        }
+        loadAllSongs()
     }
 
     // === 播放统计方法 ===
@@ -706,13 +667,6 @@ class PlayerViewModel @Inject constructor(
                 null
             }
         }
-    }
-
-    /**
-     * 清除错误消息
-     */
-    fun clearErrorMessage() {
-        _errorMessage.value = null
     }
 
     override fun onCleared() {

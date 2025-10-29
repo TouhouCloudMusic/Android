@@ -428,20 +428,6 @@ fun BottomSheetPlayer(
                                                 modifier = Modifier
                                                     .align(Alignment.CenterVertically)
                                             ) {
-                                                // 评分按钮
-                                                IconButton(
-                                                    onClick = {
-                                                        showRatingDialog = true
-                                                    },
-                                                    modifier = Modifier.padding(4.dp)
-                                                ) {
-                                                    Icon(
-                                                        painter = painterResource(R.drawable.ic_star_24px),
-                                                        contentDescription = "评分",
-                                                        tint = LocalPlayerUIColor.current,
-                                                        modifier = Modifier.size(36.dp)
-                                                    )
-                                                }
                                                 // 收藏按钮
                                                 IconButton(
                                                     onClick = {
@@ -458,6 +444,20 @@ fun BottomSheetPlayer(
                                                         },
                                                         contentDescription = "收藏",
                                                         tint = Color.Unspecified // 使用默认颜色
+                                                    )
+                                                }
+                                                // 评分按钮
+                                                IconButton(
+                                                    onClick = {
+                                                        showRatingDialog = true
+                                                    },
+                                                    modifier = Modifier.padding(4.dp)
+                                                ) {
+                                                    Icon(
+                                                        painter = painterResource(R.drawable.ic_star_24px),
+                                                        contentDescription = "评分",
+                                                        tint = LocalPlayerUIColor.current,
+                                                        modifier = Modifier.size(36.dp)
                                                     )
                                                 }
                                                 // 评论按钮

@@ -56,7 +56,6 @@ fun MusicListItem(
 
     Row(
         modifier = Modifier
-            .background(SaltTheme.colors.background)
             .clip(RoundedCornerShape(8.dp))
             .clickable(onClick = onClick)
     ) {

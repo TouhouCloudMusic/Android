@@ -144,9 +144,21 @@ object LocalMusicSorter {
                 val album2 = item2.albumName ?: ""
                 compareChinese(album1, album2)
             }
-            Duration -> TODO()
-            LastPlayed -> TODO()
-            DateAdded -> TODO()
+            Duration -> { item1: SongEntity, item2: SongEntity ->
+                val duration1 = item1.duration ?: 0L
+                val duration2 = item2.duration ?: 0L
+                duration1.compareTo(duration2)
+            }
+            LastPlayed -> { item1: SongEntity, item2: SongEntity ->
+                val lastPlayed1 = item1.lastPlayed ?: 0L
+                val lastPlayed2 = item2.lastPlayed ?: 0L
+                lastPlayed1.compareTo(lastPlayed2)
+            }
+            DateAdded -> { item1: SongEntity, item2: SongEntity ->
+                val dateAdded1 = item1.dateAdded ?: 0L
+                val dateAdded2 = item2.dateAdded ?: 0L
+                dateAdded1.compareTo(dateAdded2)
+            }
         }
 
         // 如果需要逆序排序

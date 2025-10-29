@@ -2,10 +2,14 @@ package net.hearnsoft.tcm.compose.ui.screens.account
 
 import android.annotation.SuppressLint
 import android.widget.Toast
+import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -13,9 +17,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.moriafly.salt.ui.Button
 import com.moriafly.salt.ui.ItemEdit
@@ -41,6 +47,7 @@ fun RegisterScreen(
     // 注册界面内容
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
     val context = LocalContext.current
 
     val authState = userViewModel.authState.collectAsState().value
@@ -85,26 +92,69 @@ fun RegisterScreen(
                 },
                 hint = stringResource(R.string.password_hint),
             )
+            ItemEditPassword(
+                text = confirmPassword,
+                onChange = {
+                    confirmPassword = it
+                },
+                hint = stringResource(R.string.confirm_password_hint),
+            )
         }
 
-        Button(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = SaltTheme.dimens.padding,
-                    vertical = SaltTheme.dimens.padding * 0.5f
-                ),
-            text = stringResource(R.string.register_button),
-            enabled = !isLoading,
-            onClick = {
-                userViewModel.signUp(
-                    LoginCredential(
-                        username = username,
-                        password = password
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center,
+        ) {
+            Crossfade(
+                targetState = authState is AuthState.Loading,
+                label = "RegisterButtonCrossfade"
+            ) { isLoading ->
+                if (isLoading) {
+                    Box(Modifier.fillMaxWidth()) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .padding(
+                                    vertical = SaltTheme.dimens.padding * 0.5f
+                                )
+                                .align(Alignment.Center),
+                            color = SaltTheme.colors.highlight,
+                            strokeWidth = 3.dp
+                        )
+                    }
+                } else {
+                    Button(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(
+                                horizontal = SaltTheme.dimens.padding,
+                                vertical = SaltTheme.dimens.padding * 0.5f
+                            ),
+                        text = stringResource(R.string.register_button),
+                        onClick = {
+                            if (username.isNotBlank()) {
+                                if (password.isNotBlank() && confirmPassword.isNotBlank() && password == confirmPassword) {
+                                    userViewModel.signUp(
+                                        LoginCredential(
+                                            username = username,
+                                            password = password
+                                        )
+                                    )
+                                } else {
+                                    Toast.makeText(context,
+                                        context.getString(R.string.passwords_not_empty_or_not_match_toast),
+                                        Toast.LENGTH_SHORT).show()
+                                }
+                            } else {
+                                Toast.makeText(context,
+                                    context.getString(R.string.user_not_empty_toast),
+                                    Toast.LENGTH_SHORT).show()
+                            }
+                        },
                     )
-                )
-            },
-        )
+                }
+            }
+        }
     }
 
 }

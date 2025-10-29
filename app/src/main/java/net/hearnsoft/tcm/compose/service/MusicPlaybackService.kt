@@ -10,6 +10,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C.AUDIO_CONTENT_TYPE_MUSIC
 import androidx.media3.common.C.USAGE_MEDIA
+import androidx.media3.common.ForwardingPlayer
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.Tracks
@@ -18,10 +19,8 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.analytics.AnalyticsListener
 import androidx.media3.session.CommandButton
 import androidx.media3.session.DefaultMediaNotificationProvider
-import androidx.media3.session.LibraryResult
 import androidx.media3.session.MediaLibraryService
 import androidx.media3.session.MediaSession
-import androidx.media3.session.MediaSession.MediaItemsWithStartPosition
 import androidx.media3.session.SessionCommand
 import androidx.media3.session.SessionResult
 import com.google.common.collect.ImmutableList
@@ -31,10 +30,14 @@ import com.moriafly.salt.ui.UnstableSaltUiApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import net.hearnsoft.tcm.compose.BuildConfig
 import net.hearnsoft.tcm.compose.R
 import net.hearnsoft.tcm.compose.MainActivity
+import net.hearnsoft.tcm.compose.pref.PlayerSeekToPreviousAction
+import net.hearnsoft.tcm.compose.pref.SettingsDataStore
 import net.hearnsoft.tcm.compose.utils.Logger
 import net.hearnsoft.tcm.compose.utils.LyricsExtractor
 import net.hearnsoft.tcm.compose.utils.LyricsExtractor.LyricsFormat
@@ -54,6 +57,9 @@ class MusicPlaybackService : MediaLibraryService(), AnalyticsListener {
         const val ACTION_EXIT_APP = "${BuildConfig.APPLICATION_ID}.ACTION_EXIT_APP"
     }
 
+    // 设置数据存储
+    private lateinit var settingsDataStore: SettingsDataStore
+
     var mediaLibrarySession: MediaLibrarySession? = null
     var player: ExoPlayer? = null
     private val playlist: MutableList<MediaItem> = ArrayList()
@@ -67,6 +73,8 @@ class MusicPlaybackService : MediaLibraryService(), AnalyticsListener {
 
     override fun onCreate() {
         super.onCreate()
+        settingsDataStore = SettingsDataStore(this)
+
         initializePlayer()
         initializeSession()
 
@@ -105,7 +113,13 @@ class MusicPlaybackService : MediaLibraryService(), AnalyticsListener {
             .setSessionCommand(SessionCommand(CUSTOM_COMMAND_CLOSE, Bundle.EMPTY))
             .build()
 
-        mediaLibrarySession = MediaLibrarySession.Builder(this, player!!, LibrarySessionCallback())
+        // 设置自定义Player包装类
+        val wrapperPlayer = MyAppPlayerWrapper(
+            exoPlayer = player!!,
+            settingsDataStore = settingsDataStore
+        )
+
+        mediaLibrarySession = MediaLibrarySession.Builder(this, wrapperPlayer, LibrarySessionCallback())
             .setCustomLayout(ImmutableList.of(closeCommand))
             .setSessionActivity(sessionActivity)
             .build()
@@ -240,12 +254,48 @@ class MusicPlaybackService : MediaLibraryService(), AnalyticsListener {
 
                 // 延迟停止服务
                 serviceScope.launch {
-                    kotlinx.coroutines.delay(500)
+                    delay(500)
                     stopSelf()
                 }
                 return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
             }
             return super.onCustomCommand(session, controller, customCommand, args)
+        }
+    }
+
+    // 我们的自定义Player包装类
+    @UnstableApi
+    private class MyAppPlayerWrapper(
+        exoPlayer: ExoPlayer,
+        private val settingsDataStore: SettingsDataStore
+    ) : ForwardingPlayer(exoPlayer) {
+
+        private var previousAction: PlayerSeekToPreviousAction = PlayerSeekToPreviousAction.DEFAULT
+
+        init {
+            CoroutineScope(Dispatchers.Main).launch {
+                settingsDataStore.playerSeekToPreviousAction.collect { actionOrdinal ->
+                    previousAction = PlayerSeekToPreviousAction.entries.getOrNull(actionOrdinal)
+                        ?: PlayerSeekToPreviousAction.DEFAULT
+                }
+            }
+        }
+
+        // 修改过的上一曲方法
+        override fun seekToPrevious() {
+            when (previousAction) {
+                PlayerSeekToPreviousAction.DEFAULT -> super.seekToPrevious()
+                PlayerSeekToPreviousAction.ALWAYS_PREVIOUS -> seekToPreviousMediaItem()
+                PlayerSeekToPreviousAction.ALWAYS_RESTART -> seekTo(0L)
+            }
+        }
+
+        override fun getAvailableCommands(): Player.Commands {
+            return super.getAvailableCommands()
+                .buildUpon()
+                .add(COMMAND_SEEK_TO_PREVIOUS)
+                .add(COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM)
+                .build()
         }
     }
 }

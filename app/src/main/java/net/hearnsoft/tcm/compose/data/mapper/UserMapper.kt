@@ -1,11 +1,11 @@
 package net.hearnsoft.tcm.compose.data.mapper
 
+import net.hearnsoft.tcm.compose.domain.model.auth.LoginCredential
 import net.hearnsoft.tcm.compose.domain.model.user.User
 import net.hearnsoft.tcm.compose.domain.model.user.UserRole
-import net.hearnsoft.tcm.compose.domain.model.auth.LoginCredential
+import net.hearnsoft.thcdb_api.model.AuthCredential
 import net.hearnsoft.thcdb_api.model.user.UserProfile
 import net.hearnsoft.thcdb_api.model.user.UserRoleData
-import net.hearnsoft.thcdb_api.model.AuthCredential
 
 object UserMapper {
 

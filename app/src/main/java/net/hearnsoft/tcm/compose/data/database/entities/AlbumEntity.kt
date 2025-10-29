@@ -1,10 +1,10 @@
 package net.hearnsoft.tcm.compose.data.database.entities
 
+import android.net.Uri
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import android.net.Uri
 
 @Entity(
     tableName = "albums",

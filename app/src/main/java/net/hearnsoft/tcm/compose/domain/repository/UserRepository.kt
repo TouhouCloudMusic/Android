@@ -1,8 +1,8 @@
 package net.hearnsoft.tcm.compose.domain.repository
 
 import android.net.Uri
-import net.hearnsoft.tcm.compose.domain.model.user.User
 import net.hearnsoft.tcm.compose.domain.model.auth.LoginCredential
+import net.hearnsoft.tcm.compose.domain.model.user.User
 
 interface UserRepository {
 

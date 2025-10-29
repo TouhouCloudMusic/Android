@@ -7,7 +7,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import net.hearnsoft.tcm.compose.data.database.MusicDatabase
 import net.hearnsoft.tcm.compose.data.database.dao.AlbumDao
 import net.hearnsoft.tcm.compose.data.database.dao.ArtistDao
 import net.hearnsoft.tcm.compose.data.database.dao.SongDao

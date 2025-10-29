@@ -112,6 +112,7 @@
     <string name="login_failed">登录失败: %s</string>
     <string name="username_hint">用户名</string>
     <string name="password_hint">密码</string>
+    <string name="confirm_password_hint">确认密码</string>
     <string name="login_button">登录</string>
     <string name="register_account">注册账号</string>
     <string name="forgot_password">忘记密码？</string>
@@ -193,4 +194,6 @@
     <string name="logout_success">已登出</string>
     <string name="unknown_error">发生未知错误</string>
     <string name="user_pass_not_empty_toast">用户名和密码不可为空</string>
+    <string name="passwords_not_empty_or_not_match_toast">密码不可为空或密码不正确</string>
+    <string name="user_not_empty_toast">用户名不可为空</string>
 </resources>

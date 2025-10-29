@@ -111,6 +111,7 @@
     <string name="login_failed">Login failed: %s</string>
     <string name="username_hint">Username</string>
     <string name="password_hint">Password</string>
+    <string name="confirm_password_hint">Confirm password</string>
     <string name="login_button">Login</string>
     <string name="register_account">Register Account</string>
     <string name="forgot_password">Forgot Password?</string>
@@ -192,4 +193,6 @@
     <string name="logout_success">Logged out successfully</string>
     <string name="unknown_error">Unknown error occurred</string>
     <string name="user_pass_not_empty_toast">Username and password can\'t be empty</string>
+    <string name="passwords_not_empty_or_not_match_toast">Password can\'t be empty or password not match</string>
+    <string name="user_not_empty_toast">Username can\'t be empty</string>
 </resources>

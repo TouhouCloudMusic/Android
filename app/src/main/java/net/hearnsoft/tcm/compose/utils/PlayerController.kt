@@ -68,9 +68,6 @@ class PlayerController @Inject constructor(
     private var mediaController: MediaController? = null
     private var controllerFuture: ListenableFuture<MediaController>? = null
 
-    // 设置数据存储
-    val settingsDataStore = SettingsDataStore(context)
-
     val scope = CoroutineScope(Dispatchers.Main)
 
     // 连接状态
@@ -332,25 +329,7 @@ class PlayerController @Inject constructor(
      */
     fun skipToPrevious() {
         scope.launch {
-            mediaController?.let { controller ->
-                val actionOrdinal = settingsDataStore.playerSeekToPreviousAction.first()
-                Logger.debug("PlayerController", "上一曲行为设置值: $actionOrdinal")
-                val action = PlayerSeekToPreviousAction.entries.getOrNull(actionOrdinal)
-                when (action) {
-                    PlayerSeekToPreviousAction.DEFAULT -> {
-                        controller.seekToPrevious()
-                    }
-                    PlayerSeekToPreviousAction.ALWAYS_PREVIOUS -> {
-                        controller.seekToPreviousMediaItem()
-                    }
-                    PlayerSeekToPreviousAction.ALWAYS_RESTART -> {
-                        controller.seekTo(0L)
-                    }
-                    else -> {
-                        controller.seekToPrevious()
-                    }
-                }
-            } ?: run {
+            mediaController?.seekToPrevious() ?: run {
                 Logger.warn("PlayerController", "媒体控制器未连接，无法跳到上一首")
             }
         }

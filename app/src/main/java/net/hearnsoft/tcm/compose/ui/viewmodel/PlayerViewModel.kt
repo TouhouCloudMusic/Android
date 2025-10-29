@@ -62,6 +62,10 @@ class PlayerViewModel @Inject constructor(
     private val _allAlbums = MutableStateFlow<List<AlbumEntity>>(emptyList())
     val allAlbums: StateFlow<List<AlbumEntity>> = _allAlbums.asStateFlow()
 
+    val _currentSongFavoriteStatus: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val currentSongFavoriteStatus: StateFlow<Boolean> = _currentSongFavoriteStatus.asStateFlow()
+
+
     // === 排序和过滤状态 ===
     private val _currentSongSortingRule = MutableStateFlow(
         SongSortingRule(SongSortingStrategy.Title, false)

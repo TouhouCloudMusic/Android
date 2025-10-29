@@ -118,6 +118,9 @@ fun BottomSheetPlayer(
     // 播放状态
     val isPlaying = playerViewModel.isPlaying.collectAsState().value
 
+    // 是否收藏
+    val isFavorite = playerViewModel.isFavorite.collectAsState().value
+
     // 播放模式状态
     val repeatMode = playerViewModel.repeatMode.collectAsState().value
     val shuffleModeEnabled = playerViewModel.shuffleModeEnabled.collectAsState().value
@@ -196,11 +199,6 @@ fun BottomSheetPlayer(
         mutableStateOf<Long?>(null)
     }
 
-    // 收藏状态
-    var favorite by remember {
-        mutableStateOf(false)
-    }
-
     // 评论数量小数字
     var commentCount by remember {
         mutableIntStateOf(9)
@@ -214,14 +212,6 @@ fun BottomSheetPlayer(
     // 封面是否加载完成
     var coverLoaded by remember {
         mutableStateOf(false)
-    }
-
-    // 从ViewModel更新收藏状态
-    LaunchedEffect(currentPlaying) {
-        currentPlaying?.let { mediaItem ->
-            val songEntity = playerViewModel.getSongEntityByMediaItem(mediaItem)
-            favorite = songEntity?.isFavorite ?: false
-        }
     }
 
     // 状态栏颜色控制和全局前景色控制
@@ -440,14 +430,12 @@ fun BottomSheetPlayer(
                                                 IconButton(
                                                     onClick = {
                                                         // TODO: 添加收藏逻辑
-                                                        favorite = !favorite
-                                                        playerViewModel.updateFavoriteStatus(
-                                                            currentPlaying?.mediaId!!.toLong(), favorite)
+                                                        playerViewModel.toggleCurrentSongFavorite()
                                                     },
                                                     modifier = Modifier.padding(4.dp)
                                                 ) {
                                                     Icon(
-                                                        painter = if (favorite) {
+                                                        painter = if (isFavorite) {
                                                             painterResource(id = R.drawable.ic_favorite)
                                                         } else {
                                                             painterResource(id = R.drawable.ic_favorite_border)

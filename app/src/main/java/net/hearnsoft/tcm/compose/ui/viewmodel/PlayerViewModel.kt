@@ -29,6 +29,7 @@ import net.hearnsoft.tcm.compose.domain.model.song.SongSortingStrategy
 import net.hearnsoft.tcm.compose.utils.LocalMusicSorter
 import net.hearnsoft.tcm.compose.utils.Logger
 import net.hearnsoft.tcm.compose.utils.PlayerController
+import net.hearnsoft.tcm.compose.utils.PlayerFavoriteBridge
 import javax.inject.Inject
 
 /**
@@ -62,10 +63,6 @@ class PlayerViewModel @Inject constructor(
     private val _allAlbums = MutableStateFlow<List<AlbumEntity>>(emptyList())
     val allAlbums: StateFlow<List<AlbumEntity>> = _allAlbums.asStateFlow()
 
-    val _currentSongFavoriteStatus: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val currentSongFavoriteStatus: StateFlow<Boolean> = _currentSongFavoriteStatus.asStateFlow()
-
-
     // === 排序和过滤状态 ===
     private val _currentSongSortingRule = MutableStateFlow(
         SongSortingRule(SongSortingStrategy.Title, false)
@@ -85,6 +82,7 @@ class PlayerViewModel @Inject constructor(
     val currentMediaItemIndex = playerController.currentMediaItemIndex
     val repeatMode = playerController.repeatMode
     val shuffleModeEnabled = playerController.shuffleModeEnabled
+    val isFavorite = playerController.isFavorite
     // 播放器音高和速度
     val playbackSpeed = playerController.playbackSpeed
     val pitch = playerController.pitch
@@ -597,6 +595,19 @@ class PlayerViewModel @Inject constructor(
         }
     }
 
+    fun toggleCurrentSongFavorite() {
+        viewModelScope.launch {
+            val mediaItem = currentMediaItem.value
+            if (mediaItem != null) {
+                val mediaId = mediaItem.mediaId.toLongOrNull()
+                if (mediaId != null) {
+                    val newStatus = !isFavorite.value
+                    updateFavoriteStatus(mediaId, newStatus)
+                }
+            }
+        }
+    }
+
     /**
      * 更新收藏状态
      */
@@ -604,6 +615,7 @@ class PlayerViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 musicRepository.updateFavoriteStatus(songId, isFavorite)
+                PlayerFavoriteBridge.update(isFavorite)
                 Logger.debug(TAG, "更新收藏状态: $songId -> $isFavorite")
             } catch (e: Exception) {
                 Logger.err(TAG, "更新收藏状态失败: ${e.message}")

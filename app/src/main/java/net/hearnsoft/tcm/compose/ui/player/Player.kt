@@ -216,6 +216,14 @@ fun BottomSheetPlayer(
         mutableStateOf(false)
     }
 
+    // 从ViewModel更新收藏状态
+    LaunchedEffect(currentPlaying) {
+        currentPlaying?.let { mediaItem ->
+            val songEntity = playerViewModel.getSongEntityByMediaItem(mediaItem)
+            favorite = songEntity?.isFavorite ?: false
+        }
+    }
+
     // 状态栏颜色控制和全局前景色控制
     LaunchedEffect(state.isExpanded, currentPlaying, coverLoaded, isSystemInDarkTheme) {
         // 更新播放器UI颜色逻辑
@@ -433,6 +441,8 @@ fun BottomSheetPlayer(
                                                     onClick = {
                                                         // TODO: 添加收藏逻辑
                                                         favorite = !favorite
+                                                        playerViewModel.updateFavoriteStatus(
+                                                            currentPlaying?.mediaId!!.toLong(), favorite)
                                                     },
                                                     modifier = Modifier.padding(4.dp)
                                                 ) {

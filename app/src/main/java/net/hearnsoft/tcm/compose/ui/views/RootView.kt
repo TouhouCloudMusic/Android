@@ -206,7 +206,8 @@ fun AppRootView(
                         navController = navController,
                         currentMainScreenRoute = currentMainScreenRoute
                     )
-                }
+                },
+                gesturesEnabled = false
             ) {
                 // 获取当前 TopAppBar 类型
                 val currentTopAppBarType = when {

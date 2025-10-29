@@ -197,4 +197,5 @@
     <string name="user_pass_not_empty_toast">用户名和密码不可为空</string>
     <string name="passwords_not_empty_or_not_match_toast">密码不可为空或密码不正确</string>
     <string name="user_not_empty_toast">用户名不可为空</string>
+    <string name="player_not_connected">播放器服务未能连接，请重启App</string>
 </resources>

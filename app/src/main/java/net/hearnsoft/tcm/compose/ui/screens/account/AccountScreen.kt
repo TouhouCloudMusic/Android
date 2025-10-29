@@ -82,38 +82,38 @@ fun AccountScreen(
             userViewModel.checkAuthStatus()
         }
     ) {
-        Column(Modifier.fillMaxSize()) {
-            AccountHeaderCard(
-                modifier = modifier,
-                user = user,
-                onClick = {
-                    when (authState) {
-                        is AuthState.Authenticated -> {
-                            // 已登录，可以导航到用户详情页面
-                            Logger.info("AccountScreen", "User already authenticated")
-                            navController.navigate(ScreenRoute.MyProfile.route)
-                        }
-                        is AuthState.NetworkError -> {
-                            // 网络错误时，如果有用户信息就进入个人页面，否则进入登录页面
-                            if (user != null) {
+        LazyColumn(Modifier.fillMaxWidth()) {
+            item {
+                AccountHeaderCard(
+                    modifier = modifier,
+                    user = user,
+                    onClick = {
+                        when (authState) {
+                            is AuthState.Authenticated -> {
+                                // 已登录，可以导航到用户详情页面
+                                Logger.info("AccountScreen", "User already authenticated")
                                 navController.navigate(ScreenRoute.MyProfile.route)
-                            } else {
+                            }
+                            is AuthState.NetworkError -> {
+                                // 网络错误时，如果有用户信息就进入个人页面，否则进入登录页面
+                                if (user != null) {
+                                    navController.navigate(ScreenRoute.MyProfile.route)
+                                } else {
+                                    navController.navigate(ScreenRoute.LoginPage.route)
+                                }
+                            }
+                            else -> {
+                                // 未登录，导航到登录页面
+                                Logger.info("AccountScreen", "Navigate to login screen")
                                 navController.navigate(ScreenRoute.LoginPage.route)
                             }
                         }
-                        else -> {
-                            // 未登录，导航到登录页面
-                            Logger.info("AccountScreen", "Navigate to login screen")
-                            navController.navigate(ScreenRoute.LoginPage.route)
-                        }
                     }
-                }
-            )
-            LazyColumn(Modifier.fillMaxWidth()) {
-                repeat(20) {
-                    item {
-                        Text("Placeholder item #$it", modifier = Modifier.padding(16.dp))
-                    }
+                )
+            }
+            repeat(20) {
+                item {
+                    Text("Placeholder item #$it", modifier = Modifier.padding(16.dp))
                 }
             }
         }

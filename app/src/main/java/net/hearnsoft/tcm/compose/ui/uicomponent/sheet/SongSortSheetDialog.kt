@@ -36,6 +36,7 @@ fun MusicSortSheetDialog(
         R.string.sort_by_title to SongSortingStrategy.Title,
         R.string.sort_by_artist to SongSortingStrategy.ArtistName,
         R.string.sort_by_album to SongSortingStrategy.AlbumName,
+        R.string.sort_by_play_count to SongSortingStrategy.PlayCount,
         R.string.sort_by_duration to SongSortingStrategy.Duration,
         R.string.sort_by_date_added to SongSortingStrategy.DateAdded
     )

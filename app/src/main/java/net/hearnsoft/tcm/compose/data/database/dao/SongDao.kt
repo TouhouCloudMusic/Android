@@ -34,7 +34,7 @@ interface SongDao {
     @Query("SELECT * FROM songs WHERE last_played IS NOT NULL ORDER BY last_played DESC LIMIT :limit")
     fun getRecentlyPlayedSongs(limit: Int = 50): Flow<List<SongEntity>>
 
-    @Query("UPDATE songs SET play_count = play_count + 1, last_played = :timestamp WHERE song_id = :songId")
+    @Query("UPDATE songs SET play_count = play_count + 1, last_played = :timestamp WHERE media_store_id = :songId")
     suspend fun incrementPlayCount(songId: Long, timestamp: Long = System.currentTimeMillis())
 
     @Query("UPDATE songs SET is_favorite = :isFavorite WHERE song_id = :songId")

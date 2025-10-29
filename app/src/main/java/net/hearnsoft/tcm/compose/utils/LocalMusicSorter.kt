@@ -133,8 +133,10 @@ object LocalMusicSorter {
                 compareChinese(item1.title, item2.title)
             }
             PlayCount -> { item1: SongEntity, item2: SongEntity ->
-                // 默认按标题排序
-                compareChinese(item1.title, item2.title)
+                // 这里我们需要冒泡排序，播放次数多的在前面
+                val playCount1 = item1.playCount ?: 0
+                val playCount2 = item2.playCount ?: 0
+                playCount2.compareTo(playCount1)
             }
 
             AlbumName -> { item1: SongEntity, item2: SongEntity ->

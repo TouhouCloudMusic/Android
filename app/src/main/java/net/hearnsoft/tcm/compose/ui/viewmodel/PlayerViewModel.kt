@@ -2,6 +2,7 @@ package net.hearnsoft.tcm.compose.ui.viewmodel
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.hearnsoft.tcm.compose.data.database.entities.AlbumEntity
@@ -135,6 +137,9 @@ class PlayerViewModel @Inject constructor(
 
         // 加载所有专辑
         loadAllAlbums()
+
+        // 监听当前歌曲，并进行播放次数增加
+        observeToIncrementPlayCount()
     }
 
     private fun observeDataChanges() {
@@ -609,13 +614,20 @@ class PlayerViewModel @Inject constructor(
     /**
      * 增加播放次数
      */
-    fun incrementPlayCount(songId: Long) {
+    fun observeToIncrementPlayCount() {
         viewModelScope.launch {
-            try {
-                musicRepository.incrementPlayCount(songId)
-                Logger.debug(TAG, "更新播放次数: $songId")
-            } catch (e: Exception) {
-                Logger.err(TAG, "更新播放次数失败: ${e.message}")
+            currentMediaItem.collectLatest { mediaItem ->
+                mediaItem?.let {
+                    val mediaId = it.mediaId.toLongOrNull()
+                    if (mediaId != null) {
+                        try {
+                            musicRepository.incrementPlayCount(mediaId)
+                            Logger.debug(TAG, "增加播放次数: $mediaId")
+                        } catch (e: Exception) {
+                            Logger.err(TAG, "增加播放次数失败: ${e.message}")
+                        }
+                    }
+                }
             }
         }
     }

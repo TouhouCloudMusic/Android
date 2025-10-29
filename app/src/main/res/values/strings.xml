@@ -74,6 +74,7 @@
     <string name="sort_by_date_added">Date Added</string>
     <string name="sort_by_year">Year</string>
     <string name="sort_by_count">Count</string>
+    <string name="sort_by_play_count">Play count</string>
     
     <!-- Music FX -->
     <string name="music_effects">Music Effects</string>

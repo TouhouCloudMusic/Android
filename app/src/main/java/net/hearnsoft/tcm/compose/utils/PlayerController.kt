@@ -98,6 +98,9 @@ class PlayerController @Inject constructor(
     private val _shuffleModeEnabled = MutableStateFlow(false)
     val shuffleModeEnabled: StateFlow<Boolean> = _shuffleModeEnabled.asStateFlow()
 
+    // 是否收藏当前播放项
+    val isFavorite: StateFlow<Boolean> = PlayerFavoriteBridge.isFavorite
+
     // === 歌词相关 ===
     val lyrics: StateFlow<String?> = PlayerLyricsBridge.lyrics
     val lyricsFormat: StateFlow<LyricsFormat> = PlayerLyricsBridge.lyricsFormat

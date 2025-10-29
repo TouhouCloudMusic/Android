@@ -27,31 +27,40 @@ import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 import com.moriafly.salt.ui.UnstableSaltUiApi
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import net.hearnsoft.tcm.compose.BuildConfig
 import net.hearnsoft.tcm.compose.R
 import net.hearnsoft.tcm.compose.MainActivity
+import net.hearnsoft.tcm.compose.data.repository.MusicRepository
 import net.hearnsoft.tcm.compose.pref.PlayerSeekToPreviousAction
 import net.hearnsoft.tcm.compose.pref.SettingsDataStore
 import net.hearnsoft.tcm.compose.utils.Logger
 import net.hearnsoft.tcm.compose.utils.LyricsExtractor
 import net.hearnsoft.tcm.compose.utils.LyricsExtractor.LyricsFormat
+import net.hearnsoft.tcm.compose.utils.PlayerFavoriteBridge
 import net.hearnsoft.tcm.compose.utils.PlayerLyricsBridge
+import javax.inject.Inject
 import kotlin.math.min
 
+@AndroidEntryPoint
 @UnstableApi
 @UnstableSaltUiApi
 @ExperimentalMaterial3Api
 @ExperimentalFoundationApi
-class MusicPlaybackService : MediaLibraryService(), AnalyticsListener {
+class MusicPlaybackService: MediaLibraryService(), AnalyticsListener {
+
+    @Inject
+    lateinit var musicRepository: MusicRepository
 
     companion object {
         const val CUSTOM_COMMAND_CLOSE = "${BuildConfig.APPLICATION_ID}.COMMAND_CLOSE"
+        const val CUSTOM_COMMAND_FAVORITE = "${BuildConfig.APPLICATION_ID}.COMMAND_FAVORITE"
 
         // 自定义action
         const val ACTION_EXIT_APP = "${BuildConfig.APPLICATION_ID}.ACTION_EXIT_APP"
@@ -66,6 +75,14 @@ class MusicPlaybackService : MediaLibraryService(), AnalyticsListener {
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
+    private val closeCommandButton = CommandButton.Builder(CommandButton.ICON_UNDEFINED)
+        .setDisplayName("Close")
+        .setCustomIconResId(R.drawable.ic_close_24px)
+        .setSessionCommand(SessionCommand(CUSTOM_COMMAND_CLOSE, Bundle.EMPTY))
+        .build()
+
+    private lateinit var favoriteCommandButton: CommandButton
+
     // 当前媒体的歌词信息
     private var currentLyrics: String? = ""
 
@@ -79,6 +96,32 @@ class MusicPlaybackService : MediaLibraryService(), AnalyticsListener {
         initializeSession()
 
         player?.addAnalyticsListener(this)
+        observeFavoriteStatus()
+    }
+
+    private fun observeFavoriteStatus() {
+        serviceScope.launch {
+            player?.let { exoPlayer ->
+                exoPlayer.addListener(object : Player.Listener {
+                    override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                        mediaItem?.let { item ->
+                            val mediaId = item.mediaId.toLongOrNull()
+                            if (mediaId != null) {
+                                serviceScope.launch {
+                                    val song = musicRepository.getSongByMediaStoreId(mediaItem.mediaId.toLong())
+                                    val isFavorite = song?.isFavorite ?: false
+                                    PlayerFavoriteBridge.update(isFavorite)
+                                    updateFavoriteCommandStatus(isFavorite)
+                                }
+                            }
+                        }
+                    }
+                })
+            }
+            PlayerFavoriteBridge.isFavorite.collect { isFavorite ->
+                updateFavoriteCommandStatus(isFavorite)
+            }
+        }
     }
 
     private fun initializePlayer() {
@@ -106,11 +149,10 @@ class MusicPlaybackService : MediaLibraryService(), AnalyticsListener {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // 创建自定义关闭命令按钮
-        val closeCommand = CommandButton.Builder(CommandButton.ICON_UNDEFINED)
-            .setDisplayName("Close")
-            .setCustomIconResId(R.drawable.ic_close_24px)
-            .setSessionCommand(SessionCommand(CUSTOM_COMMAND_CLOSE, Bundle.EMPTY))
+        val favoriteCommand = CommandButton.Builder(CommandButton.ICON_UNDEFINED)
+            .setDisplayName("Favorite")
+            .setCustomIconResId(R.drawable.ic_favorite_border)
+            .setSessionCommand(SessionCommand(CUSTOM_COMMAND_FAVORITE, Bundle.EMPTY))
             .build()
 
         // 设置自定义Player包装类
@@ -120,7 +162,7 @@ class MusicPlaybackService : MediaLibraryService(), AnalyticsListener {
         )
 
         mediaLibrarySession = MediaLibrarySession.Builder(this, wrapperPlayer, LibrarySessionCallback())
-            .setCustomLayout(ImmutableList.of(closeCommand))
+            .setCustomLayout(ImmutableList.of(favoriteCommand, closeCommandButton))
             .setSessionActivity(sessionActivity)
             .build()
 
@@ -203,6 +245,22 @@ class MusicPlaybackService : MediaLibraryService(), AnalyticsListener {
         player?.prepare()
     }
 
+    private fun updateFavoriteCommandStatus(status: Boolean) {
+        val iconResId = if (status) {
+            R.drawable.ic_favorite
+        } else {
+            R.drawable.ic_favorite_border
+        }
+        favoriteCommandButton = CommandButton.Builder(CommandButton.ICON_UNDEFINED)
+            .setDisplayName("Favorite")
+            .setCustomIconResId(iconResId)
+            .setSessionCommand(SessionCommand(CUSTOM_COMMAND_FAVORITE, Bundle.EMPTY))
+            .build()
+        mediaLibrarySession?.setCustomLayout(
+            ImmutableList.of(favoriteCommandButton, closeCommandButton)
+        )
+    }
+
     override fun onDestroy() {
         if (mediaLibrarySession != null) {
             mediaLibrarySession?.release()
@@ -224,6 +282,7 @@ class MusicPlaybackService : MediaLibraryService(), AnalyticsListener {
             val connectionResult = super.onConnect(session, controller)
             val availableCommands = connectionResult.availableSessionCommands.buildUpon()
                 // 添加自定义关闭命令
+                .add(SessionCommand(CUSTOM_COMMAND_FAVORITE, Bundle.EMPTY))
                 .add(SessionCommand(CUSTOM_COMMAND_CLOSE, Bundle.EMPTY))
                 .build()
             return MediaSession.ConnectionResult.accept(
@@ -258,6 +317,31 @@ class MusicPlaybackService : MediaLibraryService(), AnalyticsListener {
                     stopSelf()
                 }
                 return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
+            }
+            if (customCommand.customAction == CUSTOM_COMMAND_FAVORITE) {
+                // 处理收藏命令
+                val currentItem = player?.currentMediaItem
+                if (currentItem != null) {
+                    val mediaId = currentItem.mediaId.toLongOrNull()
+                    if (mediaId != null) {
+                        serviceScope.launch {
+                            try {
+                                // 切换收藏状态
+                                val newStatus = PlayerFavoriteBridge.toggle()
+                                musicRepository.updateFavoriteStatus(
+                                    songId = mediaId,
+                                    isFavorite = newStatus
+                                )
+                                updateFavoriteCommandStatus(newStatus)
+                            } catch (e: Exception) {
+                                Logger.err(
+                                    "LibrarySessionCallback",
+                                    "Error updating favorite status: ${e.message}"
+                                )
+                            }
+                        }
+                    }
+                }
             }
             return super.onCustomCommand(session, controller, customCommand, args)
         }

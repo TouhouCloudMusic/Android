@@ -1,14 +1,19 @@
 package net.hearnsoft.tcm.compose.ui.utils
 
 import android.content.Context
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
+import android.graphics.Matrix
+import android.graphics.Paint
 import android.renderscript.Allocation
 import android.renderscript.Element
 import android.renderscript.RenderScript
 import android.renderscript.ScriptIntrinsicBlur
+import androidx.core.graphics.createBitmap
 import androidx.core.graphics.get
 import com.google.android.renderscript.Toolkit
-import androidx.core.graphics.createBitmap
 import kotlin.math.ceil
 
 fun Bitmap.zoom(newWidth: Float, newHeight: Float): Bitmap {

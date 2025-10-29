@@ -4,13 +4,10 @@ import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
-import androidx.compose.runtime.collectAsState
+import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
-import net.hearnsoft.tcm.compose.domain.model.song.SongSortingRule
-import androidx.core.net.toUri
-import androidx.lifecycle.asLiveData
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import net.hearnsoft.tcm.compose.pref.SettingsDataStore

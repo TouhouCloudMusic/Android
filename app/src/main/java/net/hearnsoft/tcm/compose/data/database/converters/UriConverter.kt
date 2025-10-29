@@ -1,7 +1,7 @@
 package net.hearnsoft.tcm.compose.data.database.converters
 
-import androidx.room.TypeConverter
 import android.net.Uri
+import androidx.room.TypeConverter
 
 class UriConverter {
     @TypeConverter

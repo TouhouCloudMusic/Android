@@ -11,18 +11,17 @@ import net.hearnsoft.tcm.compose.data.remote.ApiService
 import net.hearnsoft.tcm.compose.domain.model.auth.LoginCredential
 import net.hearnsoft.tcm.compose.domain.model.user.User
 import net.hearnsoft.tcm.compose.domain.repository.UserRepository
-import net.hearnsoft.tcm.compose.utils.Logger
+import net.hearnsoft.thcdb_api.model.BaseResponse
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import okio.BufferedSink
 import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
-import net.hearnsoft.thcdb_api.model.BaseResponse
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.RequestBody.Companion.toRequestBody
 
 @Singleton
 class UserRepositoryImpl @Inject constructor(

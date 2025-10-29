@@ -1,6 +1,5 @@
 package net.hearnsoft.tcm.compose.ui.player
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
@@ -22,7 +21,6 @@ import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.input.pointer.util.addPointerInputChange
 import androidx.compose.ui.unit.IntOffset
 import com.moriafly.salt.ui.SaltTheme
-import com.moriafly.salt.ui.thenIf
 
 /**
  * 底部弹出面板组件

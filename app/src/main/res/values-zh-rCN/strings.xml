@@ -75,6 +75,7 @@
     <string name="sort_by_date_added">添加时间</string>
     <string name="sort_by_year">年份</string>
     <string name="sort_by_count">数量</string>
+    <string name="sort_by_play_count">播放次数</string>
     
     <!-- Music FX -->
     <string name="music_effects">音乐效果</string>

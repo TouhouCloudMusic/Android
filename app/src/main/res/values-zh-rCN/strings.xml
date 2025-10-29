@@ -192,4 +192,5 @@
     <string name="profile_updated_success">资料更新成功</string>
     <string name="logout_success">已登出</string>
     <string name="unknown_error">发生未知错误</string>
+    <string name="user_pass_not_empty_toast">用户名和密码不可为空</string>
 </resources>

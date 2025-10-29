@@ -136,9 +136,11 @@ class PlayerViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.Default) {
             _currentSongSortingRule.collectLatest { sortingRule ->
                 // 每当排序规则变化时，重新应用排序和过滤
-                val currentSongs = _rawSongs.value
-                if (currentSongs.isNotEmpty()) {
-                    applySongSort(currentSongs, sortingRule)
+                // 触发一次数据库加载以获取最新歌曲列表
+                val songs = musicRepository.getAllSongs().first()
+                _rawSongs.value = songs
+                if (songs.isNotEmpty()) {
+                    applySongSort(songs, sortingRule)
                 }
             }
         }
@@ -146,9 +148,12 @@ class PlayerViewModel @Inject constructor(
         // 专辑排序规则监听
         viewModelScope.launch(Dispatchers.Default) {
             _currentAlbumSortingRule.collectLatest { sortingRule ->
-                val currentAlbums = _rawAlbums.value
-                if (currentAlbums.isNotEmpty()) {
-                    applyAlbumSort(currentAlbums, sortingRule)
+                // 每当排序规则变化时，重新应用排序
+                // 触发一次数据库加载以获取最新专辑列表
+                val albums = musicRepository.getAllAlbums().first()
+                _rawAlbums.value = albums
+                if (albums.isNotEmpty()) {
+                    applyAlbumSort(albums, sortingRule)
                 }
             }
         }
